@@ -30,7 +30,7 @@ module CSVStore
       if field.downcase == 'false' || field == '0' 
         return false
       else
-        raise ArgumentError, "'#{field}' is not a valid boolean value."
+        raise ArgumentError, "invalid value for Boolean() '#{field}'"
       end
     end
 
@@ -45,16 +45,17 @@ module CSVStore
 
 
     def initialize data_object, schema
-      @data = data_object
-      @column_types = convert schema, :type
-      @allow_null   = convert schema, :allow_null
-      @error = false
+      @data   = data_object.clone
+      @schema = schema
+      @column_types = extract_from_schema :type
+      @allow_null   = extract_from_schema :allow_null
+      @error  = false
     end
 
 
-    def convert schema, target
+    def extract_from_schema target
       # Drop first row which holds the settings for the primary key.
-      hash = schema.drop(1).inject({}) do |result, (k, v)|
+      hash = @schema.drop(1).inject({}) do |result, (k, v)|
         v = :datetime if v == :time # Sequel handles Time as Datetime
       result[k] = v[target]
       result
@@ -66,60 +67,57 @@ module CSVStore
 
 
     # Returns @table with converted fields if no error is thrown, nil otherwise
-    def validate
+    def validate_and_convert
       content = @data.content
       temp_data = content
       begin
         content.each_with_index do |row, row_index|
-          temp_data[row_index] = validate_row(row, row_index, 
-                                              @column_types[row_index], 
-                                              @allow_null[row_index])
+          temp_data[row_index] = validate_and_convert_row(row, row_index, 
+                                                          @column_types[row_index], 
+                                                          @allow_null[row_index])
         end
-        Data.new(@data.path, temp_data, has_error: @error)
       rescue InvalidRowLengthError
-        Data.new(@data.path, temp_data, has_error: @error)
-      rescue
-        raise
+        # Swallow this exception, then leave the begin..end block and return a new Data object
       end
+      Data.new(@data.path, temp_data, has_error: @error)
     end
 
 
-    
+   
+    def validate_and_convert_row row, row_index, column_type, allow_null
+      # CSV.parse adjusts the size of each row to equal the size of the longest row 
+      # by adding nil where necessary.
+      raise InvalidRowLengthError unless row.size == @column_types.size
 
-    # Todo: In case the length does not fit, throw a 'personal exception' like IvalidRowLengthException
-    def validate_row row, row_index, column_type, allow_null
-      temp_row = row
+      @row = row.dup
       begin
-        # CSV.parse adjusts the size of each row to equal the size of the longest row 
-        # by adding nil where necessary.
-        raise InvalidRowLengthError unless row.size == @column_types.size
-      rescue InvalidRowLengthError => e
-        Logger.log(@data.path, :verify, e, row: row_index+1)
-        @error = true
-        raise
-      end
+        row.each_with_index do |field, field_index|
+          @field = field
+          @field_index = field_index
 
-      row.each_with_index do |field, field_index|
-        begin
           if field.nil?
-            temp_row[field_index] = validate_null(allow_null)
+            @row[field_index] = validate_null(allow_null)
           else
-            temp_row[field_index] = validate_type(column_type, field)
+            @row[field_index] = convert_type(column_type, field)
           end
-          temp_row
-        rescue ArgumentError, NullNotAllowedError => e
-          Logger.log(@data.path, :verify, e, value: field, row: row_index+1, col: field_index+1)
-          @error = true
-          raise
-        rescue 
-          raise
         end
+      rescue ArgumentError, NullNotAllowedError => e
+        Logger.log(@data.path, :verify, e, value: @field, row: row_index+1, col: @field_index+1)
+        @error = true
       end
+      @row
+
+    rescue InvalidRowLengthError => e
+      Logger.log(@data.path, :verify, e, row: row_index+1)
+      @error = true
+      raise
     end
+
+
 
     # Helper methods ---------------------------------
 
-    def validate_type column_type, field
+    def convert_type column_type, field
       Converters[column_type][field]
     end
 

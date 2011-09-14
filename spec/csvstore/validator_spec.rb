@@ -12,7 +12,7 @@ describe CSVStore::Validator do
   string1,,string3,string4,string5,string6,string7
   ,2,3,4,5,6,7
   1.12,,3.14,4.15,5.16,6.17,7.18
-  2011-2-4,2012/2/4,2013-2-4,2014-2-4,2015-2-4,2016-2-4,
+  2011-2-4,2012/2/4,2013/2/4,2014-2-4,2015-2-4,2016-2-4,
   1:30,,3:30pm,4:30,5:30am,6:30,7:30
   1:30,,3:30pm,4:30,5:30am,6:30,7:30
   true,false,True,False,1,0,true
@@ -57,122 +57,152 @@ describe CSVStore::Validator do
 
     context "On Success" do
 
-      it "#validate_row: row of strings should return the expected result" do
-        row         = content.first
-        row_index   = 0 # first row
-        column_type = :string
-        allow_null  = true
+      context "#validate_and_convert_row" do
 
-        validator.validate_row(row, row_index, column_type, allow_null).should ==  
-          ["string1", nil, "string3", "string4", "string5", "string6", "string7"]
-        validator.error.should == false
+        it "should convert the items of a String column into the correct type" do
+          row         = content.first
+          row_index   = 0 # first row
+          column_type = :string
+          allow_null  = true
+
+          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==  
+            ["string1", nil, "string3", "string4", "string5", "string6", "string7"]
+          validator.error.should == false
+        end
+
+        it "should convert the items of an Integer column into the correct type" do
+          row         = content[1]
+          row_index   = 1 # second row
+          column_type = :integer
+          allow_null  = true
+
+          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==  
+            [nil, 2, 3, 4, 5, 6,7]
+          validator.error.should == false
+        end
+
+        it "should convert the items of a Float column into the correct type" do
+          row         = content[2]
+          row_index   = 2 # third row
+          column_type = :float
+          allow_null  = true
+
+          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==  
+            [1.12,nil,3.14,4.15,5.16,6.17,7.18]
+          validator.error.should == false
+        end
+
+        it "should convert the items of a Date column into the correct type" do
+          row         = content[3]
+          row_index   = 3 # fourth row
+          column_type = :date
+          allow_null  = true
+
+          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
+            ["2011-02-04", "2012-02-04", "2013-02-04", "2014-02-04", "2015-02-04", "2016-02-04", nil]
+          validator.error.should == false
+        end
+
+        it "should convert the items of a Date column into the correct type" do
+          row         = content[4]
+          row_index   = 4 # fourth row
+          column_type = :datetime
+          allow_null  = true
+
+          validator.validate_and_convert_row(row, row_index, column_type, allow_null).each do |item|
+            if item.nil?
+              nil
+            else
+              item.should == DateTime.parse(item).to_s
+            end
+          end
+          validator.error.should == false
+        end
+
+        it "should convert the items of a Time column into the correct type" do
+          row         = content[5]
+          row_index   = 5 # sixth row
+          column_type = :datetime
+          allow_null  = true
+
+          validator.validate_and_convert_row(row, row_index, column_type, allow_null).each do |item|
+            if item.nil?
+              nil
+            else
+              item.should == DateTime.parse(item).to_s
+            end
+          end
+          validator.error.should == false
+        end
+
+
+        it "should convert the items of a Boolean column into the correct type" do
+          row         = content[6]
+          row_index   = 6 # seventh row
+          column_type = :boolean
+          allow_null  = true
+
+          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==  [true,false,true,false,true,false,true]
+          validator.error.should == false
+        end
+
+
       end
 
-      it "#validate_row: row of integers should return the expected result" do
-        row         = content[1]
-        row_index   = 1 # second row
-        column_type = :integer
-        allow_null  = true
+      context "On Failure" do
 
-        validator.validate_row(row, row_index, column_type, allow_null).should ==  
-          [nil, 2, 3, 4, 5, 6,7]
-        validator.error.should == false
+        context "#validate_and_convert_row" do
+
+          it "Integer column: return the row converted so far and log the error" do
+
+            row         = content[1]
+            row[3]      = 'xxx' # wrong value
+            row_index   = 1
+            column_type = :integer
+            allow_null  = true
+
+            validator.error.should == false
+            validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
+              [nil, 2, 3, "xxx", "5", "6", "7"]
+
+            CSVStore::Logger.error_queue.should == 
+              {"/home/sovonex/Desktop/my_file.csv" => 
+               {:verify=>
+                [{:error=>ArgumentError,
+                  :message=>"invalid value for Integer(): \"xxx\"",
+                  :value=>"xxx",
+                  :row=>2,
+                  :col=>4}]}}
+
+                validator.error.should == true
+          end
+
+          it "Float column: return the row converted so far and log the error" do
+
+            row         = content[2]
+            row[3]      = 'xxx' # wrong value
+            row_index   = 1
+            column_type = :float
+            allow_null  = true
+
+            validator.error.should == false
+            validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
+              [nil, 2, 3, "xxx", "5", "6", "7"]
+
+            CSVStore::Logger.error_queue.should == 
+              {"/home/sovonex/Desktop/my_file.csv" => 
+               {:verify=>
+                [{:error=>ArgumentError,
+                  :message=>"invalid value for Integer(): \"xxx\"",
+                  :value=>"xxx",
+                  :row=>2,
+                  :col=>4}]}}
+
+                validator.error.should == true
+          end
+
+        end
       end
-
-      it "#validate_row: row of floats should return the expected result" do
-        row         = content[2]
-        row_index   = 2 # third row
-        column_type = :float
-        allow_null  = true
-
-        validator.validate_row(row, row_index, column_type, allow_null).should ==  
-          [1.12,nil,3.14,4.15,5.16,6.17,7.18]
-        validator.error.should == false
-      end
-
-      it "#validate_row: row of booleans should return the expected result" do
-        row         = content[6]
-        row_index   = 6 # seventh row
-        column_type = :boolean
-        allow_null  = true
-
-        validator.validate_row(row, row_index, column_type, allow_null).should ==  [true,false,true,false,true,false,true]
-        validator.error.should == false
-      end
-
-      # it "temp test for failure:" do
-      #   row         = content[5]
-      #   row_index   = 5 # seventh row
-      #   column_type = :boolean
-      #   allow_null  = true
-
-      #   pp CSVStore::Logger.error_queue
-      #   validator.error.should == false
-      #   validator.validate_row(row, row_index, column_type, allow_null).should ==  [true,false,true,false,true,false,true]
-      # end
     end
   end
 end
-
-
-
-array = [[1,2,3],[4,5,6],[7,8,9]]
-
-
-error_var = false
-class ExTest
-
-  @error_var = false
-  @exceptions = []
-
-  class MyException < ArgumentError; end
-
-  def row row
-    puts "error_var inside 'row': #{@error_var}"
-    row.each do |item|
-      raise MyException, "It's a five!" if item == 5
-      puts "Number: #{item}"
-    end
-  rescue MyException => e
-    puts "Found this exception:"
-    puts e.class
-    @error_var = true
-    # @exceptions << e
-    # execution continues immediately 
-    # AFTER THE BEGIN BLOCK THAT SPAWNED IT, that is:
-    # outside of 'row'
-  rescue
-    raise
-  end
- 
-  # Try this
-  # def row row
-  #   temp_row = row
-  #   begin
-  #     ...
-  #   rescue
-  #     @error_var = true
-  #     log_error error
-  #   end
-  #   # after 'each' or 'rescue'
-  #   temp_row
-  # end
-
-
-  def table table
-    table.each do |r|
-      row r
-    end
-
-  end
-end
-
-ExTest.new.table array
-
-
-
-
-
-
-
-
