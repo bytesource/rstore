@@ -37,7 +37,6 @@ module CSVStore
     Converters = Hash.new {|h,k| h[k] = lambda { |field| field }}.
       merge!({string:   lambda { |field| field },
               date:     lambda { |field| Date.parse(field).to_s },
-              # Sequel also handles Time as DateTime
               datetime: lambda { |field| DateTime.parse(field).to_s }, 
               integer:  lambda { |field| Integer(field) },
               float:    lambda { |field| Float(field) },
@@ -87,7 +86,8 @@ module CSVStore
     def validate_and_convert_row row, row_index, column_type, allow_null
       # CSV.parse adjusts the size of each row to equal the size of the longest row 
       # by adding nil where necessary.
-      raise InvalidRowLengthError unless row.size == @column_types.size
+      raise InvalidRowLengthError, 
+        "Row length does not match number of columns" unless row.size == @column_types.size
 
       @row = row.dup
       begin
@@ -123,7 +123,7 @@ module CSVStore
 
 
     def validate_null allow_null
-      raise NullNotAllowedError "Null not allowed" unless allow_null == true
+      raise NullNotAllowedError, "NULL not allowed" unless allow_null == true
     end
 
   end
