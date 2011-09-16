@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+require 'csvstore/core_ext/object'
+
 module CSVStore
   class Data
 
@@ -13,7 +15,7 @@ module CSVStore
     def initialize path, content, options = {}
       @path    = path
       @content = content
-      raise ArgumentError, ":has_error=>'#{options[:has_error]}'" unless is_boolean_or_nil?(options[:has_error])
+      raise ArgumentError, ":has_error=>'#{options[:has_error]}'" unless options[:has_error].boolean_or_nil?
       @type    = extract_type path
       @error   = options[:has_error] || false
     end
@@ -25,11 +27,6 @@ module CSVStore
 
     def has_error?
       @error
-    end
-
-    def is_boolean_or_nil? value
-      return true if value.nil?
-      !!value == value
     end
 
   end
