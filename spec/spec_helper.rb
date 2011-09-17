@@ -9,4 +9,6 @@ require 'csvstore/base_table'
 require 'csvstore/data'
 require 'csvstore/validator'
 require 'csvstore/logger'
+require 'csvstore/configuration'
+require 'csvstore/file_crawler'
 
