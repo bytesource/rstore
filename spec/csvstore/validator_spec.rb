@@ -226,8 +226,10 @@ describe CSVStore::Validator do
           CSVStore::Logger.error_queue = empty_hash
 
           validator.error.should == false
-          result = validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
-            ["2011-09-15T01:30:00+00:00", nil, "2011-09-15T15:30:00+00:00", "7:61", "5:30am", "6:30", "7:30"]
+
+          date_now = Time.now.to_s.match(/(?<date>.*?)\s/)[:date]
+          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
+            ["#{date_now}T01:30:00+00:00", nil, "#{date_now}T15:30:00+00:00", "7:61", "5:30am", "6:30", "7:30"]
 
           CSVStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
           validator.error.should == true
@@ -243,8 +245,10 @@ describe CSVStore::Validator do
           CSVStore::Logger.error_queue = empty_hash
 
           validator.error.should == false
+
+          date_now = Time.now.to_s.match(/(?<date>.*?)\s/)[:date]
           result = validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
-            ["2011-09-15T01:30:00+00:00", nil, "2011-09-15T15:30:00+00:00", "7:61", "5:30am", "6:30", "7:30"]
+            ["#{date_now}T01:30:00+00:00", nil, "#{date_now}T15:30:00+00:00", "7:61", "5:30am", "6:30", "7:30"]
 
           CSVStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
           validator.error.should == true
