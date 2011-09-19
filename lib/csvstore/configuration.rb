@@ -15,6 +15,8 @@ module CSVStore
               has_headers: lambda { |value| value.boolean_or_nil? },
               selector:    lambda { |value| value.is_a?(String) }})
 
+    FileDefaults         = {recursive: false, has_headers: true}
+
     attr_reader :file_options, :parse_options
     attr_reader :path
     
@@ -41,7 +43,7 @@ module CSVStore
    
     def file_options= all_options
       new_settings = extract_options all_options, KnownFileOptions
-      @file_options = new_settings
+      @file_options = FileDefaults.merge(new_settings)
     end
 
 

@@ -22,6 +22,20 @@ describe CSVStore::Configuration do
       specify { config.path.should  == path }
     end
 
+    context "when a file option is not given as a parameter" do
+      options = all_options.dup
+      options.delete(:recursive)
+      options.delete(:selector)
+
+      let(:config) { described_class.new(path, options) }
+
+      it "should return the default option" do
+        # As there is no sensible default for :selector, this key is left out if not given as a parameter. 
+        config.file_options.should == {:recursive=>false, :has_headers=>true}
+
+      end
+    end
+
     context "on failure" do
 
       context "when option hash contains unknown option keys" do
