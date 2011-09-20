@@ -45,6 +45,8 @@ module CSVStore
       end
       if target
         instance_variable_get(target)
+      else
+        raise ArgumentError, "'#{key}' is not an instance variable"
       end
     end
 
