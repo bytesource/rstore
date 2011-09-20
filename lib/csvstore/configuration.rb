@@ -38,9 +38,19 @@ module CSVStore
       @parse_options = new_settings
     end
 
-    # GO ON HERE AND CHECK THE INPUT VALUE!!!
 
-   
+    def [] key
+      target = instance_variables.find do |var|
+        var.to_s.gsub(/@/,'').to_sym == key
+      end
+      if target
+        instance_variable_get(target)
+      end
+    end
+
+
+    
+
     def file_options= all_options
       new_settings = extract_options all_options, KnownFileOptions
       @file_options = FileDefaults.merge(new_settings)
