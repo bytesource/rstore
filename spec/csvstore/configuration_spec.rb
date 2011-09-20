@@ -20,6 +20,11 @@ describe CSVStore::Configuration do
       specify { config.parse_options.should == parse_options }
       specify { config.file_options.should  == file_options }
       specify { config.path.should  == path }
+
+      specify { config[:parse_options].should == parse_options }
+      specify { config[:file_options].should  == file_options }
+      specify { config[:path].should  == path }
+      specify { config[:does_not_exist].should  == nil }
     end
 
     context "when a file option is not given as a parameter" do
