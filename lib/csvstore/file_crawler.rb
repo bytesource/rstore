@@ -13,33 +13,33 @@ module CSVStore
 
     attr_reader :file_options, :parse_options 
     attr_reader :path
-    attr_reader :file_paths
+    attr_reader :file_paths, :file_type
     attr_reader :config
     
     
 
-    def initialize file_or_folder, options
+    def initialize file_or_folder, file_type, options={}
       @path = file_or_folder
       @config = Configuration.new(file_or_folder, options)
       @file_options  = config.file_options
       @parse_options = config.parse_options
       @file_paths    = []
+      @file_type     = file_type
     end
 
     def parse
       dest = File.expand_path(@path)
       if File.directory?(dest)
-        puts "Directory"
-        puts "is directory"   # Test if destination is a directory.
         Dir.chdir(dest)                # Change current directory to 'path'.
         files = ''
         if @file_options[:recursive]
-          files = Dir.glob("**/*")       # Recursively read files into array.
+          files = Dir.glob("**/*.{#{@file_type}}")       # Recursively read files into array, skip files that are not of @file_type
         else
-          files = Dir.glob("*")          # Read files of the current directory
+          files = Dir.glob("*.{#{@file_type}}")          # Read files of the current directory
         end
         files.each do |f|
-          @file_paths << f
+          next if File.directory? f
+          @file_paths << File.expand_path(f)
         end
       else # file or web address
         @file_paths << @path
