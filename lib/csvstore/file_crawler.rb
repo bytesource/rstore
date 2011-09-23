@@ -1,7 +1,7 @@
 # encoding: utf-8
 
 require 'csvstore/configuration'
-require 'uri'
+require 'open-uri'
 
 module CSVStore
   class FileCrawler
@@ -29,23 +29,11 @@ module CSVStore
     end
 
     def parse
-      return @file_path << @path if @path =~ /^#{URI.regexp}$/
-
-      dest = File.expand_path(@path)
-      if File.directory?(dest)
-        Dir.chdir(dest) do                           # Change current directory to 'path'.
-          files = []
-          if @file_options[:recursive]
-            files = Dir.glob("**/*.{#{@file_type}}") # Recursively read files into array, skip files that are not of @file_type
-          else
-            files = Dir.glob("*.{#{@file_type}}")    # Read files of the current directory
-          end
-          files.each do |file|
-            next if File.directory? file
-            @file_paths << File.expand_path(file)
-          end
-        end
-      else # file or wrong directory path
+      if @path =~ /^#{URI.regexp}$/
+        return @file_paths << @path
+      elsif File.directory?(File.expand_path(@path))
+        add_file_paths(@file_options[:recursive])
+      else # either a file, a bad formatted urls or a non-existing directory path
         file = File.expand_path(@path)
         raise ArgumentError, "'#{@path}' is not a valid path"     unless File.exists?(file)
         error_message = <<-MESSAGE
@@ -59,24 +47,6 @@ module CSVStore
       end
     end
 
-    # def parse
-    #   dest = File.expand_path(@path)
-    #   if File.directory?(dest)
-    #     Dir.chdir(dest)                # Change current directory to 'path'.
-    #     files = ''
-    #     if @file_options[:recursive]
-    #       files = Dir.glob("**/*.{#{@file_type}}")       # Recursively read files into array, skip files that are not of @file_type
-    #     else
-    #       files = Dir.glob("*.{#{@file_type}}")          # Read files of the current directory
-    #     end
-    #     files.each do |f|
-    #       next if File.directory? f
-    #       @file_paths << File.expand_path(f)
-    #     end
-    #   else # file or web address
-    #     @file_paths << @path
-    #   end
-    # end
 
     def add
       parse
@@ -87,8 +57,35 @@ module CSVStore
     end
 
 
+    def add_file_paths option
+      Dir.chdir(@path) do                           # Change current directory to 'path'.
+        files = []
+        if option
+          files = Dir.glob("**/*.{#{@file_type}}") # Recursively read files into array, skip files that are not of @file_type
+        else
+          files = Dir.glob("*.{#{@file_type}}")    # Read files of the current directory
+        end
+        files.each do |file|
+          next if File.directory? file
+          @file_paths << File.expand_path(file)
+        end
+      end
+    end
+
+
     def can_read? path
       !!(/.*\.#{@file_type.to_s}$/ =~ path)
+    end
+
+    def remote_file_exists? url
+      url = url
+      again? = true 
+      open( url).status
+    rescue
+      if again?
+      url = url.gsub(/http/,'https')
+      again? = false
+      retry
     end
 
   end

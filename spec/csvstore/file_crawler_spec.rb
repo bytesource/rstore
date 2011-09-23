@@ -135,10 +135,54 @@ describe CSVStore::FileCrawler do
 
           it "should throw an exception" do
 
-            crawler.add
             lambda do
               crawler.add
             end.should raise_exception(ArgumentError)
+          end
+        end
+      end
+    end
+
+    describe "given a URL" do
+
+      context "on success" do
+
+        url1 = 'http://github.com/circle/fastercsv/blob/master/test/test_data.csv'
+        url2 = 'http://www.sovonex.com/drill-collars.php' # does require a file in an URL to be of a specific file type.
+        urls = [url1, url2]
+        let(:crawler) { described_class }
+
+        # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
+        it "should return a hash for the url" do
+
+          CSVStore::FileCrawler.file_queue = empty_hash
+          urls.each do |url|
+            c = crawler.new(url, file_type, options)
+            c.add
+          end
+          CSVStore::FileCrawler.file_queue.should == {"#{urls[0]}"=>
+                                                      {:file_options=>{:recursive=>true, :has_headers=>true}, 
+                                                       :parse_options=>{:col_sep => ";", :quote_char => "'"}},
+                                                       "#{urls[1]}"=>
+                                                      {:file_options=>{:recursive=>true, :has_headers=>true}, 
+                                                       :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
+        end
+      end
+
+      context "On failure" do
+
+        context "when the url has the wrong format" do
+
+          wrong_format = 'http:/www. sovonex.com.test.csv' # contains whitespace
+
+          let(:crawler) { described_class.new(wrong_format, file_type) }
+
+          it "should throw an exception" do
+
+            lambda do
+              crawler.add
+            end.should raise_exception(ArgumentError,"'#{wrong_format}' is not a valid path")
+
           end
         end
       end
