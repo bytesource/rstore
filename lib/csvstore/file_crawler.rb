@@ -29,19 +29,14 @@ module CSVStore
     end
 
     def parse
-      if @path =~ /^#{URI.regexp}$/
-        return @file_paths << @path
-      elsif File.directory?(File.expand_path(@path))
+      if @path =~ URLRegex                                 # URL
+        return @file_paths << verify_and_format_url(@path)
+      elsif File.directory?(File.expand_path(@path))       # Directory
         add_file_paths(@file_options[:recursive])
-      else # either a file, a bad formatted urls or a non-existing directory path
+      else                                                 # Either a file or a non-existing directory path
         file = File.expand_path(@path)
-        raise ArgumentError, "'#{@path}' is not a valid path"     unless File.exists?(file)
-        error_message = <<-MESSAGE
-        File '#{@path}' is not a #{@file_type} file.
-        NOTE: Non-#{@file_type} files in a directory path
-              are silently skipped WITHOUT raising an exception
-        MESSAGE
-        raise ArgumentError, error_message    unless can_read?(@path)
+        raise ArgumentError, "'#{@path}' is not a valid path" unless File.exists?(file)
+        raise ArgumentError, ErrorMessage                     unless can_read?(@path)
 
         @file_paths << file
       end
@@ -73,20 +68,44 @@ module CSVStore
     end
 
 
+    # Helper methods ---------------------------
+
+
     def can_read? path
       !!(/.*\.#{@file_type.to_s}$/ =~ path)
     end
 
-    def remote_file_exists? url
-      url = url
-      again? = true 
-      open( url).status
-    rescue
-      if again?
-      url = url.gsub(/http/,'https')
-      again? = false
-      retry
+
+    def verify_and_format_url url
+      address = url
+      begin # add additional 'begin' block so that we can return the original, unchanged url in the error message.
+        open(address)
+        address
+      rescue
+        case address
+        when /^www/  # open-uri does not recognize URLs starting with 'www'
+          address = 'http://' + address
+          retry
+        when /^http:/ # open-uri does not redirect from http to https on a valid https URL 
+          address = address.gsub(/http/,'https')
+          retry
+        else 
+          raise ArgumentError, "Could not connect to #{url}. Please check it this URL is correct."
+        end
+      end
     end
+
+
+    # http://daringfireball.net/2010/07/improved_regex_for_matching_urls
+    URLRegex = /^((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+
+                  (?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/x
+
+
+    ErrorMessage = <<-MESSAGE
+        File '#{@path}' is not a #{@file_type} file.
+        NOTE: Non-#{@file_type} files in a directory path
+              are silently skipped WITHOUT raising an exception
+    MESSAGE
 
   end
 end

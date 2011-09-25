@@ -148,7 +148,7 @@ describe CSVStore::FileCrawler do
       context "on success" do
 
         url1 = 'http://github.com/circle/fastercsv/blob/master/test/test_data.csv'
-        url2 = 'http://www.sovonex.com/drill-collars.php' # does require a file in an URL to be of a specific file type.
+        url2 = 'www.sovonex.com/drill-collars.php' # does require a file in an URL to be of a specific file type.
         urls = [url1, url2]
         let(:crawler) { described_class }
 
@@ -160,10 +160,10 @@ describe CSVStore::FileCrawler do
             c = crawler.new(url, file_type, options)
             c.add
           end
-          CSVStore::FileCrawler.file_queue.should == {"#{urls[0]}"=>
+          CSVStore::FileCrawler.file_queue.should == {"#{urls[0].gsub(/http/,'https')}"=>
                                                       {:file_options=>{:recursive=>true, :has_headers=>true}, 
                                                        :parse_options=>{:col_sep => ";", :quote_char => "'"}},
-                                                       "#{urls[1]}"=>
+                                                       "http://#{urls[1]}"=>
                                                       {:file_options=>{:recursive=>true, :has_headers=>true}, 
                                                        :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
         end
@@ -173,7 +173,7 @@ describe CSVStore::FileCrawler do
 
         context "when the url has the wrong format" do
 
-          wrong_format = 'http:/www. sovonex.com.test.csv' # contains whitespace
+          wrong_format = 'http:/www.sovonex.com/test.csv' # one slash missing
 
           let(:crawler) { described_class.new(wrong_format, file_type) }
 
@@ -183,6 +183,20 @@ describe CSVStore::FileCrawler do
               crawler.add
             end.should raise_exception(ArgumentError,"'#{wrong_format}' is not a valid path")
 
+          end
+        end
+
+        context "when the remote file does not exist" do
+
+          does_not_exist = 'http://www.sovonex.com/does-not_exist.csv'
+
+          let(:crawler) { described_class.new(does_not_exist, file_type) }
+
+          it "should throw an exception" do
+
+            lambda do
+              crawler.add
+            end.should raise_exception(ArgumentError,/Could not connect to #{does_not_exist}/)
           end
         end
       end
