@@ -17,7 +17,6 @@ describe CSVStore::FileCrawler do
   file_type   = :csv
 
   let(:crawler) { described_class.new(test_dir, file_type, options) }
-  let(:empty_hash) { Hash.new {|h,k| h[k] = Hash.new{|h,k| h[k] = []}} }
 
   context "On Initialization" do
 
@@ -38,7 +37,7 @@ describe CSVStore::FileCrawler do
     describe "given a path to a directory" do
       # If given a directory, all files not ending on 'file_type' are silently skipped without raising an exception.
 
-      context "On success" do
+      context "on success" do
 
         context "with default options for 'recursive'" do
 
@@ -47,10 +46,9 @@ describe CSVStore::FileCrawler do
           # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
           it "should return a hash for all files of the current directory" do
 
-            crawler.add
-            CSVStore::FileCrawler.file_queue.should == {"#{File.expand_path('../test_dir/empty.csv')}" => 
-                                                        {:file_options=>{:recursive=>false, :has_headers=>true}, 
-                                                         :parse_options=>{}}}
+            crawler.file_options_hash.should == {"#{File.expand_path('../test_dir/empty.csv')}" => 
+                                                 {:file_options=>{:recursive=>false, :has_headers=>true}, 
+                                                  :parse_options=>{}}}
           end
         end
 
@@ -61,9 +59,7 @@ describe CSVStore::FileCrawler do
           # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
           it "should return a hash for all files of the current directory and subdirectories" do
 
-            CSVStore::FileCrawler.file_queue = empty_hash
-            crawler.add
-            CSVStore::FileCrawler.file_queue.should == {"#{File.expand_path('../test_dir/empty.csv')}"  => 
+            crawler.file_options_hash.should == {"#{File.expand_path('../test_dir/empty.csv')}"  => 
                                                         {:file_options=>{:recursive=>true, :has_headers=>true}, 
                                                          :parse_options=>{:col_sep => ";", :quote_char => "'"}},
                                                          "#{File.expand_path('../test_dir/dir_1/dir_2/test.csv')}"  => 
@@ -73,18 +69,18 @@ describe CSVStore::FileCrawler do
         end
       end
 
-      context "On failure" do
+      context "on failure" do
 
         context "when directory does not exist" do
 
           wrong_dir_path = 'xxx'
 
-          let(:crawler) { described_class.new(wrong_dir_path, file_type) }
+          let(:crawler) { described_class }
 
           it "should throw an exception" do
 
             lambda do
-              crawler.add
+              crawler.new(wrong_dir_path, file_type, options)
             end.should raise_exception(ArgumentError,"'#{wrong_dir_path}' is not a valid path")
 
           end
@@ -94,7 +90,7 @@ describe CSVStore::FileCrawler do
 
     describe "given a path to a file" do
 
-      context "On success" do
+      context "on success" do
 
         file = '../test_dir/empty.csv'
         let(:crawler) { described_class.new(file, file_type, options) }
@@ -102,26 +98,24 @@ describe CSVStore::FileCrawler do
         # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
         it "should return a hash for the file" do
 
-          CSVStore::FileCrawler.file_queue = empty_hash
-          crawler.add
-          CSVStore::FileCrawler.file_queue.should == {"/home/sovonex/Desktop/temp/csvstore/spec/test_dir/empty.csv" => 
+          crawler.file_options_hash.should == {"/home/sovonex/Desktop/temp/csvstore/spec/test_dir/empty.csv" => 
                                                       {:file_options=>{:recursive=>true, :has_headers=>true}, 
                                                        :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
         end
       end
 
-      context "On failure" do
+      context "on failure" do
 
         context "when file does not exist" do
 
           wrong_file_path = 'xxx.csv'
 
-          let(:crawler) { described_class.new(wrong_file_path, file_type) }
+          let(:crawler) { described_class }
 
           it "should throw an exception" do
 
             lambda do
-              crawler.add
+              crawler.new(wrong_file_path, file_type, options)
             end.should raise_exception(ArgumentError,"'#{wrong_file_path}' is not a valid path")
 
           end
@@ -155,32 +149,33 @@ describe CSVStore::FileCrawler do
         # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
         it "should return a hash for the url" do
 
-          CSVStore::FileCrawler.file_queue = empty_hash
-          urls.each do |url|
-            c = crawler.new(url, file_type, options)
-            c.add
-          end
-          CSVStore::FileCrawler.file_queue.should == {"#{urls[0].gsub(/http/,'https')}"=>
+          c1 = crawler.new(url1, file_type, options)
+          c2 = crawler.new(url2, file_type, options)
+
+
+
+          c1.file_options_hash.should == {"#{urls[0].gsub(/http/,'https')}"=>
                                                       {:file_options=>{:recursive=>true, :has_headers=>true}, 
-                                                       :parse_options=>{:col_sep => ";", :quote_char => "'"}},
-                                                       "http://#{urls[1]}"=>
+                                                       :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
+
+         c2.file_options_hash.should ==  {"http://#{urls[1]}"=>
                                                       {:file_options=>{:recursive=>true, :has_headers=>true}, 
                                                        :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
         end
       end
 
-      context "On failure" do
+      context "on failure" do
 
         context "when the url has the wrong format" do
 
           wrong_format = 'http:/www.sovonex.com/test.csv' # one slash missing
 
-          let(:crawler) { described_class.new(wrong_format, file_type) }
+          let(:crawler) { described_class } 
 
           it "should throw an exception" do
 
             lambda do
-              crawler.add
+              crawler.new(wrong_format, file_type) 
             end.should raise_exception(ArgumentError,"'#{wrong_format}' is not a valid path")
 
           end
