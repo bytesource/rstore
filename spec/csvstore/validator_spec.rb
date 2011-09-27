@@ -4,7 +4,7 @@ require 'spec_helper'
 require 'csv'
 require 'sequel'
 
-describe CSVStore::Validator do
+describe RStore::Validator do
 
   # CSV content to be parsed by CSV class
   csv = <<-CSV.gsub(/^ +/, "")
@@ -38,7 +38,7 @@ describe CSVStore::Validator do
   schema  = DB.schema(:test)
   path    = '/home/sovonex/Desktop/my_file.csv'
 
-  let(:data)      { CSVStore::Data.new(path, content) }
+  let(:data)      { RStore::Data.new(path, content) }
   let(:validator) { described_class.new(data, schema) }
 
 
@@ -169,7 +169,7 @@ describe CSVStore::Validator do
           validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
             [nil, 2, 3, "xxx", "5", "6", "7"]
 
-          CSVStore::Logger.error_queue.should == 
+          RStore::Logger.error_queue.should == 
             {"/home/sovonex/Desktop/my_file.csv" => 
              {:verify=>
               [{:error=>ArgumentError,
@@ -188,13 +188,13 @@ describe CSVStore::Validator do
           row_index   = 1
           column_type = :float
           allow_null  = true
-          CSVStore::Logger.error_queue = empty_hash
+          RStore::Logger.error_queue = empty_hash
 
           validator.error.should == false
           validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
             [1.12, nil, 3.14, "xxx", "5.16", "6.17", "7.18"]
 
-          CSVStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
+          RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
 
           validator.error.should == true
         end
@@ -206,13 +206,13 @@ describe CSVStore::Validator do
           row_index   = 1
           column_type = :date
           allow_null  = true
-          CSVStore::Logger.error_queue = empty_hash
+          RStore::Logger.error_queue = empty_hash
 
           validator.error.should == false
           validator.validate_and_convert_row(row, row_index, column_type, allow_null).should == 
             ["2011-02-04", "2012-02-04", "2013-02-04", "2011-40-2", "2015-2-4", "2016/2/4", nil]
 
-          CSVStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
+          RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
           validator.error.should == true
         end
 
@@ -223,7 +223,7 @@ describe CSVStore::Validator do
           row_index   = 1
           column_type = :datetime
           allow_null  = true
-          CSVStore::Logger.error_queue = empty_hash
+          RStore::Logger.error_queue = empty_hash
 
           validator.error.should == false
 
@@ -231,7 +231,7 @@ describe CSVStore::Validator do
           validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
             ["#{date_now}T01:30:00+00:00", nil, "#{date_now}T15:30:00+00:00", "7:61", "5:30am", "6:30", "7:30"]
 
-          CSVStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
+          RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
           validator.error.should == true
         end
 
@@ -242,7 +242,7 @@ describe CSVStore::Validator do
           row_index   = 1
           column_type = :datetime
           allow_null  = true
-          CSVStore::Logger.error_queue = empty_hash
+          RStore::Logger.error_queue = empty_hash
 
           validator.error.should == false
 
@@ -250,7 +250,7 @@ describe CSVStore::Validator do
           result = validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
             ["#{date_now}T01:30:00+00:00", nil, "#{date_now}T15:30:00+00:00", "7:61", "5:30am", "6:30", "7:30"]
 
-          CSVStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
+          RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
           validator.error.should == true
         end
 
@@ -261,13 +261,13 @@ describe CSVStore::Validator do
           row_index   = 1
           column_type = :boolean
           allow_null  = true
-          CSVStore::Logger.error_queue = empty_hash
+          RStore::Logger.error_queue = empty_hash
 
           validator.error.should == false
           validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
             [true, false, true, "xxx", "1", "0", "true"]
 
-          CSVStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
+          RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
 
           validator.error.should == true
         end
@@ -280,17 +280,17 @@ describe CSVStore::Validator do
           row_index   = 1
           column_type = :boolean
           allow_null  = false  # no null values allowed
-          CSVStore::Logger.error_queue = empty_hash
+          RStore::Logger.error_queue = empty_hash
 
           validator.error.should == false
           validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
             [true, false, true, nil, "1", "0", "true"]
 
-          CSVStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1
-          CSVStore::Logger.error_queue.should == 
+          RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1
+          RStore::Logger.error_queue.should == 
             {"/home/sovonex/Desktop/my_file.csv"=>
              {:verify=>
-              [{:error=>CSVStore::NullNotAllowedError,
+              [{:error=>RStore::NullNotAllowedError,
                 :message=>"NULL not allowed",
                 :value=>nil,
                 :row=>2,
@@ -312,10 +312,10 @@ describe CSVStore::Validator do
           new_content[2] = short_row
           allow_null  = true
 
-          new_data = CSVStore::Data.new(path, new_content) 
-          new_validator = CSVStore::Validator.new(new_data, schema) 
+          new_data = RStore::Data.new(path, new_content) 
+          new_validator = RStore::Validator.new(new_data, schema) 
 
-          CSVStore::Logger.error_queue = empty_hash
+          RStore::Logger.error_queue = empty_hash
 
           new_validator.error.should == false
 
@@ -332,15 +332,15 @@ describe CSVStore::Validator do
 
           result.error.should == true
 
-          CSVStore::Logger.error_queue.should == 
+          RStore::Logger.error_queue.should == 
             {"/home/sovonex/Desktop/my_file.csv"=>
              {:verify=>
-              [{:error=>CSVStore::InvalidRowLengthError,
+              [{:error=>RStore::InvalidRowLengthError,
                 :message=>"Row length does not match number of columns",
                 :row=>3}]}}
 
 
-              CSVStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1
+              RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1
 
 
               new_validator.error.should == true
@@ -353,10 +353,10 @@ describe CSVStore::Validator do
           new_content[2] = long_row
           allow_null  = true
 
-          new_data = CSVStore::Data.new(path, new_content) 
-          new_validator = CSVStore::Validator.new(new_data, schema) 
+          new_data = RStore::Data.new(path, new_content) 
+          new_validator = RStore::Validator.new(new_data, schema) 
 
-          CSVStore::Logger.error_queue = empty_hash
+          RStore::Logger.error_queue = empty_hash
 
           new_validator.error.should == false
 
@@ -372,15 +372,15 @@ describe CSVStore::Validator do
           
           result.error.should == true
 
-          CSVStore::Logger.error_queue.should == 
+          RStore::Logger.error_queue.should == 
             {"/home/sovonex/Desktop/my_file.csv"=>
              {:verify=>
-              [{:error=>CSVStore::InvalidRowLengthError,
+              [{:error=>RStore::InvalidRowLengthError,
                 :message=>"Row length does not match number of columns",
                 :row=>3}]}}
 
 
-              CSVStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1
+              RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1
 
 
               new_validator.error.should == true

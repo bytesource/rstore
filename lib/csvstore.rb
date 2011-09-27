@@ -1,4 +1,4 @@
 # encoding: utf-8
 
-module CSVStore
+module RStore
 end

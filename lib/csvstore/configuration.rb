@@ -1,7 +1,7 @@
 # encoding: utf-8
-require 'csvstore/core_ext/object'
+require 'rstore/core_ext/object'
 
-module CSVStore
+module RStore
   class Configuration
 
     # Todo: Evaluate the correctness of values passes via file_options

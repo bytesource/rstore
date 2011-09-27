@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CSVStore::FileCrawler do
+describe RStore::FileCrawler do
 
   # Directory struture:
   # test_dir/
@@ -21,7 +21,7 @@ describe CSVStore::FileCrawler do
   context "On Initialization" do
 
     it "should set all variables correctly" do
-      config = CSVStore::Configuration.new(test_dir, options)
+      config = RStore::Configuration.new(test_dir, options)
 
       crawler.path.should == test_dir
       crawler.file_options.should  == config.file_options
@@ -98,7 +98,7 @@ describe CSVStore::FileCrawler do
         # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
         it "should return a hash for the file" do
 
-          crawler.file_options_hash.should == {"/home/sovonex/Desktop/temp/csvstore/spec/test_dir/empty.csv" => 
+          crawler.file_options_hash.should == {"/home/sovonex/Desktop/temp/rstore/spec/test_dir/empty.csv" => 
                                                       {:file_options=>{:recursive=>true, :has_headers=>true}, 
                                                        :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
         end

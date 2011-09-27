@@ -1,13 +1,13 @@
 # encoding: utf-8
 
-module CSVStore
+module RStore
   class BaseDB
 
     class << self
-      attr_reader :db_classes # self = #<Class:CSVStore::BaseDB>
+      attr_reader :db_classes # self = #<Class:RStore::BaseDB>
     end
 
-    @db_classes = Hash.new     # self = CSVStore::BaseDB
+    @db_classes = Hash.new     # self = RStore::BaseDB
 
 
     def self.inherited subclass

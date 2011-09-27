@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'data/db_classes' # BaseDB subclasses
 
-describe CSVStore::BaseDB do
+describe RStore::BaseDB do
   let(:base) {described_class}
 
   context "When loading BaseDB subclasses" do
@@ -14,7 +14,7 @@ describe CSVStore::BaseDB do
 
     it "#db_classes: should also add an ad-hoc subclass to the hash" do
 
-      class TestDB < CSVStore::BaseDB
+      class TestDB < RStore::BaseDB
       end
 
       base.db_classes.should == {:plastronics => PlastronicsDB, :my => MyDB, :test => TestDB}

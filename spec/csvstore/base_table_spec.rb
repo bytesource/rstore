@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'data/table_classes' # BaseTable subclasses
 
-describe CSVStore::BaseTable do
+describe RStore::BaseTable do
   let(:base) {described_class}
 
   context "When loading BaseTable subclasses" do
@@ -14,7 +14,7 @@ describe CSVStore::BaseTable do
 
     it "#table_classes: should also add an ad-hoc subclass to the hash" do
 
-      class TestTable < CSVStore::BaseTable
+      class TestTable < RStore::BaseTable
       end
 
       base.table_classes.should == {:project => ProjectTable, :dna => DNATable, :test => TestTable} 

@@ -1,9 +1,9 @@
 # encoding: utf-8
 
-require 'csvstore/configuration'
+require 'rstore/configuration'
 require 'open-uri'
 
-module CSVStore
+module RStore
   class FileCrawler
 
     # class << self

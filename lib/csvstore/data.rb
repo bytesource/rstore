@@ -1,8 +1,8 @@
 # encoding: utf-8
 
-require 'csvstore/core_ext/object'
+require 'rstore/core_ext/object'
 
-module CSVStore
+module RStore
   class Data
 
     attr_reader   :path

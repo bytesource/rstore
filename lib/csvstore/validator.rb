@@ -1,8 +1,8 @@
 # encoding: utf-8
-require 'csvstore/logger'
-require 'csvstore/exceptions'
+require 'rstore/logger'
+require 'rstore/exceptions'
 
-module CSVStore
+module RStore
   class Validator
 
     # @return [Hash<:verify => Array>]

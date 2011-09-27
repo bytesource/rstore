@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'csv'
 
-describe CSVStore::Data do
+describe RStore::Data do
 
   # Preparing data for content:
   csv = <<-CSV.gsub(/^ +/, "")
@@ -17,7 +17,7 @@ describe CSVStore::Data do
 
   let(:data) { described_class.new(path, content) }
 
-  context "When initializing CSVStore::Data" do
+  context "When initializing RStore::Data" do
 
     it "should set all instance variables correctly" do
 
@@ -33,11 +33,11 @@ describe CSVStore::Data do
     'false' by default and if no boolean value was passed" do
       data.has_error?.should == false
 
-      with_error = CSVStore::Data.new(path, content, :has_error => true)
+      with_error = RStore::Data.new(path, content, :has_error => true)
       with_error.has_error?.should == true
 
       lambda do
-        CSVStore::Data.new(path, content, :has_error =>  'xxx')
+        RStore::Data.new(path, content, :has_error =>  'xxx')
       end.should raise_error
     end
   end

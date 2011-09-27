@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CSVStore::Configuration do
+describe RStore::Configuration do
 
   parse_options = {row_sep: '\n', col_sep: ';', quote_char: "'", field_size_limit: nil, skip_blanks: true}
   file_options  = {recursive: true, has_headers: true, selector: 'pre div.line'}

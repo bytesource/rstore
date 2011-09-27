@@ -1,9 +1,9 @@
 
-class PlastronicsDB < CSVStore::BaseDB
+class PlastronicsDB < RStore::BaseDB
   connect :database => 'mysql', :password => 'xxx'
 end
 
 
-class MyDB < CSVStore::BaseDB
+class MyDB < RStore::BaseDB
 end
 

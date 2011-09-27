@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CSVStore::Logger do
+describe RStore::Logger do
 
   let(:logger) { described_class }
 

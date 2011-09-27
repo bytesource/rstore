@@ -3,16 +3,16 @@ require 'open-uri'
 require 'nokogiri'
 require 'csv'
 $:.unshift File.expand_path('../../../lib', __FILE__)
-require 'csvstore/data'
-require 'csvstore/base_db'
-require 'csvstore/base_table'
+require 'rstore/data'
+require 'rstore/base_db'
+require 'rstore/base_table'
 
 # Options:
-# Consider splitting options for CSV and CSVStore using 'values_at':
+# Consider splitting options for CSV and RStore using 'values_at':
 # h = { "cat" => "feline", "dog" => "canine", "cow" => "bovine" }
 # h.values_at("cow", "cat")  #=> ["bovine", "feline"]
 
-module CSVStore
+module RStore
   class CSV
 
     class << self
@@ -43,8 +43,8 @@ module CSVStore
   end
 end
 
-# temp = CSVStore::CSV.new("hello", "world")
+# temp = RStore::CSV.new("hello", "world")
 # temp.run
-temp = CSVStore::CSV.new("I feel great", "you to")
+temp = RStore::CSV.new("I feel great", "you to")
 temp.run
-puts CSVStore::CSV.persistent_row
+puts RStore::CSV.persistent_row

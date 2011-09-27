@@ -1,6 +1,6 @@
 # encoding: utf-8
 
-module CSVStore
+module RStore
   class Logger
 
     class << self

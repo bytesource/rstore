@@ -1,4 +1,4 @@
-class ProjectTable < CSVStore::BaseTable
+class ProjectTable < RStore::BaseTable
 
   create do
     primary_key :id, :allow_null => false
@@ -10,6 +10,6 @@ class ProjectTable < CSVStore::BaseTable
 end
 
 
-class DNATable < CSVStore::BaseTable
+class DNATable < RStore::BaseTable
 end
 
