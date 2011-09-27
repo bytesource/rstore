@@ -2,7 +2,6 @@
 require 'open-uri'
 require 'nokogiri'
 require 'csv'
-$:.unshift File.expand_path('../../../lib', __FILE__)
 require 'rstore/data'
 require 'rstore/base_db'
 require 'rstore/base_table'

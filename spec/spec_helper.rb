@@ -11,4 +11,5 @@ require 'rstore/validator'
 require 'rstore/logger'
 require 'rstore/configuration'
 require 'rstore/file_crawler'
+require 'rstore/csv'
 
