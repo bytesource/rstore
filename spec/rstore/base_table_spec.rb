@@ -26,7 +26,7 @@ describe RStore::BaseTable do
 
     it "Subclass#table_info: should return a proc with the table info" do
 
-      subclass.table_info.class == Proc
+      subclass.table_info.class.should == Proc
     end
   end
 end
