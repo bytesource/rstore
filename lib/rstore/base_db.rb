@@ -19,7 +19,7 @@ module RStore
         attr_reader :connection_info
       end
 
-      @connection_info = hash  # self = PlastronicsDB
+      @connection_info = hash.merge!(:database => self.name.to_s)  # self = PlastronicsDB
     end
 
     def self.name  
