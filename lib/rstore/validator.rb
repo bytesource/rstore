@@ -71,9 +71,7 @@ module RStore
       temp_data = content
       begin
         content.each_with_index do |row, row_index|
-          temp_data[row_index] = validate_and_convert_row(row, row_index, 
-                                                          @column_types[row_index], 
-                                                          @allow_null[row_index])
+          temp_data[row_index] = validate_and_convert_row(row, row_index)
         end
       rescue InvalidRowLengthError
         # Swallow this exception, then leave the begin..end block and return a new Data object
@@ -83,7 +81,7 @@ module RStore
 
 
    
-    def validate_and_convert_row row, row_index, column_type, allow_null
+    def validate_and_convert_row row, row_index
       # CSV.parse adjusts the size of each row to equal the size of the longest row 
       # by adding nil where necessary.
       raise InvalidRowLengthError, 
@@ -96,9 +94,9 @@ module RStore
           @field_index = field_index
 
           if field.nil?
-            @row[field_index] = validate_null(allow_null)
+            @row[field_index] = validate_null(@allow_null[field_index])
           else
-            @row[field_index] = convert_type(column_type, field)
+            @row[field_index] = convert_type(@column_types[field_index], field)
           end
         end
       rescue ArgumentError, NullNotAllowedError => e
@@ -112,8 +110,6 @@ module RStore
       @error = true
       raise
     end
-
-
 
     # Helper methods ---------------------------------
 
@@ -161,45 +157,4 @@ end
 #           converting_data: [path, 'error_message', row_index, field_index],
 #           writing_data: [path, 'error_message', row_index]}
 
-
-
-# Process Report
-# There where errors with the following files:
-# /home/sovonex/Desktop/false.csv
-# http://www.sovonex.com/corrupt.csv
-# /home/sovonex/me.csv
-# /home/sovonex/you.csv
-
-# The above files have NOT been written to the database yet.
-
-# A detailed description of all errors found follows:
-# /home/sovonex/Desktop/false.csv
-# Verifying data:
-# 1) "hello" at [row 2, field 1], ArgumentError: Error message 
-# 2) "world" at [row 2, field 2], ArgumentError: Error message
-# http://www.sovonex.com/corrupt.csv
-# Writing data:
-# 1)
-
-
-
-# Note: The contents of the above listed files 
-#       have NOT been written to the database
-#       due to the following errors:
-
-# Detailed listing of errors:
-# /home/sovonex/Desktop/false.csv:     Reading file: 'original error message'
-# http://www.sovonex.com/corrupt.csv   Parsing data: 'original error message'  
-# /home/sovonex/me.csv                 Converting data: 'originial error message' at row x, field x # if convert error *)
-#                                      Converting data: 'no of items does not match no of columns at row x   # if convert error
-
-
-# /home/sovonex/you.csv                Writing data: 'original error message' 
-
-
-# IDEA:
-# Edit the error message right at the source of error using two methods:
-# size_error_message default_size, acutal_size, row_index
-# conversion_error_message original_error_message, row_index, field_index
-
-
+ 

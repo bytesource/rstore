@@ -4,19 +4,28 @@ require 'spec_helper'
 require 'csv'
 require 'sequel'
 
+module HelperMethods
+  def dt time
+    date_now = Time.now.to_s.match(/(?<date>.*?)\s/)[:date]
+    "#{date_now}T#{time}:00+00:00"
+  end
+end
+
 describe RStore::Validator do
+  include HelperMethods
 
   # CSV content to be parsed by CSV class
   csv = <<-CSV.gsub(/^ +/, "")
-  col1,col2,生日,col4,col5,col6,col7
-  string1,,string3,string4,string5,string6,string7
-  ,2,3,4,5,6,7
-  1.12,,3.14,4.15,5.16,6.17,7.18
-  2011-2-4,2012/2/4,2013/2/4,2014-2-4,2015-2-4,2016/2/4,
-  1:30,,3:30pm,4:30,5:30am,6:30,7:30
-  1:30,,3:30pm,4:30,5:30am,6:30,7:30
-  true,false,True,False,1,0,true
-  CSV
+"strings","integers","floats","dates","datetimes","times","booleans"
+"string1","1","1.12","2011-2-4","1:30","1:30am",
+"string2","2","2.22","2012/2/4","2:30","2:30pm","false"
+,"3","3.33","2013/2/4","3:30","3:30 a.m.","True"
+"string4","4",,,"4:30","4:30 p.m.","False"
+"string5","5","5.55","2015-2-4","5:30","5:30AM","1"
+"string6","6","6.66","2016/2/4","6:30","6:30 P.M.","0"
+"string7","7","7.77",,,,
+   CSV
+
 
   # Create database table and retrieve the schema:
   DB = Sequel.sqlite
@@ -34,7 +43,7 @@ describe RStore::Validator do
     end
   end
 
-  content = CSV.parse(csv).drop(1)
+  content = CSV.parse(csv).drop(1)  # remove header row
   schema  = DB.schema(:test)
   path    = '/home/sovonex/Desktop/my_file.csv'
 
@@ -53,337 +62,67 @@ describe RStore::Validator do
     end
   end
 
+
   context "Validation" do
 
-    context "On Success" do
+    context "on success" do
 
-      context "#validate_and_convert_row" do
 
-        it "should convert the items of a String column into the correct type" do
-          row         = content.first
-          row_index   = 0 # first row
-          column_type = :string
-          allow_null  = true
+      context :validate_and_convert do
 
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==  
-            ["string1", nil, "string3", "string4", "string5", "string6", "string7"]
+        it "should convert all items into the correct type" do
+
+          validator.validate_and_convert.content.should == 
+            [["string1", 1, 1.12, "2011-02-04", dt('01:30'), dt('01:30'), nil],
+             ["string2", 2, 2.22, "2012-02-04", dt('02:30'), dt('14:30'), false],
+             [nil, 3, 3.33, "2013-02-04", dt('03:30'), dt('03:30'), true],
+             ["string4", 4, nil, nil, dt('04:30'), dt('16:30'), false],
+             ["string5", 5, 5.55, "2015-02-04",dt('05:30'), dt('05:30') , true],
+             ["string6", 6, 6.66, "2016-02-04", dt('06:30'), dt('18:30'), false],
+             ["string7", 7, 7.77, nil, nil, nil, nil]]
+
           validator.error.should == false
+          RStore::Logger.error_queue.should be_empty
         end
-
-        it "should convert the items of an Integer column into the correct type" do
-          row         = content[1]
-          row_index   = 1 # second row
-          column_type = :integer
-          allow_null  = true
-
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==  
-            [nil, 2, 3, 4, 5, 6,7]
-          validator.error.should == false
-        end
-
-        it "should convert the items of a Float column into the correct type" do
-          row         = content[2]
-          row_index   = 2 # third row
-          column_type = :float
-          allow_null  = true
-
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==  
-            [1.12,nil,3.14,4.15,5.16,6.17,7.18]
-          validator.error.should == false
-        end
-
-        it "should convert the items of a Date column into the correct type" do
-          row         = content[3]
-          row_index   = 3 # fourth row
-          column_type = :date
-          allow_null  = true
-
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
-            ["2011-02-04", "2012-02-04", "2013-02-04", "2014-02-04", "2015-02-04", "2016-02-04", nil]
-          validator.error.should == false
-        end
-
-        it "should convert the items of a DateTime column into the correct type" do
-          row         = content[4]
-          row_index   = 4 # fourth row
-          column_type = :datetime
-          allow_null  = true
-
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).each do |item|
-            if item.nil?
-              nil
-            else
-              item.should == DateTime.parse(item).to_s
-            end
-          end
-          validator.error.should == false
-        end
-
-        it "should convert the items of a Time column into the correct type" do
-          row         = content[5]
-          row_index   = 5 # sixth row
-          column_type = :datetime
-          allow_null  = true
-
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).each do |item|
-            if item.nil?
-              nil
-            else
-              item.should == DateTime.parse(item).to_s
-            end
-          end
-          validator.error.should == false
-        end
-
-
-        it "should convert the items of a Boolean column into the correct type" do
-          row         = content[6]
-          row_index   = 6 # seventh row
-          column_type = :boolean
-          allow_null  = true
-
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==  [true,false,true,false,true,false,true]
-          validator.error.should == false
-        end
-
       end
     end
 
-    context "On Failure" do
-
-        let(:empty_hash) { Hash.new {|h,k| h[k] = Hash.new{|h,k| h[k] = []}} }
-
-      context "#validate_and_convert_row" do
-
-
-
-        it "Integer column: return row as converted so far and log the error" do
-
-          row         = content[1].dup
-          row[3]      = 'xxx' # wrong value
-          row_index   = 1
-          column_type = :integer
-          allow_null  = true
-
-          validator.error.should == false
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
-            [nil, 2, 3, "xxx", "5", "6", "7"]
-
-          RStore::Logger.error_queue.should == 
-            {"/home/sovonex/Desktop/my_file.csv" => 
-             {:verify=>
-              [{:error=>ArgumentError,
-                :message=>"invalid value for Integer(): \"xxx\"",
-                :value=>"xxx",
-                :row=>2,
-                :col=>4}]}}
-
-              validator.error.should == true
-        end
-
-        it "Float column: return row as converted so far and log the error" do
-
-          row         = content[2].dup
-          row[3]      = 'xxx' # wrong value
-          row_index   = 1
-          column_type = :float
-          allow_null  = true
-          RStore::Logger.error_queue = empty_hash
-
-          validator.error.should == false
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
-            [1.12, nil, 3.14, "xxx", "5.16", "6.17", "7.18"]
-
-          RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
-
-          validator.error.should == true
-        end
-
-        it "Date column: return row as converted so far and log the error" do
-
-          row         = content[3].dup
-          row[3]      = '2011-40-2' # wrong date
-          row_index   = 1
-          column_type = :date
-          allow_null  = true
-          RStore::Logger.error_queue = empty_hash
-
-          validator.error.should == false
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should == 
-            ["2011-02-04", "2012-02-04", "2013-02-04", "2011-40-2", "2015-2-4", "2016/2/4", nil]
-
-          RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
-          validator.error.should == true
-        end
-
-        it "DateTime column: return row as converted so far and log the error" do
-
-          row         = content[4].dup
-          row[3]      = '7:61' # wrong time
-          row_index   = 1
-          column_type = :datetime
-          allow_null  = true
-          RStore::Logger.error_queue = empty_hash
-
-          validator.error.should == false
-
-          date_now = Time.now.to_s.match(/(?<date>.*?)\s/)[:date]
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
-            ["#{date_now}T01:30:00+00:00", nil, "#{date_now}T15:30:00+00:00", "7:61", "5:30am", "6:30", "7:30"]
-
-          RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
-          validator.error.should == true
-        end
-
-        it "Time column: return row as converted so far and log the error" do
-
-          row         = content[5].dup
-          row[3]      = '7:61' # wrong time
-          row_index   = 1
-          column_type = :datetime
-          allow_null  = true
-          RStore::Logger.error_queue = empty_hash
-
-          validator.error.should == false
-
-          date_now = Time.now.to_s.match(/(?<date>.*?)\s/)[:date]
-          result = validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
-            ["#{date_now}T01:30:00+00:00", nil, "#{date_now}T15:30:00+00:00", "7:61", "5:30am", "6:30", "7:30"]
-
-          RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
-          validator.error.should == true
-        end
-
-        it "Boolean column: return row as converted so far and log the error" do
-
-          row         = content[6].dup
-          row[3]      = 'xxx' # wrong value
-          row_index   = 1
-          column_type = :boolean
-          allow_null  = true
-          RStore::Logger.error_queue = empty_hash
-
-          validator.error.should == false
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
-            [true, false, true, "xxx", "1", "0", "true"]
-
-          RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1 
-
-          validator.error.should == true
-        end
-
-
-        it "NULL value where null not allowed: return row as converted so far and log the error" do
-
-          row         = content[6].dup
-          row[3]      = nil  # NULL value
-          row_index   = 1
-          column_type = :boolean
-          allow_null  = false  # no null values allowed
-          RStore::Logger.error_queue = empty_hash
-
-          validator.error.should == false
-          validator.validate_and_convert_row(row, row_index, column_type, allow_null).should ==
-            [true, false, true, nil, "1", "0", "true"]
-
-          RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1
-          RStore::Logger.error_queue.should == 
-            {"/home/sovonex/Desktop/my_file.csv"=>
-             {:verify=>
-              [{:error=>RStore::NullNotAllowedError,
-                :message=>"NULL not allowed",
-                :value=>nil,
-                :row=>2,
-                :col=>4}]}}
-
-
-              validator.error.should == true
-        end
-
-      end
-
-      context "#validate_and_convert" do
-
-
-        it "Row length shorter than the number of columns: return new Data object with content converted so far and log the error" do
-
-          short_row   = ["1.12", nil,"3.14", "4.15", "5.16", "6.17"]
-          new_content = content.dup
-          new_content[2] = short_row
-          allow_null  = true
-
-          new_data = RStore::Data.new(path, new_content) 
-          new_validator = RStore::Validator.new(new_data, schema) 
-
-          RStore::Logger.error_queue = empty_hash
-
-          new_validator.error.should == false
-
-          result = new_validator.validate_and_convert
-          result.content.should == 
-            [["string1", nil, "string3", "string4", "string5", "string6", "string7"],
-             [nil, 2, 3, 4, 5, 6, 7],
-             ["1.12", nil, "3.14", "4.15", "5.16", "6.17"], # row too short. No further validation from here
-             ["2011-2-4", "2012/2/4", "2013/2/4", "2014-2-4", "2015-2-4", "2016/2/4", nil],
-             ["1:30", nil, "3:30pm", "4:30", "5:30am", "6:30", "7:30"],
-             ["1:30", nil, "3:30pm", "4:30", "5:30am", "6:30", "7:30"],
-             ["true", "false", "True", "False", "1", "0", "true"]]
-
-
-          result.error.should == true
-
-          RStore::Logger.error_queue.should == 
-            {"/home/sovonex/Desktop/my_file.csv"=>
-             {:verify=>
-              [{:error=>RStore::InvalidRowLengthError,
-                :message=>"Row length does not match number of columns",
-                :row=>3}]}}
-
-
-              RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1
-
-
-              new_validator.error.should == true
-        end
-
-        it "Row length long than the number of columns: return new Data object with content converted so far and log the error" do
-
-          long_row   = ["1.12", nil,"3.14", "4.15", "5.16", "6.17", "7.18", "8.19"]
-          new_content = content.dup
-          new_content[2] = long_row
-          allow_null  = true
-
-          new_data = RStore::Data.new(path, new_content) 
-          new_validator = RStore::Validator.new(new_data, schema) 
-
-          RStore::Logger.error_queue = empty_hash
-
-          new_validator.error.should == false
-
-          result = new_validator.validate_and_convert
-          result.content.should == 
-            [["string1", nil, "string3", "string4", "string5", "string6", "string7"],
-             [nil, 2, 3, 4, 5, 6, 7],
-             ["1.12", nil, "3.14", "4.15", "5.16", "6.17", "7.18", "8.19"], # row too long. No further validation from here
-             ["2011-2-4", "2012/2/4", "2013/2/4", "2014-2-4", "2015-2-4", "2016/2/4", nil],
-             ["1:30", nil, "3:30pm", "4:30", "5:30am", "6:30", "7:30"],
-             ["1:30", nil, "3:30pm", "4:30", "5:30am", "6:30", "7:30"],
-             ["true", "false", "True", "False", "1", "0", "true"]]
-          
-          result.error.should == true
-
-          RStore::Logger.error_queue.should == 
-            {"/home/sovonex/Desktop/my_file.csv"=>
-             {:verify=>
-              [{:error=>RStore::InvalidRowLengthError,
-                :message=>"Row length does not match number of columns",
-                :row=>3}]}}
-
-
-              RStore::Logger.error_queue["/home/sovonex/Desktop/my_file.csv"][:verify].size.should == 1
-
-
-              new_validator.error.should == true
+    context "on failure" do
+
+      data_with_errors = 
+        [["string1", "xxx", "1.12", "2011-2-4", "1:30", "1:30am", nil],     # '1'       -> 'xxx'
+         ["string2", "2", "xxx", "2012/2/4", "2:30", "2:30pm", "false"],    # '2.2'     -> 'xxx'
+         [nil, "3", "3.33", "xxx", "3:30", "3:30 a.m.", "True"],            # '20132/4' -> 'xxx'
+         ["string4", "4", nil, nil, "xxx", "4:30 p.m.", "False"],           # '4:30'    -> 'xxx'
+         ["string5", "5", "5.55", "2015-2-4", "5:30", "xxx", "1"],          # '5:30AM'  -> 'xxx'
+         ["string6", "6", "6.66", "2016/2/4", "6:30", "6:30 P.M.", "xxx"],  # '0'       -> 'xxx'
+         ["string7", "7", "7.77", nil, nil, nil, nil]]
+
+      let(:data)      { RStore::Data.new(path, data_with_errors) }
+      let(:validator) { described_class.new(data, schema) }
+
+      context :validate_and_convert do
+
+        it "should log the error, skip the rest of the current row and continue with the next row" do
+
+        validator.validate_and_convert.content.should == 
+          [["string1", "xxx", "1.12", "2011-2-4", "1:30", "1:30am", nil],   
+           ["string2", 2, "xxx", "2012/2/4", "2:30", "2:30pm", "false"], 
+           [nil, 3, 3.33, "xxx", "3:30", "3:30 a.m.", "True"],        
+           ["string4", 4, nil, nil, "xxx", "4:30 p.m.", "False"],      
+           ["string5", 5, 5.55, "2015-02-04", dt('05:30'), "xxx", "1"],    
+           ["string6", 6, 6.66, "2016-02-04", dt('06:30'),dt('18:30'), "xxx"],
+           ["string7", 7, 7.77, nil, nil, nil, nil]]
+
+        validator.error.should == true
+
+        log = RStore::Logger.error_queue[path][:verify]
+        log.size.should  == 6
+        pp log[0].should == {:error=>ArgumentError,
+                             :message=>"invalid value for Integer(): \"xxx\"",
+                             :value=>"xxx",
+                             :row=>1,
+                             :col=>2}
         end
       end
     end
