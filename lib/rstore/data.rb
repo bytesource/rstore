@@ -9,8 +9,13 @@ module RStore
     attr_reader   :content
     attr_reader   :type
     attr_accessor :error
+    attr_reader   :state
     
+
+      KnownStates = [:parsed, :verified, :error]
     
+
+
     
     def initialize path, content, options = {}
       @path    = path
@@ -30,4 +35,4 @@ module RStore
     end
 
   end
-end
+end 
