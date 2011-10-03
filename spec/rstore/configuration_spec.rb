@@ -13,6 +13,7 @@ describe RStore::Configuration do
 
   let(:config) { described_class.new(path, all_options) }
 
+
   describe "On initialization" do
 
     context "when successfull" do
@@ -35,8 +36,7 @@ describe RStore::Configuration do
       let(:config) { described_class.new(path, options) }
 
       it "should return the default option" do
-        # As there is no sensible default for :selector, this key is left out if not given as a parameter. 
-        config.file_options.should == {:recursive=>false, :has_headers=>true}
+        config.file_options.should == {:recursive=>false, :has_headers=>true, :selector => ''}
 
       end
     end
@@ -46,7 +46,7 @@ describe RStore::Configuration do
       context "when option hash contains unknown option keys" do
         with_unknown_option = all_options.merge(:unknown => 'some value', :also_unknown => 'some other value')
 
-        it "should throw an exception" do 
+        it "should throw an exception" do
 
           lambda do
             described_class.new(path, with_unknown_option)
@@ -69,6 +69,24 @@ describe RStore::Configuration do
               described_class.new(path, options)
             end.should raise_exception(ArgumentError)
           end
+        end
+      end
+    end
+
+    context "self.default_file_options=" do
+
+      let(:config) { described_class }
+
+      context "on success" do
+
+        it "should set the new value" do
+
+          option = {:selector => 'body'}
+
+          defaults = config.default_file_options
+
+          config.default_file_options = defaults.merge(option)
+          config.default_file_options.should == defaults.erge(option) 
         end
       end
     end

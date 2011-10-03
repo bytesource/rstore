@@ -8,23 +8,26 @@ module RStore
 
     # Supported options
     KnownParseOptions   = [:row_sep, :col_sep, :quote_char, :field_size_limit, :skip_blanks].freeze
-    KnownFileOptions    = [:recursive, :has_headers, :selector]
 
-    Validations         = Hash.new { |h,k| lambda { |value| true }}.
+    class << self
+      attr_accessor :default_file_options
+    end
+
+    @default_file_options = {recursive: false, has_headers: true, selector: ''}
+      
+
+    Validations = Hash.new { |h,k| lambda { |value| true }}.
       merge!({recursive:   lambda { |value| value.boolean_or_nil? },
               has_headers: lambda { |value| value.boolean_or_nil? },
               selector:    lambda { |value| value.is_a?(String) }})
 
-    FileDefaults         = {recursive: false, has_headers: true}
 
-    attr_reader :file_options, :parse_options
-    attr_reader :path
+    attr_reader   :file_options, :parse_options
+    attr_reader   :path
     
 
-
-
     def initialize path, all_options
-      all_options = all_options.dup
+      all_options        = all_options.dup
       self.parse_options = all_options
       self.file_options  = all_options
       @path = path
@@ -36,6 +39,12 @@ module RStore
     def parse_options= all_options
       new_settings = extract_options all_options, KnownParseOptions
       @parse_options = new_settings
+    end
+
+
+    def file_options= all_options
+      new_settings = extract_options all_options, Configuration.default_file_options
+      @file_options = Configuration.default_file_options.merge(new_settings)
     end
 
 
@@ -51,12 +60,16 @@ module RStore
     end
 
 
-    
-
-    def file_options= all_options
-      new_settings = extract_options all_options, KnownFileOptions
-      @file_options = FileDefaults.merge(new_settings)
+    def self.default_file_options= options
+      new_options = Configuration.default_file_options.merge(options)
+      raise ArgumentError, "#{options} contains unknown option" if new_options.size > Configuration.default_file_options.size
+      new_options.each do |option, value|
+        error_message = "'#{value}' (#{value.class}) is not a valid value for option #{option.inspect}"
+        raise ArgumentError, error_message unless valid_value?(option, value)
+      end
+      Configuration.default_file_options = new_options
     end
+
 
 
     # Helper methods
@@ -65,14 +78,15 @@ module RStore
     def extract_options provided_options, supported_options
 
       provided_options_copy = provided_options.dup
+      supported_options = only_keys(supported_options)
 
       provided_options_copy.inject({}) do |extracted, (option, value)|
         if supported_options.include?(option)
-          if valid_value?(option, value)
+          if Configuration.valid_value?(option, value)
             extracted[option] = value 
             provided_options.delete(option)
           else
-            raise ArgumentError, "path #{@path}: '#{value}' (#{value.class}) is not a valid value for option '#{option.to_s}'"
+            raise ArgumentError, "path #{@path}: '#{value}' (#{value.class}) is not a valid value for option #{option.inspect}"
           end
         end
       extracted
@@ -80,7 +94,7 @@ module RStore
     end
 
 
-    def valid_value? option, value
+    def self.valid_value? option, value
       Validations[option][value]
     end
 
@@ -89,6 +103,12 @@ module RStore
       keys = all_options.keys.join(', ')
       "Unsupported options: #{keys} for path '#{path}'"
     end
+
+
+    def only_keys seq
+      seq.is_a?(Hash) ? seq.keys : seq
+    end
+
  
   end
 end
