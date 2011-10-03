@@ -7,31 +7,43 @@ module RStore
 
     attr_reader   :path
     attr_reader   :content
-    attr_reader   :type
-    attr_accessor :error
     attr_reader   :state
-    
-
-      KnownStates = [:parsed, :verified, :error]
-    
+    attr_reader   :type
 
 
-    
-    def initialize path, content, options = {}
-      @path    = path
-      @content = content
-      raise ArgumentError, ":has_error=>'#{options[:has_error]}'" unless options[:has_error].boolean_or_nil?
-      @type    = extract_type path
-      @error   = options[:has_error] || false
+    KnownStates = [:parsed, :verified, :error]
+
+
+    def initialize path, content, state
+      @path      = path
+      @content   = content
+      self.state = state
+      @type      = extract_type path
     end
+
 
     def extract_type path
       path, filename = File.split(path)
       filename.match(/\.(?<type>.*)$/)[:type].to_sym
     end
 
+
+    def state= state
+      error_message = "#{state.inspect} is not a valid state. The following states are valid: #{print_valid_states}" 
+      raise ArgumentError, error_message  unless KnownStates.include?(state)
+      @state = state
+    end
+
+
     def has_error?
-      @error
+      @state == :error
+    end
+
+
+    # Helper methods --------------------------------
+
+    def print_valid_states
+      KnownStates.map { |s| s.inspect }.join(', ')
     end
 
   end

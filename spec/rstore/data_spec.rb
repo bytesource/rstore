@@ -15,30 +15,34 @@ describe RStore::Data do
   content = CSV.parse(csv)
   path    = '/home/sovonex/temp/fantastic.csv'
 
-  let(:data) { described_class.new(path, content) }
+  let(:data) { described_class.new(path, content, :parsed) }
 
-  context "When initializing RStore::Data" do
+  context "On initialization" do
 
     it "should set all instance variables correctly" do
 
-      data.path.should == '/home/sovonex/temp/fantastic.csv'
+      data.path.should       == '/home/sovonex/temp/fantastic.csv'
+      data.state.should      == :parsed
       data.has_error?.should == false
-      data.type.should == :csv
-      data.content.should == [["col1", "col2", "col3", "生日", "col5", "col6"], 
-                              ["1", "2", "3", "4.433", "5", "-6.43"], 
-                              ["\"test\"", "test2", nil, nil, nil, nil]]
+      data.type.should       == :csv
+      data.content.should    == [["col1", "col2", "col3", "生日", "col5", "col6"], 
+                                 ["1", "2", "3", "4.433", "5", "-6.43"], 
+                                 ["\"test\"", "test2", nil, nil, nil, nil]]
     end
+  end
 
-    it "#has_error? should return the respective value given at initialization, 
-    'false' by default and if no boolean value was passed" do
-      data.has_error?.should == false
+  context :state do
 
-      with_error = RStore::Data.new(path, content, :has_error => true)
-      with_error.has_error?.should == true
+    context "on failure" do
 
-      lambda do
-        RStore::Data.new(path, content, :has_error =>  'xxx')
-      end.should raise_error
+      it "should raise an error" do
+
+        state = :wrong_state
+
+        lambda do
+          data.state = state
+        end.should raise_exception(ArgumentError, /#{state.inspect} is not a valid state/ )
+      end
     end
   end
 end
