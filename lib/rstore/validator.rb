@@ -14,7 +14,7 @@ module RStore
     attr_reader   :column_types
     # @return [Array<Boolean>] Array of boolean values indicating if NULL is allowed as a column value
     attr_reader   :allow_null
-    attr_accessor :error
+    attr_accessor :state
 
       #  Converters used to verify the field data is valid. 
       #  If a conversion fails, an exception is thrown and the processed
@@ -45,6 +45,7 @@ module RStore
 
     def initialize data_object, schema
       @data   = data_object.clone
+      @state  = @data.state
       @schema = schema
       @column_types = extract_from_schema :type
       @allow_null   = extract_from_schema :allow_null
@@ -76,7 +77,7 @@ module RStore
       rescue InvalidRowLengthError
         # Swallow this exception, then leave the begin..end block and return a new Data object
       end
-      Data.new(@data.path, temp_data, has_error: @error)
+      Data.new(@data.path, temp_data, state)
     end
 
 
@@ -101,13 +102,13 @@ module RStore
         end
       rescue ArgumentError, NullNotAllowedError => e
         Logger.log(@data.path, :verify, e, value: @field, row: row_index+1, col: @field_index+1)
-        @error = true
+        @state = :error
       end
       @row
 
     rescue InvalidRowLengthError => e
       Logger.log(@data.path, :verify, e, row: row_index+1)
-      @error = true
+      @state = :error
       raise
     end
 

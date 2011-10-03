@@ -47,7 +47,7 @@ describe RStore::Validator do
   schema  = DB.schema(:test)
   path    = '/home/sovonex/Desktop/my_file.csv'
 
-  let(:data)      { RStore::Data.new(path, content) }
+  let(:data)      { RStore::Data.new(path, content, :parsed) }
   let(:validator) { described_class.new(data, schema) }
 
 
@@ -58,7 +58,7 @@ describe RStore::Validator do
       # Sequel handles Time as DateTime
       validator.column_types.should == [:string, :integer, :float, :date, :datetime, :datetime, :boolean]
       validator.allow_null.should   == [true, true, true, true, true, true, true]
-      validator.error.should        == false
+      validator.state.should        == data.state
     end
   end
 
@@ -81,7 +81,7 @@ describe RStore::Validator do
              ["string6", 6, 6.66, "2016-02-04", dt('06:30'), dt('18:30'), false],
              ["string7", 7, 7.77, nil, nil, nil, nil]]
 
-          validator.error.should == false
+          validator.state.should == data.state
           RStore::Logger.error_queue.should be_empty
         end
       end
@@ -98,7 +98,7 @@ describe RStore::Validator do
          ["string6", "6", "6.66", "2016/2/4", "6:30", "6:30 P.M.", "xxx"],  # '0'       -> 'xxx'
          ["string7", "7", "7.77", nil, nil, nil, nil]]
 
-      let(:data)      { RStore::Data.new(path, data_with_errors) }
+      let(:data)      { RStore::Data.new(path, data_with_errors, :parsed) }
       let(:validator) { described_class.new(data, schema) }
 
       context :validate_and_convert do
@@ -114,7 +114,7 @@ describe RStore::Validator do
            ["string6", 6, 6.66, "2016-02-04", dt('06:30'),dt('18:30'), "xxx"],
            ["string7", 7, 7.77, nil, nil, nil, nil]]
 
-        validator.error.should == true
+        validator.state.should == :error
 
         log = RStore::Logger.error_queue[path][:verify]
         log.size.should  == 6
