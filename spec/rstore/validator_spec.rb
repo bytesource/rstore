@@ -4,12 +4,6 @@ require 'spec_helper'
 require 'csv'
 require 'sequel'
 
-module HelperMethods
-  def dt time
-    date_now = Time.now.to_s.match(/(?<date>.*?)\s/)[:date]
-    "#{date_now}T#{time}:00+00:00"
-  end
-end
 
 describe RStore::Validator do
   include HelperMethods
@@ -53,12 +47,25 @@ describe RStore::Validator do
 
   context "Initialization" do
 
-    it "should set all parameters correctly" do
-      validator.data.content.should == content
-      # Sequel handles Time as DateTime
-      validator.column_types.should == [:string, :integer, :float, :date, :datetime, :datetime, :boolean]
-      validator.allow_null.should   == [true, true, true, true, true, true, true]
-      validator.state.should        == data.state
+    context "on success" do
+
+      it "should set all parameters correctly" do
+        validator.data.content.should == content
+        # Sequel handles Time as DateTime
+        validator.column_types.should == [:string, :integer, :float, :date, :datetime, :datetime, :boolean]
+        validator.allow_null.should   == [true, true, true, true, true, true, true]
+        validator.state.should        == :parsed
+      end
+    end
+
+    context "on failure" do
+
+      let(:data) { RStore::Data.new(path, content, :verified) }
+
+      it "should raise exception if the state of the Data object passed is not :parsed" do
+
+        lambda { described_class.new(data, schema) }.should raise_exception(/not a valid state for class Validator/)
+      end
     end
   end
 
@@ -81,7 +88,7 @@ describe RStore::Validator do
              ["string6", 6, 6.66, "2016-02-04", dt('06:30'), dt('18:30'), false],
              ["string7", 7, 7.77, nil, nil, nil, nil]]
 
-          validator.state.should == data.state
+          validator.state.should == :verified
           RStore::Logger.error_queue.should be_empty
         end
       end
@@ -118,11 +125,11 @@ describe RStore::Validator do
 
         log = RStore::Logger.error_queue[path][:verify]
         log.size.should  == 6
-        pp log[0].should == {:error=>ArgumentError,
-                             :message=>"invalid value for Integer(): \"xxx\"",
-                             :value=>"xxx",
-                             :row=>1,
-                             :col=>2}
+        log[0].should == {:error=>ArgumentError,
+                          :message=>"invalid value for Integer(): \"xxx\"",
+                          :value=>"xxx",
+                          :row=>1,
+                          :col=>2}
         end
       end
     end

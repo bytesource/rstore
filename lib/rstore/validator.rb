@@ -44,6 +44,8 @@ module RStore
 
 
     def initialize data_object, schema
+      state   = data_object.state
+      raise InvalidStateError, "#{state.inspect} is not a valid state for class Validator" unless state == :parsed
       @data   = data_object.clone
       @state  = @data.state
       @schema = schema
@@ -77,7 +79,8 @@ module RStore
       rescue InvalidRowLengthError
         # Swallow this exception, then leave the begin..end block and return a new Data object
       end
-      Data.new(@data.path, temp_data, state)
+      @state = :verified unless @state == :error
+      Data.new(@data.path, temp_data, @state)
     end
 
 
