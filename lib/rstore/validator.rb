@@ -71,11 +71,10 @@ module RStore
 
     # Returns @table with converted fields if no error is thrown, nil otherwise
     def validate_and_convert
-      content = @data.content
-      temp_data = content.dup  # Without #dup, 'temp_data' is only a pointer to 'content'
+      temp_data = @data.content.dup
 
       begin
-        content.each_with_index do |row, row_index|
+        @data.content.each_with_index do |row, row_index|
 
           temp_data[row_index] = validate_and_convert_row(row, row_index)
         end
