@@ -10,11 +10,11 @@ module RStore
     KnownParseOptions   = [:row_sep, :col_sep, :quote_char, :field_size_limit, :skip_blanks].freeze
 
     class << self
-      attr_accessor :default_file_options
+      attr_reader :default_file_options
     end
 
     @default_file_options = {recursive: false, has_headers: true, selector: ''}
-      
+
 
     Validations = Hash.new { |h,k| lambda { |value| true }}.
       merge!({recursive:   lambda { |value| value.boolean_or_nil? },
@@ -24,7 +24,7 @@ module RStore
 
     attr_reader   :file_options, :parse_options
     attr_reader   :path
-    
+
 
     def initialize path, all_options
       all_options        = all_options.dup
@@ -35,7 +35,7 @@ module RStore
       raise ArgumentError, arg_error_message(@path, all_options) if all_options.size > 0
     end
 
-    
+
     def parse_options= all_options
       new_settings = extract_options all_options, KnownParseOptions
       @parse_options = new_settings
@@ -60,14 +60,15 @@ module RStore
     end
 
 
-    def self.default_file_options= options
+    def self.update_default_file_options options
+      raise ArgumentError, "#{options} must be an instance of Hash" unless options.is_a?(Hash)
       new_options = Configuration.default_file_options.merge(options)
-      raise ArgumentError, "#{options} contains unknown option" if new_options.size > Configuration.default_file_options.size
+      raise ArgumentError, "#{options} contains unknown option key" if new_options.size > Configuration.default_file_options.size
       new_options.each do |option, value|
         error_message = "'#{value}' (#{value.class}) is not a valid value for option #{option.inspect}"
         raise ArgumentError, error_message unless valid_value?(option, value)
       end
-      Configuration.default_file_options = new_options
+      @default_file_options = new_options
     end
 
 
@@ -109,7 +110,7 @@ module RStore
       seq.is_a?(Hash) ? seq.keys : seq
     end
 
- 
+
   end
 end
 
