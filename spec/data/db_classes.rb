@@ -1,6 +1,10 @@
 
 class PlastronicsDB < RStore::BaseDB
-  connect :adapter => 'mysql', :password => 'xxx'
+  connect :adapter => 'mysql', 
+    :host     => 'localhost',
+    :user     => 'root',
+    :password => 'xxx'
+
 end
 
 
