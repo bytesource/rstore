@@ -13,37 +13,12 @@ require 'rstore/base_table'
 
 module RStore
   class CSV
-
-    class << self
-      attr_accessor :persistent_row
-    end
-
-    attr_accessor :temp_row
     
 
-    @persistent_row = []
-    @temp_row       = []
-
-
-    def initialize *args
-      @temp_row = args
-    end
-
-    def run
-      begin
-        puts "Inside 'run' doing stuff..."
-        raise Exception, "shit happend"
-      rescue Exception
-        # $stderr.print "That's what failed: " + $!.to_s
-        CSV.persistent_row += @temp_row
-      end
-    end
+    # After 'table create':
+    # http://stackoverflow.com/questions/1671401/unable-to-output-mysql-tables-which-involve-dates-in-sequel
+    # Sequel::MySQL.convert_invalid_date_time = nil  if TempDB.connection_info[:adapter] = 'mysql'
 
   end
 end
 
-# temp = RStore::CSV.new("hello", "world")
-# temp.run
-temp = RStore::CSV.new("I feel great", "you to")
-temp.run
-puts RStore::CSV.persistent_row
