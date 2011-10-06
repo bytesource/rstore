@@ -16,6 +16,12 @@ module RStore
       main_info.merge!(optional_info)
       @error_queue[path][step] << main_info
     end
+
+
+    def self.empty_error_queue
+      @error_queue = Hash.new {|h,k| h[k] = Hash.new{|h,k| h[k] = []}}
+    end
+
   end
 end
 
