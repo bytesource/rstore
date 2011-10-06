@@ -60,11 +60,31 @@ describe RStore::Validator do
 
     context "on failure" do
 
-      let(:data) { RStore::Data.new(path, content, :verified) }
+      context "when state of Data object does not equal :parsed" do
 
-      it "should raise exception if the state of the Data object passed is not :parsed" do
+        let(:data) { RStore::Data.new(path, content, :verified) }
 
-        lambda { described_class.new(data, schema) }.should raise_exception(/not a valid state for class Validator/)
+        it "should raise an exception" do
+
+          lambda { described_class.new(data, schema) }.should raise_exception(/not a valid state for class Validator/)
+        end
+      end
+
+      context "when the data contains a nil value where nil is not allowed" do
+
+        DB.alter_table :test do
+          drop_column :boolean_col
+          add_column  :boolean_col, :boolean, :default => true, :null => false
+        end
+
+        it "should raise an exception" do
+        end
+
+        DB.alter_table :test do
+          drop_column :boolean_col
+          add_column  :boolean_col, :boolean
+        end
+
       end
     end
   end
