@@ -4,16 +4,18 @@ require 'spec_helper'
 require 'csv'
 
 describe RStore::Storage do
+  include HelperMethods
+
   # CSV content to be parsed by CSV class
   csv = <<-CSV.gsub(/^ +/, "")
-  col1,col2,生日,col4,col5,col6,col7
-  string1,,string3,string4,string5,string6,string7
-  ,2,3,4,5,6,7
-  1.12,,3.14,4.15,5.16,6.17,7.18
-  2011-2-4,2012/2/4,2013/2/4,2014-2-4,2015-2-4,2016/2/4,
-  1:30,,3:30pm,4:30,5:30am,6:30,7:30
-  1:30,,3:30pm,4:30,5:30am,6:30,7:30
-  true,false,True,False,1,0,true
+  "strings","integers","floats","dates","datetimes","times","booleans"
+  "string1","1","1.12","2011-2-4","1:30","1:30am",
+  "string2","2","2.22","2012/2/4","2:30","2:30pm","false"
+  ,"3","3.33","2013/2/4","3:30","3:30 a.m.","True"
+  "string4","4",,,"4:30","4:30 p.m.","False"
+  "string5","5","5.55","2015-2-4","5:30","5:30AM","1"
+  "string6","6","6.66","2016/2/4","6:30","6:30 P.M.","0"
+  "string7","7","7.77",,,,
   CSV
 
 
@@ -36,21 +38,105 @@ describe RStore::Storage do
   schema  = DB.schema(:test)
   path    = '/home/sovonex/Desktop/my_file.csv'
 
-  let(:data)      { RStore::Data.new(path, content) }
+  let(:data)      { RStore::Data.new(path, content, :parsed) }
   let(:validator) { RStore::Validator.new(data, schema) }
 
-  let(:storage)   { described_class.new(validator.data, DB, :test) }
+  let(:storage)   { described_class.new(validator.validate_and_convert, DB, :test) }
 
   context "On initialization" do
 
-    it "should set all variables correctly" do
+    context "on success" do
 
-      storage.data.content.should == validator.data.content
-      # storage.prepared_data[6].should == nil
+      it "should set all variables correctly" do
+
+        storage.data.content.should == validator.validate_and_convert.content
+        storage.primary_key.should  == :id
+
+        prep = storage.prepared_data
+        prep.size.should == 7
+        storage.prepared_data[3].should ==
+          {:string_col=>"string4",
+           :integer_col=>4,
+           :float_col=>nil,
+           :date_col=>nil,
+           :datetime_col=>dt('04:30'),
+           :time_col=>dt('16:30'),
+           :boolean_col=>false}
+
+        RStore::Logger.error_queue.should be_empty
+      end
+    end
+
+    context "on failure" do
+
+      it "should raise exception if the state of the Data object passed is not :verified" do
+
+        lambda { described_class.new(data, DB, :test) }.should raise_exception(/not a valid state on initialization for class Storage/)
+      end
+    end
+  end
+
+  context :insert do
+
+    context "on failure" do
+
+      data      =  RStore::Data.new(path, content, :parsed)
+      validator =  RStore::Validator.new(data, schema) 
+
+      validated_data = validator.validate_and_convert
+      pp validated_data.content[1][3]
+      puts "--------------------"
+      validated_data.content[1][3] = 'xxx'   # 4 -> 'xxx'
+      pp validated_data.content[1][3]
+      validated_data_with_error = validated_data
+
+      let(:storage)   { described_class.new(validated_data_with_error, DB, :test) }
 
 
+      it "should log the error and roll back the data already inserted from the current file" do
 
-      RStore::Logger.error_queue.should be_empty
+        storage.insert
+        DB[:test].all.should == []
+        RStore::Logger.error_queue.should == 
+          {"/home/sovonex/Desktop/my_file.csv"=>
+           {:store=>
+            [{:error=>Sequel::InvalidValue,
+              :message=>"ArgumentError: invalid date",
+              :row=>2}]}}
+
+      end
+    end
+
+
+    context "on success" do
+
+      it "should insert all data into the database table" do
+
+        RStore::Logger.empty_error_queue
+        storage.insert
+        types = DB[:test].all[0].map do |k,v|
+          v.class
+        end
+        types.should == [Fixnum, String, Fixnum, Float, Date, Time, Time, NilClass]
+
+
+        #   {:id=>1,
+        #    :string_col=>"string1",
+        #    :integer_col=>1,
+        #    :float_col=>1.12,
+        #    :date_col=>#<Date: 2011-02-04 (4911193/2,0,2299161)>,
+        # :datetime_col=>2011-10-05 09:30:00 +0800,
+        #   :time_col=>2011-10-05 09:30:00 +0800,
+        #   :boolean_col=>nil}
+        # [Fixnum, String, Fixnum, Float, Date, Time, Time, NilClass]
+
+        RStore::Logger.error_queue.should be_empty
+
+      end
     end
   end
 end
+
+
+
+
