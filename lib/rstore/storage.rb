@@ -4,16 +4,15 @@ require 'sequel'
 require 'rstore/data'
 require 'rstore/logger'
 require 'rstore/exceptions'
+require 'rstore/modules/helper_methods'
 
 module RStore
   class Storage
+    include HelperMethods
 
     attr_accessor :data, :db, :table, :prepared_data, :primary_key
     attr_accessor :state
     
-    
-    
-
 
     def initialize data_object, database, table_name
       state = data_object.state
@@ -22,23 +21,17 @@ module RStore
       @data  = data_object.clone
       @db    = database
       @table = table_name
-      @primary_key = primary_key
+      @schema = @db.schema(@table)
+      @primary_key = p_key @schema 
       @prepared_data = prepare_data
     end
 
-
+    
     def column_names
-      @db.schema(@table).map do |(col_name, col_properties)|  
+      @schema.map do |(col_name, col_properties)|  
         col_name unless col_name == @primary_key
       end.compact
     end
-
-    def primary_key
-      @db.schema(@table).map do |(col_name, col_properties)|
-        col_name  if col_properties[:primary_key] == true
-      end.compact.first
-    end
-
 
 
     def prepare_data
