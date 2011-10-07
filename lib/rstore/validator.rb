@@ -95,8 +95,11 @@ module RStore
     def validate_and_convert_row row, row_index
       # CSV.parse adjusts the size of each row to equal the size of the longest row 
       # by adding nil where necessary.
-      raise InvalidRowLengthError, 
-        "Row length does not match number of columns" unless row.size == @column_types.size
+      error_message = %Q(Row length does not match number of columns. Please verify that:
+                         1. The database table fits the csv table data
+                         2. There is no primary key on a data column (you always need to 
+                         define a separate column for an auto-incrementing primary key))
+      raise InvalidRowLengthError, error_message unless row.size == @column_types.size
 
       @row = row.dup
       begin
@@ -135,37 +138,3 @@ module RStore
 
   end
 end
-
-
-# Where Sequel's type conversion does not meet requirements
-# Integer '2.3' => 2
-# Integer 'xxx' => 0           # should throw exception
-
-# Float 'xxx' => 0.0           # should throw exception
-
-# Boolean 'xxx' => false       # should throw exception
-
-
-# Where Sequel's type conversion is intelligent
-# true, 'true', 'True'  => true  (note: only in Sqlite)
-
-# How to convert
-# Boolean:
-# -- 'false', 'False', 0 => false
-# -- 'true', 'True', 1 => true
-# else: throw exception
-
-# Integer:
-# throw exception if Integer 'field' fails (do not just insert 0 as Sequel does)
-
-# Float:
-# throw exception if Float 'field' fails (do not just insert 0.0 as Sequel does)
-
-
-
-# errors = {reading_file: [[path, 'error_message'],[...],...]
-#           parsing_data: [path, 'error_message'], # FasterCSV provides line no. in error message.
-#           converting_data: [path, 'error_message', row_index, field_index],
-#           writing_data: [path, 'error_message', row_index]}
-
- 
