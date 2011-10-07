@@ -70,20 +70,36 @@ describe RStore::Validator do
         end
       end
 
-      context "when the data contains a nil value where nil is not allowed" do
+      context "when the data contains nil where nil is not allowed" do
 
         DB.alter_table :test do
           drop_column :boolean_col
-          add_column  :boolean_col, :boolean, :default => true, :null => false
+          add_column  :boolean_col, :boolean, :default => false, :allow_null => false
         end
 
-        it "should raise an exception" do
+        new_schema = DB.schema(:test)
+
+        it "should log the error" do
+
+          validator = described_class.new(data, new_schema) 
+          validator.allow_null.should == [true, true, true, true, true, true, false]
+          validator.validate_and_convert
+
+          RStore::Logger.error_queue.should ==
+            {"/home/sovonex/Desktop/my_file.csv"=>
+             {:verify=>
+              [{:error=>RStore::NullNotAllowedError, :message=>"NULL not allowed", :value=>nil, :row=>1, :col=>7}, 
+               {:error=>RStore::NullNotAllowedError, :message=>"NULL not allowed", :value=>nil, :row=>7, :col=>7}]}}
+
+          RStore::Logger.empty_error_queue
         end
 
+        # Reverse changes
         DB.alter_table :test do
           drop_column :boolean_col
           add_column  :boolean_col, :boolean
         end
+
 
       end
     end
