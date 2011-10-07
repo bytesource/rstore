@@ -1,7 +1,6 @@
 # encoding: utf-8
 require 'rstore/logger'
 require 'rstore/exceptions'
-require 'pry'
 
 module RStore
   class Validator
@@ -57,15 +56,21 @@ module RStore
 
 
     def extract_from_schema target
-      # Drop first row which holds the settings for the primary key.
-      hash = @schema.drop(1).inject({}) do |result, (k, v)|
-        v = :datetime if v == :time # Sequel handles Time as Datetime
-      result[k] = v[target]
-      result
+
+      schema = @schema.dup
+     
+      # Delete primary key column entry
+      schema.delete_if do |(_, property_hash)|
+        property_hash[:primary_key] == true
       end
-      hash.map do |column_name, value|
-        value
+
+      schema.map do |(_, property_hash)|
+        # Sequel handles Time as Datetime:
+        type = property_hash[target]
+        type = (type == :time) ? :datetime : type
+        type
       end
+
     end
 
 
