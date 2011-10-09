@@ -3,9 +3,9 @@ require 'rstore/logger'
 require 'rstore/exceptions'
 
 module RStore
-  class Validator
+  class Converter
 
-    # @return [Hash<:verify => Array>]
+    # @return [Hash<:convert => Array>]
     attr_accessor :error_queue
     # @ return [String] path of the given csv file
     # @return [Array<Array>] Array of array returned by CSV.parse
@@ -45,7 +45,7 @@ module RStore
 
     def initialize data_object, schema
       state   = data_object.state
-      raise InvalidStateError, "#{state.inspect} is not a valid state for class Validator" unless state == :parsed
+      raise InvalidStateError, "#{state.inspect} is not a valid state for class Converter" unless state == :parsed
       @data   = data_object.clone
       @state  = @data.state
       @schema = schema
@@ -75,24 +75,24 @@ module RStore
 
 
     # Returns @table with converted fields if no error is thrown, nil otherwise
-    def validate_and_convert
+    def convert
       temp_data = @data.content.dup
 
       begin
         @data.content.each_with_index do |row, row_index|
 
-          temp_data[row_index] = validate_and_convert_row(row, row_index)
+          temp_data[row_index] = convert_row(row, row_index)
         end
       rescue InvalidRowLengthError
         # Swallow this exception, then leave the begin..end block and return a new Data object
       end
-      @state = :verified unless @state == :error
+      @state = :converted unless @state == :error
       Data.new(@data.path, temp_data, @state)
     end
 
 
    
-    def validate_and_convert_row row, row_index
+    def convert_row row, row_index
       # CSV.parse adjusts the size of each row to equal the size of the longest row 
       # by adding nil where necessary.
       error_message = %Q(Row length does not match number of columns. Please verify that:
@@ -114,13 +114,13 @@ module RStore
           end
         end
       rescue ArgumentError, NullNotAllowedError => e
-        Logger.log(@data.path, :verify, e, value: @field, row: row_index+1, col: @field_index+1)
+        Logger.log(@data.path, :convert, e, value: @field, row: row_index+1, col: @field_index+1)
         @state = :error
       end
       @row
 
     rescue InvalidRowLengthError => e
-      Logger.log(@data.path, :verify, e, row: row_index+1)
+      Logger.log(@data.path, :convert, e, row: row_index+1)
       @state = :error
       raise
     end

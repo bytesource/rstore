@@ -39,9 +39,9 @@ describe RStore::Storage do
   path    = '/home/sovonex/Desktop/my_file.csv'
 
   let(:data)      { RStore::Data.new(path, content, :parsed) }
-  let(:validator) { RStore::Validator.new(data, schema) }
+  let(:converter) { RStore::Converter.new(data, schema) }
 
-  let(:storage)   { described_class.new(validator.validate_and_convert, DB, :test) }
+  let(:storage)   { described_class.new(converter.convert, DB, :test) }
 
   context "On initialization" do
 
@@ -49,7 +49,7 @@ describe RStore::Storage do
 
       it "should set all variables correctly" do
 
-        storage.data.content.should == validator.validate_and_convert.content
+        storage.data.content.should == converter.convert.content
         storage.primary_key.should  == :id
 
         prep = storage.prepared_data
@@ -69,7 +69,7 @@ describe RStore::Storage do
 
     context "on failure" do
 
-      it "should raise exception if the state of the Data object passed is not :verified" do
+      it "should raise exception if the state of the Data object passed is not :converted" do
 
         lambda { described_class.new(data, DB, :test) }.should raise_exception(/not a valid state on initialization for class Storage/)
       end
@@ -81,9 +81,9 @@ describe RStore::Storage do
     context "on failure" do
 
       data      =  RStore::Data.new(path, content, :parsed)
-      validator =  RStore::Validator.new(data, schema) 
+      converter =  RStore::Converter.new(data, schema) 
 
-      validated_data = validator.validate_and_convert
+      validated_data = converter.convert
       pp validated_data.content[1][3]
       puts "--------------------"
       validated_data.content[1][3] = 'xxx'   # 4 -> 'xxx'

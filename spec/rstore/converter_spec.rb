@@ -5,7 +5,7 @@ require 'csv'
 require 'sequel'
 
 
-describe RStore::Validator do
+describe RStore::Converter do
   include HelperMethods
 
   # CSV content to be parsed by CSV class
@@ -42,7 +42,7 @@ describe RStore::Validator do
   path    = '/home/sovonex/Desktop/my_file.csv'
 
   let(:data)      { RStore::Data.new(path, content, :parsed) }
-  let(:validator) { described_class.new(data, schema) }
+  let(:converter) { described_class.new(data, schema) }
 
 
   context "Initialization" do
@@ -50,11 +50,11 @@ describe RStore::Validator do
     context "on success" do
 
       it "should set all parameters correctly" do
-        validator.data.content.should == content
+        converter.data.content.should == content
         # Sequel handles Time as DateTime
-        validator.column_types.should == [:string, :integer, :float, :date, :datetime, :datetime, :boolean]
-        validator.allow_null.should   == [true, true, true, true, true, true, true]
-        validator.state.should        == :parsed
+        converter.column_types.should == [:string, :integer, :float, :date, :datetime, :datetime, :boolean]
+        converter.allow_null.should   == [true, true, true, true, true, true, true]
+        converter.state.should        == :parsed
       end
     end
 
@@ -62,11 +62,11 @@ describe RStore::Validator do
 
       context "when state of Data object does not equal :parsed" do
 
-        let(:data) { RStore::Data.new(path, content, :verified) }
+        let(:data) { RStore::Data.new(path, content, :converted) }
 
         it "should raise an exception" do
 
-          lambda { described_class.new(data, schema) }.should raise_exception(/not a valid state for class Validator/)
+          lambda { described_class.new(data, schema) }.should raise_exception(/not a valid state for class Converter/)
         end
       end
 
@@ -81,13 +81,13 @@ describe RStore::Validator do
 
         it "should log the error" do
 
-          validator = described_class.new(data, new_schema) 
-          validator.allow_null.should == [true, true, true, true, true, true, false]
-          validator.validate_and_convert
+          converter = described_class.new(data, new_schema) 
+          converter.allow_null.should == [true, true, true, true, true, true, false]
+          converter.convert
 
           RStore::Logger.error_queue.should ==
             {"/home/sovonex/Desktop/my_file.csv"=>
-             {:verify=>
+             {:convert=>
               [{:error=>RStore::NullNotAllowedError, :message=>"NULL not allowed", :value=>nil, :row=>1, :col=>7}, 
                {:error=>RStore::NullNotAllowedError, :message=>"NULL not allowed", :value=>nil, :row=>7, :col=>7}]}}
 
@@ -111,11 +111,11 @@ describe RStore::Validator do
     context "on success" do
 
 
-      context :validate_and_convert do
+      context :convert do
 
         it "should convert all items into the correct type" do
 
-          validator.validate_and_convert.content.should == 
+          converter.convert.content.should == 
             [["string1", 1, 1.12, "2011-02-04", dt('01:30'), dt('01:30'), nil],
              ["string2", 2, 2.22, "2012-02-04", dt('02:30'), dt('14:30'), false],
              [nil, 3, 3.33, "2013-02-04", dt('03:30'), dt('03:30'), true],
@@ -124,7 +124,7 @@ describe RStore::Validator do
              ["string6", 6, 6.66, "2016-02-04", dt('06:30'), dt('18:30'), false],
              ["string7", 7, 7.77, nil, nil, nil, nil]]
 
-          validator.state.should == :verified
+          converter.state.should == :converted
           RStore::Logger.error_queue.should be_empty
         end
       end
@@ -142,13 +142,13 @@ describe RStore::Validator do
          ["string7", "7", "7.77", nil, nil, nil, nil]]
 
       let(:data)      { RStore::Data.new(path, data_with_errors, :parsed) }
-      let(:validator) { described_class.new(data, schema) }
+      let(:converter) { described_class.new(data, schema) }
 
-      context :validate_and_convert do
+      context :convert do
 
         it "should log the error, skip the rest of the current row and continue with the next row" do
 
-        validator.validate_and_convert.content.should == 
+        converter.convert.content.should == 
           [["string1", "xxx", "1.12", "2011-2-4", "1:30", "1:30am", nil],   
            ["string2", 2, "xxx", "2012/2/4", "2:30", "2:30pm", "false"], 
            [nil, 3, 3.33, "xxx", "3:30", "3:30 a.m.", "True"],        
@@ -157,9 +157,9 @@ describe RStore::Validator do
            ["string6", 6, 6.66, "2016-02-04", dt('06:30'),dt('18:30'), "xxx"],
            ["string7", 7, 7.77, nil, nil, nil, nil]]
 
-        validator.state.should == :error
+        converter.state.should == :error
 
-        log = RStore::Logger.error_queue[path][:verify]
+        log = RStore::Logger.error_queue[path][:convert]
         log.size.should  == 6
         log[0].should == {:error=>ArgumentError,
                           :message=>"invalid value for Integer(): \"xxx\"",

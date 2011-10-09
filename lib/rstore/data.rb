@@ -11,7 +11,7 @@ module RStore
     attr_reader   :type
 
 
-    KnownStates = [:parsed, :verified, :error]
+    KnownStates = [:parsed, :converted, :error]
 
 
     def initialize path, content, state

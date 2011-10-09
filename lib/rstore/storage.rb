@@ -16,7 +16,7 @@ module RStore
 
     def initialize data_object, database, table_name
       state = data_object.state
-      raise InvalidStateError, "#{state.inspect} is not a valid state on initialization for class Storage" unless state == :verified
+      raise InvalidStateError, "#{state.inspect} is not a valid state on initialization for class Storage" unless state == :converted
       @state = state
       @data  = data_object.clone
       @db    = database
