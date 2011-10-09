@@ -12,7 +12,7 @@ require 'rstore/converter'
 require 'rstore/logger'
 require 'rstore/configuration'
 require 'rstore/file_crawler'
-# require 'rstore/csv'
+require 'rstore/csv'
 require 'rstore/storage'
 
 
