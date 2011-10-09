@@ -75,8 +75,9 @@ module RStore
 
         schema = db.schema(table_name)
 
-        # Create table
-        # Implement Data#convert, Data#insert
+        # Create table (consider creating the table inside Storage#insert)
+        # Implement  Data#to_csv, Data#convert, Data#insert
+        # add known state = :raw
 
         @data_stream.each do |data|
           converter = Converter.new(data, schema)
