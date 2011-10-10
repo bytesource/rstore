@@ -80,7 +80,7 @@ module RStore
         name = @table.name
 
         @datastream.each do |data_object|
-          data_object.to_csv.convert(@database, name).insert(@database, name)
+          data_object.parse_csv.convert_fields(@database, name).into_db(@database, name)
         end
 
         @run = true
