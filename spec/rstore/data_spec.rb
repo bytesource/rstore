@@ -31,6 +31,7 @@ describe RStore::Data do
     end
   end
 
+
   context :state do
 
     context "on failure" do
