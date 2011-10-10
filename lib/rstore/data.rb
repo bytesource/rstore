@@ -35,7 +35,10 @@ module RStore
     def to_csv
       raise InvalidStateError, "#{state.inspect} is not a valid Data state for method 'to_csv'"  unless state == :raw
 
-      csv = CSV.parse(@content, @options[:parse_options])
+      options = @options[:parse_options]
+
+      csv = CSV.parse(@content, options)
+      csv = csv.drop(1)  if options[:has_header] == true  # drop the first row if it is a header 
       Data.new(@path, csv, :parsed)
     end
 
