@@ -84,6 +84,8 @@ module RStore
         end
 
         @run = true
+        Logger.print
+        Logger.empty_error_queue
       end
     end
 
