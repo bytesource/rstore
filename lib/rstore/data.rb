@@ -4,6 +4,7 @@ require 'csv'
 require 'rstore/converter'
 require 'rstore/storage'
 require 'rstore/core_ext/object'
+require 'rstore/core_ext/csv_wrapper'
 
 module RStore
   class Data
@@ -37,12 +38,14 @@ module RStore
 
       options = @options[:parse_options]
 
-      csv = CSV.parse(@content, options)
-      csv = csv.drop(1)  if options[:has_header] == true  # drop the first row if it is a header 
+      csv = CSVWrapper.parse(@content, options)
+      csv = csv.drop(1)  if options[:has_headers] == true  # drop the first row if it is a header 
       Data.new(@path, csv, :parsed)
     end
 
 
+
+    # GOT 'SELF' AND 'CONTENT' WRONG!!!!!!!!!!!!!!!!!!!1
     def convert_fields database, table_name
       converted_data = Converter.new(self, database, table_name).convert
 

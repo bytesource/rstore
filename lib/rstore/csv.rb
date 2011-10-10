@@ -1,7 +1,6 @@
 # encoding: utf-8
 require 'open-uri'
 require 'nokogiri'
-require 'csv'
 require 'rstore/data'
 require 'rstore/file_crawler'
 require 'rstore/converter'
@@ -34,7 +33,7 @@ module RStore
       @table              = nil
       @run                = false
 
-      instance_eval(block) if block_given?
+      instance_eval(&block) if block_given?
 
     end
 
@@ -66,7 +65,7 @@ module RStore
 
     def run
       raise Exception, "You can invoke the 'run' method only once on a single instance of RStore::CSV"  if @run == true
-      raise Exception, "Please specify at least one source file using the 'from' method" if @files_and_options.empty?
+      raise Exception, "Please specify at least one source file using the 'from' method" if @files_with_options.empty?
       raise Exception, "Please specify a valid database and table name using the 'to' method" if @database.nil? || @table.nil?
 
       @files_with_options.each do |path, options|
@@ -76,11 +75,11 @@ module RStore
 
       Sequel.connect(@database.connection_info) do |db|
 
-        create_table
+        create_table(db)
         name = @table.name
 
-        @datastream.each do |data_object|
-          data_object.parse_csv.convert_fields(@database, name).into_db(@database, name)
+        @data_stream.each do |data_object|
+          data_object.parse_csv.convert_fields(db, name).into_db(db, name)
         end
 
         @run = true
@@ -109,16 +108,18 @@ module RStore
     end
 
 
-    def create_table
+    def create_table db
 
       name = @table.name
 
-      unless @database.table.exists?(name)
-        @database.create_table(name, @table.table_info)
+      unless db.table_exists?(name)
+        db.create_table(name, &@table.table_info)
       end
 
       # http://stackoverflow.com/questions/1671401/unable-to-output-mysql-tables-which-involve-dates-in-sequel
-      Sequel::MySQL.convert_invalid_date_time = nil  if @database.connection_info[:adapter] = 'mysql'
+      if @database.connection_info.is_a?(Hash)
+        Sequel::MySQL.convert_invalid_date_time = nil  if @database.connection_info[:adapter] == 'mysql'
+      end
     end
     
     

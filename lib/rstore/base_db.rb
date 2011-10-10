@@ -14,12 +14,12 @@ module RStore
       BaseDB.db_classes[subclass.name] = subclass
     end
 
-    def self.connect hash
+    def self.connect hash_or_string
       class << self            # self = #<Class:PlastronicsDB>
         attr_reader :connection_info
       end
-
-      @connection_info = hash.merge!(:database => self.name.to_s)  # self = PlastronicsDB
+                               # self = PlastronicsDB
+      @connection_info = hash_or_string.is_a?(String) ? hash_or_string : merge(:database => self.name.to_s)
     end
 
     def self.name  
