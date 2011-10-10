@@ -47,7 +47,7 @@ describe RStore::FileCrawler do
           it "should return a hash for all files of the current directory" do
 
             crawler.file_options_hash.should == {"#{File.expand_path('../test_dir/empty.csv')}" => 
-                                                 {:file_options=>{:recursive=>false, :has_headers=>true}, 
+                                                 {:file_options=>{:recursive=>false, :has_headers=>true, :selector => ""}, 
                                                   :parse_options=>{}}}
           end
         end
@@ -60,10 +60,10 @@ describe RStore::FileCrawler do
           it "should return a hash for all files of the current directory and subdirectories" do
 
             crawler.file_options_hash.should == {"#{File.expand_path('../test_dir/empty.csv')}"  => 
-                                                        {:file_options=>{:recursive=>true, :has_headers=>true}, 
+                                                        {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
                                                          :parse_options=>{:col_sep => ";", :quote_char => "'"}},
                                                          "#{File.expand_path('../test_dir/dir_1/dir_2/test.csv')}"  => 
-                                                        {:file_options=>{:recursive=>true, :has_headers=>true}, 
+                                                        {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
                                                          :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
           end
         end
@@ -99,7 +99,7 @@ describe RStore::FileCrawler do
         it "should return a hash for the file" do
 
           crawler.file_options_hash.should == {"/home/sovonex/Desktop/temp/rstore/spec/test_dir/empty.csv" => 
-                                                      {:file_options=>{:recursive=>true, :has_headers=>true}, 
+                                                      {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
                                                        :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
         end
       end
@@ -155,11 +155,11 @@ describe RStore::FileCrawler do
 
 
           c1.file_options_hash.should == {"#{urls[0].gsub(/http/,'https')}"=>
-                                                      {:file_options=>{:recursive=>true, :has_headers=>true}, 
+                                                      {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
                                                        :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
 
          c2.file_options_hash.should ==  {"http://#{urls[1]}"=>
-                                                      {:file_options=>{:recursive=>true, :has_headers=>true}, 
+                                                      {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
                                                        :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
         end
       end

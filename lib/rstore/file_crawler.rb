@@ -1,7 +1,8 @@
 # encoding: utf-8
 
-require 'rstore/configuration'
 require 'open-uri'
+require 'rstore/configuration'
+require 'rstore/core_ext/string'
 
 module RStore
   class FileCrawler
@@ -34,7 +35,7 @@ module RStore
 
       @file_paths = []
       files       = []
-      if path =~ URLRegex                             # URL
+      if path.url?
         return @file_paths << verify_and_format_url(path)
       elsif File.directory?(File.expand_path(path))   # Directory
         Dir.chdir(path) do                            # Change current directory to 'path'.
@@ -105,11 +106,6 @@ module RStore
         end
       end
     end
-
-
-    # http://daringfireball.net/2010/07/improved_regex_for_matching_urls
-    URLRegex = /^((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+
-                  (?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/x
 
 
     ErrorMessage = <<-MESSAGE
