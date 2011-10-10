@@ -43,12 +43,12 @@ module RStore
               boolean:  lambda { |field| boolean_converter[field] }})
 
 
-    def initialize data_object, schema
+    def initialize data_object, database, table_name
       state   = data_object.state
       raise InvalidStateError, "#{state.inspect} is not a valid state for class Converter" unless state == :parsed
       @data   = data_object.clone
       @state  = @data.state
-      @schema = schema
+      @schema = database.schema(table_name)
       @column_types = extract_from_schema :type
       @allow_null   = extract_from_schema :allow_null
       @error  = false

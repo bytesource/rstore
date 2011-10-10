@@ -42,7 +42,7 @@ describe RStore::Converter do
   path    = '/home/sovonex/Desktop/my_file.csv'
 
   let(:data)      { RStore::Data.new(path, content, :parsed) }
-  let(:converter) { described_class.new(data, schema) }
+  let(:converter) { described_class.new(data, DB, :test) }
 
 
   context "Initialization" do
@@ -66,22 +66,22 @@ describe RStore::Converter do
 
         it "should raise an exception" do
 
-          lambda { described_class.new(data, schema) }.should raise_exception(/not a valid state for class Converter/)
+          lambda { described_class.new(data, DB, :test) }.should raise_exception(/not a valid state for class Converter/)
         end
       end
 
       context "when the data contains nil where nil is not allowed" do
-
-        DB.alter_table :test do
-          drop_column :boolean_col
-          add_column  :boolean_col, :boolean, :default => false, :allow_null => false
-        end
-
         new_schema = DB.schema(:test)
 
         it "should log the error" do
 
-          converter = described_class.new(data, new_schema) 
+          DB.alter_table :test do
+            drop_column :boolean_col
+            add_column  :boolean_col, :boolean, :default => false, :allow_null => false
+          end
+
+
+          converter = described_class.new(data, DB, :test)
           converter.allow_null.should == [true, true, true, true, true, true, false]
           converter.convert
 
@@ -91,16 +91,14 @@ describe RStore::Converter do
               [{:error=>RStore::NullNotAllowedError, :message=>"NULL not allowed", :value=>nil, :row=>1, :col=>7}, 
                {:error=>RStore::NullNotAllowedError, :message=>"NULL not allowed", :value=>nil, :row=>7, :col=>7}]}}
 
-          RStore::Logger.empty_error_queue
+              RStore::Logger.empty_error_queue
+
+              # Reverse changes
+              DB.alter_table :test do
+                drop_column :boolean_col
+                add_column  :boolean_col, :boolean
+              end
         end
-
-        # Reverse changes
-        DB.alter_table :test do
-          drop_column :boolean_col
-          add_column  :boolean_col, :boolean
-        end
-
-
       end
     end
   end
@@ -142,7 +140,7 @@ describe RStore::Converter do
          ["string7", "7", "7.77", nil, nil, nil, nil]]
 
       let(:data)      { RStore::Data.new(path, data_with_errors, :parsed) }
-      let(:converter) { described_class.new(data, schema) }
+      let(:converter) { described_class.new(data, DB, :test) }
 
       context :convert do
 
