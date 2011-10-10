@@ -32,7 +32,7 @@ module RStore
       filename.match(/\.(?<type>.*)$/)[:type].to_sym
     end
 
-    def to_csv
+    def parse_csv
       raise InvalidStateError, "#{state.inspect} is not a valid Data state for method 'to_csv'"  unless state == :raw
 
       options = @options[:parse_options]
@@ -43,14 +43,14 @@ module RStore
     end
 
 
-    def convert database, table_name
+    def convert_fields database, table_name
       converted_data = Converter.new(self, database, table_name).convert
 
       Data.new(@path, converted_data, :converted)
     end
 
 
-    def insert database, table_name
+    def into_db database, table_name
       Storage.new(self, database, table_name).insert
     end
 
