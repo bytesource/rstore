@@ -23,4 +23,20 @@ class String
     end
   end
 
+
+  def url?
+    # http://daringfireball.net/2010/07/improved_regex_for_matching_urls
+    url_regex = /^((?:https?:\/\/|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+
+                   (?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/x
+
+    !!(self =~ url_regex)
+
+  end
+
+
+
+
+
+
+
 end
