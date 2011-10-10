@@ -22,6 +22,10 @@ module RStore
       @error_queue = Hash.new {|h,k| h[k] = Hash.new{|h,k| h[k] = []}}
     end
 
+    def self.print
+      @error_queue
+    end
+
   end
 end
 
