@@ -55,7 +55,10 @@ module RStore
           end
         end
       rescue Exception => e
-        Logger.log(@data.path, :store, e, row: @row_index+1)
+        has_headers = @data.options[:file_options][:has_headers]
+        row         = has_headers ? @row_index+2 : @row_index+1
+
+        Logger.log(@data.path, :store, e, row: row)
         @state = :error
       end
       @state = :stored  unless @state == :error

@@ -8,6 +8,8 @@ require 'rstore/base_db'
 require 'rstore/base_table'
 require 'rstore/core_ext/string'
 
+require 'pry'
+
 # RStore::CSV.new do
 #   from '~/temp/', header: true, recursive: true
 #   from 'http://www.sovonex.com/summary.csv', selector: 'pre div.line'
@@ -22,6 +24,9 @@ module RStore
 
     attr_reader :database, :table
     attr_reader :data_stream
+    attr_reader :errors
+    
+    
     
     
     
@@ -31,7 +36,8 @@ module RStore
       @data_stream        = []
       @database           = nil
       @table              = nil
-      @run                = false
+      @ran_once           = false
+      @errors             = {}
 
       instance_eval(&block) if block_given?
 
@@ -64,16 +70,17 @@ module RStore
     # Sequel.connect('sqlite://blog.db'){|db| puts db[:users].count}
 
     def run
-      raise Exception, "You can invoke the 'run' method only once on a single instance of RStore::CSV"  if @run == true
+      raise Exception, "You can invoke the 'run' method only once on a single instance of #{self.class}"  if ran_once?
       raise Exception, "Please specify at least one source file using the 'from' method" if @files_with_options.empty?
       raise Exception, "Please specify a valid database and table name using the 'to' method" if @database.nil? || @table.nil?
 
       @files_with_options.each do |path, options|
-        data = read_data path, options[:file_options] 
+        data = read_data path, options[:file_options]
+        next  if data == ''
         @data_stream << Data.new(path, data, :raw, options)  
       end
 
-      Sequel.connect(@database.connection_info) do |db|
+      @database.connect do |db|
 
         create_table(db)
         name = @table.name
@@ -82,27 +89,31 @@ module RStore
           data_object.parse_csv.convert_fields(db, name).into_db(db, name)
         end
 
-        @run = true
-        Logger.print
-        Logger.empty_error_queue
+        @ran_once = true
       end
+      Logger.print
+      @errors = Logger.error_queue
+      Logger.empty_error_queue
     end
-
 
 
     def read_data path, options
       data = ''
-      if path.url?
+      begin
+        if path.url?
 
-        doc = Nokogiri::HTML(open(path))
+          doc = Nokogiri::HTML(open(path))
 
-        selector = options[:selector]
-        data = doc.css(selector).inject("") do |result, link|
-          result << link.content << "\n"
-          result
-        end
-      else
-        data = File.read(path)
+          selector = options[:selector]
+          data = doc.css(selector).inject("") do |result, link|
+            result << link.content << "\n"
+            result
+          end
+        else
+          data = File.read(path)
+        end 
+      rescue => e
+        Logger.log(path, :fetch, e)
       end
       data
     end
@@ -127,8 +138,8 @@ module RStore
       !!(name =~ /^[^\.]+\.[^\.]+$/)
     end
 
-    def run?
-      @run == true
+    def ran_once?
+      @ran_once == true
     end
 
   end

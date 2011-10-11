@@ -7,7 +7,7 @@ module RStore
     # Todo: Evaluate the correctness of values passes via file_options
 
     # Supported options
-    KnownParseOptions   = [:row_sep, :col_sep, :quote_char, :field_size_limit, :skip_blanks].freeze
+    KnownParseOptions   = {row_sep: :auto, col_sep: ",", quote_char: '"', field_size_limit: nil, skip_blanks: false}.freeze
 
     class << self
       attr_reader :default_file_options
@@ -79,7 +79,7 @@ module RStore
     def extract_options provided_options, supported_options
 
       provided_options_copy = provided_options.dup
-      supported_options = only_keys(supported_options)
+      supported_options = supported_options.keys
 
       provided_options_copy.inject({}) do |extracted, (option, value)|
         if supported_options.include?(option)
@@ -106,9 +106,9 @@ module RStore
     end
 
 
-    def only_keys seq
-      seq.is_a?(Hash) ? seq.keys : seq
-    end
+    # def only_keys seq
+    #   seq.is_a?(Hash) ? seq.keys : seq
+    # end
 
 
   end
