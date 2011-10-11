@@ -9,8 +9,11 @@ describe RStore::CSV do
   # "string1","1","1.12"
   # "string2","2","2.22"
 
-  class TestDB < RStore::BaseDB
-    connect 'sqlite:/'
+  class PlastronicsDB < RStore::BaseDB
+    connect( adapter: 'mysql', 
+             host:    'localhost', 
+             user:    'root', 
+             password:'moinmoin')
   end
 
   class DataTable < RStore::BaseTable
@@ -22,6 +25,7 @@ describe RStore::CSV do
     end
   end
 
+
   
 
   context "On initialization" do
@@ -30,7 +34,7 @@ describe RStore::CSV do
 
       store = RStore::CSV.new do
         from '../test_dir/dir_1/dir_2/test.csv'
-        to   'test.data'
+        to   'plastronics.data'
         run
       end
 

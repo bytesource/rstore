@@ -23,7 +23,7 @@ module RStore
     end
 
     def self.print
-      @error_queue
+      puts "Successfully stored data" if @error_queue.empty?
     end
 
   end
