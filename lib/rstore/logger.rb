@@ -11,7 +11,7 @@ module RStore
     # @error_queue = Hash.new {|h,k| h[k] = Hash.new(&h.default_proc)}
     @error_queue = Hash.new {|h,k| h[k] = Hash.new{|h,k| h[k] = []}}
 
-    def self.log(path, step, error, optional_info)
+    def self.log(path, step, error, optional_info={})
       main_info = Hash[:error, error.class, :message, error.to_s]
       main_info.merge!(optional_info)
       @error_queue[path][step] << main_info
@@ -23,7 +23,9 @@ module RStore
     end
 
     def self.print
-      @error_queue
+      puts "ERROR REPORT"
+      puts "Successfully stored data" if @error_queue.empty?
+      pp error_queue
     end
 
   end

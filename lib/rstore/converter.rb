@@ -2,6 +2,8 @@
 require 'rstore/logger'
 require 'rstore/exceptions'
 
+require 'pry'
+
 module RStore
   class Converter
 
@@ -95,7 +97,7 @@ module RStore
     def convert_row row, row_index
       # CSV.parse adjusts the size of each row to equal the size of the longest row 
       # by adding nil where necessary.
-      error_message = %Q(Row length does not match number of columns. Please verify that:
+      error_message = %q(Row length does not match number of columns. Please verify that:
                          1. The database table fits the csv table data
                          2. There is no primary key on a data column (you always need to 
                          define a separate column for an auto-incrementing primary key))
@@ -114,7 +116,12 @@ module RStore
           end
         end
       rescue ArgumentError, NullNotAllowedError => e
-        Logger.log(@data.path, :convert, e, value: @field, row: row_index+1, col: @field_index+1)
+        has_headers = @data.options[:file_options][:has_headers]
+        row         = has_headers ? row_index+2 : row_index+1
+
+        already_found = already_found_error_in_col?(@data.path, :convert, @field_index+1) 
+
+        Logger.log(@data.path, :convert, e, value: @field, row: row, col: @field_index+1)  unless already_found
         @state = :error
       end
       @row
@@ -126,6 +133,24 @@ module RStore
     end
 
     # Helper methods ---------------------------------
+
+
+    def already_found_error_in_col? path, state, col_index
+      logger = Logger.error_queue[path]
+      if logger[state]
+        !!(logger[state][col_index] == col_index)   # wrong because of :state => Array!!!!!!!
+      else
+        false
+      end
+    end
+
+   #   {"/home/sovonex/Desktop/my_file.csv"=>
+   #         {:store=>
+   #          [{:error=>Sequel::InvalidValue,
+   #            :message=>"ArgumentError: invalid date",
+   #            :row=>2}]}}
+
+
 
     def convert_type column_type, field
       Converters[column_type][field]

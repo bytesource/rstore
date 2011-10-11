@@ -36,24 +36,33 @@ module RStore
     def parse_csv
       raise InvalidStateError, "#{state.inspect} is not a valid Data state for method 'to_csv'"  unless state == :raw
 
-      options = @options[:parse_options]
+      file_options  = @options[:file_options]
+      parse_options = @options[:parse_options]
 
-      csv = CSVWrapper.parse(@content, options)
-      csv = csv.drop(1)  if options[:has_headers] == true  # drop the first row if it is a header 
-      Data.new(@path, csv, :parsed)
+      begin
+        csv = CSVWrapper.parse(@content, parse_options)
+        csv = csv.drop(1)  if file_options[:has_headers] == true  # drop the first row if it is a header 
+      rescue => e
+        Logger.log(@data.path, :parse, e)
+        @state = :error
+      end
+
+      @state = :parsed  unless @state == :error
+        Data.new(@path, csv, @state, @options)
     end
 
 
 
     # GOT 'SELF' AND 'CONTENT' WRONG!!!!!!!!!!!!!!!!!!!1
     def convert_fields database, table_name
-      converted_data = Converter.new(self, database, table_name).convert
-
-      Data.new(@path, converted_data, :converted)
+      return self  if @state == :error
+      converter = Converter.new(self, database, table_name)
+      converter.convert
     end
 
 
     def into_db database, table_name
+      return  if @state == :error
       Storage.new(self, database, table_name).insert
     end
 
