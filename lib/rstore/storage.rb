@@ -5,7 +5,6 @@ require 'rstore/data'
 require 'rstore/logger'
 require 'rstore/exceptions'
 require 'rstore/modules/helper_methods'
-require 'pry'
 
 module RStore
   class Storage
@@ -36,7 +35,6 @@ module RStore
 
 
     def prepare_data
-      binding.pry
       col_names = column_names
       @data.content.map do |row|
         Hash[col_names.zip(row)]

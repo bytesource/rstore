@@ -47,13 +47,13 @@ module RStore
 
     def to db_table
       raise ArgumentError, "The name of the database and table have to be separated with a dot (.)" unless delimiter_correct?(db_table)
-      database, table = db_table.split('.')
+      db, tb = db_table.split('.')
 
-      database = BaseDB.db_classes[database.to_sym]
-      table    = BaseTable.table_classes[table.to_sym]
+      database = BaseDB.db_classes[db.to_sym]
+      table    = BaseTable.table_classes[tb.to_sym]
 
-      raise Exception, "Database '#{database}' not found"  if database.nil?
-      raise Exception, "Table '#{table}' not found"        if table.nil?
+      raise Exception, "Database '#{db}' not found"  if database.nil?
+      raise Exception, "Table '#{tb}' not found"     if table.nil?
 
       @database = database
       @table    = table
