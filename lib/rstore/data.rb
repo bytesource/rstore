@@ -56,6 +56,7 @@ module RStore
     # GOT 'SELF' AND 'CONTENT' WRONG!!!!!!!!!!!!!!!!!!!1
     def convert_fields database, table_name
       return self  if @state == :error
+
       converter = Converter.new(self, database, table_name)
       converter.convert
     end
