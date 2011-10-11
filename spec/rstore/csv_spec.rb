@@ -83,40 +83,6 @@ describe RStore::CSV do
       DB = PlastronicsDB.connect
       DB.drop_table(name) if DB.table_exists?(name)
 
-      store = RStore::CSV.new do
-        from '../test_dir/dir_1/dir_2/test.csv'
-        to   'plastronics.data'
-        run
-      end
-
-      DB = PlastronicsDB.connect
-      DB.drop_table(name) if DB.table_exists?(name)
-
-      it "should store the data into the table without errors" do
-
-        store = RStore::CSV.new do
-          from '../test_dir/dir_1', :recursive => true
-          to   'plastronics.data'
-          run
-        end
-
-        store.errors.empty?.should == true
-        store.ran_once?.should == true
-
-        DB = PlastronicsDB.connect
-        DB[name].all.should == 
-          [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
-           {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
-      end
-    end
-
-    context "given an URL" do
-
-      name = FasterCSVTable.name 
-
-      DB = PlastronicsDB.connect
-      DB.drop_table(name) if DB.table_exists?(name)
-
       it "should store the data into the table without errors" do
 
         store2 = RStore::CSV.new do
