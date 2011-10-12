@@ -34,12 +34,12 @@ describe RStore::CSV do
      String   :col2
      String   :col3
      String   :col4
-     Integer  :col5
+     String   :col5
      String   :col6
      String   :col7
-     Integer  :col8
-     Integer  :col9
-     Integer  :col10
+     String   :col8
+     String   :col9
+     String   :col10
      String   :col11
      String   :col12
      String   :col13
@@ -52,49 +52,70 @@ describe RStore::CSV do
 
     context "given a directory" do
 
-      name = DataTable.name 
+      before(:each) do
+        @name = DataTable.name 
+        DB    = PlastronicsDB.connect
+        DB.drop_table(@name)  if DB.table_exists?(@name)
+      end
 
+      context "on success" do
 
-      DB = PlastronicsDB.connect
-      DB.drop_table(name) if DB.table_exists?(name)
+        it "should store the data into the table without errors" do
 
-      it "should store the data into the table without errors" do
+          store = RStore::CSV.new do
+            from '../test_dir/dir_1', :recursive => true
+            to   'plastronics.data'
+            run
+          end
 
-        store = RStore::CSV.new do
-          from '../test_dir/dir_1', :recursive => true
-          to   'plastronics.data'
-          run
+          store.errors.empty?.should == true
+          store.ran_once?.should == true
+
+          DB = PlastronicsDB.connect
+          DB[@name].all.should == 
+            [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
+             {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
         end
-
-        store.errors.empty?.should == true
-        store.ran_once?.should == true
-
-        DB = PlastronicsDB.connect
-        DB[name].all.should == 
-          [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
-           {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
       end
     end
 
-    context "given an URL" do
+    #context "given an URL" do
 
-      name = FasterCSVTable.name 
+    #  name = FasterCSVTable.name 
 
-      DB = PlastronicsDB.connect
-      DB.drop_table(name) if DB.table_exists?(name)
+    #  DB = PlastronicsDB.connect
+    #  DB.drop_table(name) if DB.table_exists?(name)
 
-      it "should store the data into the table without errors" do
+    #  it "should store the data into the table without errors" do
 
-        store2 = RStore::CSV.new do
-          from 'http://github.com/circle/fastercsv/blob/master/test/test_data.csv', :selector => 'pre div.line', :skip_blanks => true
-          to   'plastronics.fastercsv'
-          run
-        end
+    #    store2 = RStore::CSV.new do
+    #      from 'http://github.com/circle/fastercsv/blob/master/test/test_data.csv', :selector => 'pre div.line', :skip_blanks => true
+    #      to   'plastronics.fastercsv'
+    #      run
+    #    end
 
-        store2.errors.empty?.should == true
-        store2.ran_once?.should == true
-      end
-    end
+    #    store2.errors.empty?.should == true
+    #    store2.ran_once?.should == true
+    #    DB[name].first.should == 
+    #      {:id=>1,
+    #       :col1=>"GPNLWG",
+    #       :col2=>"",
+    #       :col3=>"PNX",
+    #       :col4=>"994190320",
+    #       :col5=>"5089227",
+    #       :col6=>"=\"6996479699989\"",
+    #       :col7=>"90/00/92",
+    #       :col8=>"6452735",
+    #       :col9=>"95784560",
+    #       :col10=>"6",
+    #       :col11=>"MG929000.OCS",
+    #       :col12=>"W0902-",
+    #       :col13=>"09/90/96",
+    #       :col14=>"09/90/96",
+    #       :col15=>"-002.59"}
+
+    #  end
+    #end
   end
 end
  
