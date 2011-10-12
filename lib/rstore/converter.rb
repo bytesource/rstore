@@ -119,9 +119,9 @@ module RStore
         has_headers = @data.options[:file_options][:has_headers]
         row         = has_headers ? row_index+2 : row_index+1
 
-        already_found = already_found_error_in_col?(@data.path, :convert, @field_index+1) 
+        # already_found = already_found_error_in_col?(@data.path, :convert, @field_index+1) 
 
-        Logger.log(@data.path, :convert, e, value: @field, row: row, col: @field_index+1)  unless already_found
+        Logger.log(@data.path, :convert, e, value: @field, row: row, col: @field_index+1) # unless already_found
         @state = :error
       end
       @row
@@ -135,14 +135,14 @@ module RStore
     # Helper methods ---------------------------------
 
 
-    def already_found_error_in_col? path, state, col_index
-      logger = Logger.error_queue[path]
-      if logger[state]
-        !!(logger[state][col_index] == col_index)   # wrong because of :state => Array!!!!!!!
-      else
-        false
-      end
-    end
+  #  def already_found_error_in_col? path, state, col_index
+  #    logger = Logger.error_queue[path]
+  #    if logger[state]
+  #      !!(logger[state][col_index] == col_index)   # wrong because of :state => Array!!!!!!!
+  #    else
+  #      false
+  #    end
+  #  end
 
    #   {"/home/sovonex/Desktop/my_file.csv"=>
    #         {:store=>
