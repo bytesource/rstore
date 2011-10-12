@@ -113,13 +113,11 @@ describe RStore::CSV do
 
           it "should throw an exception and abort" do
 
-            lambda do
-              store = RStore::CSV.new do
-                from '../test_dir/', :recursive => 'yes'
-                to   'plastronics.data'
-                run
-              end
-            end.should raise_exception
+            store = RStore::CSV.new do
+              from '../test_dir/', :recursive => 'yes'
+              to   'plastronics.data'
+              run
+            end
           end
         end
       end

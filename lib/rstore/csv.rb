@@ -91,9 +91,9 @@ module RStore
 
         @ran_once = true
       end
-      Logger.print
-      @errors = Logger.error_queue
-      Logger.empty_error_queue
+     # Logger.print
+     # @errors = Logger.error_queue
+     # Logger.empty_error_queue
     end
 
 
@@ -113,7 +113,7 @@ module RStore
           data = File.read(path)
         end 
       rescue => e
-        Logger.log(path, :fetch, e)
+        Logger.new(options).print(path, :fetch, e)
       end
       data
     end

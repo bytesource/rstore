@@ -98,10 +98,10 @@ module RStore
       # CSV.parse adjusts the size of each row to equal the size of the longest row 
       # by adding nil where necessary.
       error_message = <<-ERROR.gsub(/^\s+/,'')
-                         "Row length does not match number of columns. Please verify that:
+                         Row length does not match number of columns. Please verify that:
                          1. The database table fits the csv table data
                          2. There is no primary key on a data column (you always need to 
-                         define a separate column for an auto-incrementing primary key)"
+                         define a separate column for an auto-incrementing primary key)
                          ERROR
       raise InvalidRowLengthError, error_message unless row.size == @column_types.size
 
@@ -118,18 +118,17 @@ module RStore
           end
         end
       rescue ArgumentError, NullNotAllowedError => e
-        has_headers = @data.options[:file_options][:has_headers]
-        row         = has_headers ? row_index+2 : row_index+1
+        #has_headers = @data.options[:file_options][:has_headers]
+        #row         = has_headers ? row_index+2 : row_index+1
 
-        # already_found = already_found_error_in_col?(@data.path, :convert, @field_index+1) 
 
-        Logger.log(@data.path, :convert, e, value: @field, row: row, col: @field_index+1) # unless already_found
+        Logger.new(@data.options).print(@data.path, :convert, e, row: row_index, col: @field_index) 
         @state = :error
       end
       @row
 
     rescue InvalidRowLengthError => e
-      Logger.log(@data.path, :convert, e, row: row_index+1)
+      Logger.new(@data.options).print(@data.path, :convert, e, row: row_index)
       @state = :error
       raise
     end

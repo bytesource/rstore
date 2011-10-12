@@ -43,7 +43,7 @@ module RStore
         csv = CSVWrapper.parse(@content, parse_options)
         csv = csv.drop(1)  if file_options[:has_headers] == true  # drop the first row if it is a header 
       rescue => e
-        Logger.log(@data.path, :parse, e)
+        Logger.new(@options).print(@data.path, :parse, e)
         @state = :error
       end
 
