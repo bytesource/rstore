@@ -97,10 +97,12 @@ module RStore
     def convert_row row, row_index
       # CSV.parse adjusts the size of each row to equal the size of the longest row 
       # by adding nil where necessary.
-      error_message = %q(Row length does not match number of columns. Please verify that:
+      error_message = <<-ERROR.gsub(/^\s+/,'')
+                         "Row length does not match number of columns. Please verify that:
                          1. The database table fits the csv table data
                          2. There is no primary key on a data column (you always need to 
-                         define a separate column for an auto-incrementing primary key))
+                         define a separate column for an auto-incrementing primary key)"
+                         ERROR
       raise InvalidRowLengthError, error_message unless row.size == @column_types.size
 
       @row = row.dup
