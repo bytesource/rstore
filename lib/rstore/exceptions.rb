@@ -5,6 +5,7 @@ module RStore
   class InvalidRowLengthError < StandardError; end
   class NullNotAllowedError   < StandardError; end
   class InvalidStateError     < StandardError; end
+  class FileProcessingError   < StandardError; end
 
 end
 
