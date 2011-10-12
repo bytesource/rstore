@@ -77,7 +77,55 @@ describe RStore::CSV do
              {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
         end
       end
+
+      context "on failure" do
+
+        context "when the content of one of the csv files loaded cannot be parsed" do
+
+          # Directory struture:
+          # test_dir/
+          # -- csv.bad                # wrong file format (this file will not be loaded) 
+          # -- empty.csv              # not really empty, but content is not valid csv (the error will be reported)
+          # -- dir_1/
+          # -- -- dir_2/
+          # -- -- -- test.csv         # our target file (contents will be stored in database)
+
+          it "should report the error, skip the file and continue with the remaining files" do
+
+            store = RStore::CSV.new do
+              from '../test_dir/', :recursive => true
+              to   'plastronics.data'
+              run
+            end
+
+            store.errors.empty?.should == false # has error
+            store.ran_once?.should == true
+
+            DB = PlastronicsDB.connect
+            DB[@name].all.should == 
+              [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
+               {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
+
+          end
+        end
+
+        context "when the value of an option is not valid" do
+
+          it "should throw an exception and abort" do
+
+            lambda do
+              store = RStore::CSV.new do
+                from '../test_dir/', :recursive => 'yes'
+                to   'plastronics.data'
+                run
+              end
+            end.should raise_exception
+          end
+        end
+      end
     end
+  end
+end
 
     #context "given an URL" do
 
@@ -113,9 +161,4 @@ describe RStore::CSV do
     #       :col13=>"09/90/96",
     #       :col14=>"09/90/96",
     #       :col15=>"-002.59"}
-
-    #  end
-    #end
-  end
-end
  
