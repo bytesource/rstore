@@ -11,6 +11,7 @@ module RStore
 
     class << self
       attr_reader :default_file_options
+      attr_reader :default_options
     end
 
     @default_file_options = {recursive: false, has_headers: true, selector: ''}
@@ -24,6 +25,8 @@ module RStore
 
     attr_reader   :file_options, :parse_options
     attr_reader   :path
+
+    @default_options = {options: {file_options: @default_file_options, parse_options: KnownParseOptions}}
 
 
     def initialize path, all_options

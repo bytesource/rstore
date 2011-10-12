@@ -19,7 +19,7 @@ module RStore
     KnownStates = [:raw, :parsed, :converted, :error]
 
 
-    def initialize path, content, state, options={}
+    def initialize path, content, state, options
       @path      = path
       @content   = content
       self.state = state

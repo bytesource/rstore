@@ -40,8 +40,10 @@ describe RStore::Converter do
   content = CSV.parse(csv).drop(1)  # remove header row
   schema  = DB.schema(:test)
   path    = '/home/sovonex/Desktop/my_file.csv'
+  options = RStore::Configuration.default_options
+  pp options
 
-  let(:data)      { RStore::Data.new(path, content, :parsed) }
+  let(:data)      { RStore::Data.new(path, content, :parsed, options) }
   let(:converter) { described_class.new(data, DB, :test) }
 
 
@@ -62,7 +64,7 @@ describe RStore::Converter do
 
       context "when state of Data object does not equal :parsed" do
 
-        let(:data) { RStore::Data.new(path, content, :converted) }
+        let(:data) { RStore::Data.new(path, content, :converted, options) }
 
         it "should raise an exception" do
 
@@ -139,7 +141,7 @@ describe RStore::Converter do
          ["string6", "6", "6.66", "2016/2/4", "6:30", "6:30 P.M.", "xxx"],  # '0'       -> 'xxx'
          ["string7", "7", "7.77", nil, nil, nil, nil]]
 
-      let(:data)      { RStore::Data.new(path, data_with_errors, :parsed) }
+      let(:data)      { RStore::Data.new(path, data_with_errors,:parsed, options) }
       let(:converter) { described_class.new(data, DB, :test) }
 
       context :convert do
