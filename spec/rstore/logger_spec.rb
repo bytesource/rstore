@@ -4,47 +4,52 @@ require 'spec_helper'
 
 describe RStore::Logger do
 
-  let(:logger) { described_class }
+  path    = '/home/sovonex/Desktop.csv'
+  state   = :raw
+  content = ''
+  options = RStore::Configuration.default_options
 
-  begin
-    raise Exception, "Something went wrong..."
-  rescue Exception => e
-    puts "ERROR:"
-    puts $!
-  end
+  let(:data)   { RStore::Data.new(path, content, state, options) }  # has_headers => true
+  let(:logger) { described_class.new(data) }
 
 
   context "Adding error messages" do
 
+    error_information1 = [:convert, ArgumentError, {row: 2, col: 1}]
+    error_information2 = [:convert, ArgumentError, {row: 2}]
+    error_information3 = [:convert, ArgumentError]
 
-    error_information1 = ['/home/sovonex/Desktop', :convert, ArgumentError, {value: 'hello', row: 2, col: 1}]
+    context :print do
 
-    it "#log: should edit and store error information correctly" do
+      it "should raise an error and output a well formatted error message" do
 
-      begin
-        raise Exception, "Something went wrong"
-      rescue Exception => error
-        logger.log('/temp/', :convert, error, {value: 'hello', row: 2, col: 1})
-        logger.log('/temp/temp', :convert, error, {value: 'hello', row: 2, col: 1})
-        logger.log('/temp/', :convert, error, {row: 2})
-        logger.log('/temp/', :write, error, {row: 2})
+        lambda do
+          logger.print(*error_information1)
+        end.should raise_exception(RStore::FileProcessingError, /row 4, col 2/)
+
+        lambda do
+          logger.print(*error_information2)
+        end.should raise_exception(RStore::FileProcessingError, /row 4[^,]/)
+
+        lambda do
+          logger.print(*error_information3)
+        end.should raise_exception(RStore::FileProcessingError)
+
+        # RStore::FileProcessingError:
+        # An error occured while converting field values into their corresponding datatypes:
+        # File         : /home/sovonex/Desktop.csv 
+        # Type of error: Class 
+        # Error message: ArgumentError
+        # Location     : row 4, col 2
+        # =============
+        # Please fix the error and run again.
+        # NOTE: No data has been inserted into the database yet.
+        # =============
+
+
       end
-      pp logger.error_queue.should == {"/temp/"=>
-                                       {:convert=>
-                                        [{:error=>Exception,
-                                          :message=>"Something went wrong",
-                                          :value=>"hello",
-                                          :row=>2,
-                                          :col=>1},
-                                          {:error=>Exception, :message=>"Something went wrong", :row=>2}],
-                                          :write=>[{:error=>Exception, :message=>"Something went wrong", :row=>2}]},
-                                          "/temp/temp"=>
-                                        {:convert=>
-                                         [{:error=>Exception,
-                                           :message=>"Something went wrong",
-                                           :value=>"hello",
-                                           :row=>2,
-                                           :col=>1}]}}
     end
   end
 end
+
+
