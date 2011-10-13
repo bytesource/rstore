@@ -6,15 +6,18 @@ module RStore
 
     # Todo: Evaluate the correctness of values passes via file_options
 
-    # Supported options
-    KnownParseOptions   = {row_sep: :auto, col_sep: ",", quote_char: '"', field_size_limit: nil, skip_blanks: false}.freeze
 
     class << self
       attr_reader :default_file_options
+      attr_reader :default_parse_options
       attr_reader :default_options
     end
 
-    @default_file_options = {recursive: false, has_headers: true, selector: ''}
+
+    # Supported options
+    @default_parse_options   = {row_sep: :auto, col_sep: ",", quote_char: '"', field_size_limit: nil, skip_blanks: false}.freeze
+    @default_file_options    = {recursive: false, has_headers: true, selector: ''}
+    @default_options         = {file_options: @default_file_options, parse_options: @default_parse_options}
 
 
     Validations = Hash.new { |h,k| lambda { |value| true }}.
@@ -26,7 +29,6 @@ module RStore
     attr_reader   :file_options, :parse_options
     attr_reader   :path
 
-    @default_options = {options: {file_options: @default_file_options, parse_options: KnownParseOptions}}
 
 
     def initialize path, all_options
@@ -40,13 +42,13 @@ module RStore
 
 
     def parse_options= all_options
-      new_settings = extract_options all_options, KnownParseOptions
+      new_settings = extract_options(all_options, Configuration.default_parse_options)
       @parse_options = new_settings
     end
 
 
     def file_options= all_options
-      new_settings = extract_options all_options, Configuration.default_file_options
+      new_settings = extract_options(all_options, Configuration.default_file_options)
       @file_options = Configuration.default_file_options.merge(new_settings)
     end
 

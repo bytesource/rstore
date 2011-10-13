@@ -22,6 +22,12 @@ describe RStore::Configuration do
       specify { config.file_options.should  == file_options }
       specify { config.path.should  == path }
 
+      specify { described_class.default_file_options.should  == {recursive: false, has_headers: true, selector: ''} }
+      specify { described_class.default_parse_options.should == {row_sep: :auto, col_sep: ",", quote_char: '"', 
+                                                                 field_size_limit: nil, skip_blanks: false} }
+      specify { described_class.default_options.should       == {:file_options  =>  described_class.default_file_options,
+                                                                 :parse_options =>  described_class.default_parse_options} }
+
       specify { config[:parse_options].should == parse_options }
       specify { config[:file_options].should  == file_options }
       specify { config[:path].should  == path }
