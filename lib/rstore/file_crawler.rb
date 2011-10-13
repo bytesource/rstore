@@ -8,11 +8,7 @@ require 'rstore/core_ext/string'
 module RStore
   class FileCrawler
 
-    # class << self
-    #   attr_accessor :file_queue
-    # end
-
-    attr_reader :file_options_hash
+    #attr_reader :file_options_hash
     attr_reader :data_hash
 
     attr_reader :file_options, :parse_options 

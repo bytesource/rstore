@@ -31,7 +31,7 @@ describe RStore::FileCrawler do
         data.class.should   == RStore::Data
         data.content.should == ''
         data.state.should   == :raw
-        data.options.should == crawler.file_options_hash[path]
+        data.options.should == crawler.instance_variable_get(:@file_options_hash)[path]
       end
 
     end
@@ -52,9 +52,11 @@ describe RStore::FileCrawler do
           # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
           it "should return a hash for all files of the current directory" do
 
-            crawler.file_options_hash.should == {"#{File.expand_path('../test_dir/empty.csv')}" => 
-                                                 {:file_options=>{:recursive=>false, :has_headers=>true, :selector => ""}, 
-                                                  :parse_options=>{}}}
+            data = crawler.data_hash["#{File.expand_path('../test_dir/empty.csv')}"]
+
+            data.path.should == "#{File.expand_path('../test_dir/empty.csv')}"
+            data.options.should == {:file_options=>{:recursive=>false, :has_headers=>true, :selector => ""}, 
+                                    :parse_options=>{}}
           end
         end
 
@@ -62,15 +64,22 @@ describe RStore::FileCrawler do
 
           let(:crawler) { described_class.new(test_dir, file_type, options) }
 
-          # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
           it "should return a hash for all files of the current directory and subdirectories" do
 
-            crawler.file_options_hash.should == {"#{File.expand_path('../test_dir/empty.csv')}"  => 
-                                                        {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
-                                                         :parse_options=>{:col_sep => ";", :quote_char => "'"}},
-                                                         "#{File.expand_path('../test_dir/dir_1/dir_2/test.csv')}"  => 
-                                                        {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
-                                                         :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
+          data1 = crawler.data_hash["#{File.expand_path('../test_dir/empty.csv')}"]
+          data2 = crawler.data_hash["#{File.expand_path('../test_dir/dir_1/dir_2/test.csv')}"]
+
+          data1.path.should == "#{File.expand_path('../test_dir/empty.csv')}"
+          data2.path.should == "#{File.expand_path('../test_dir/dir_1/dir_2/test.csv')}"
+
+          data1.options.should == 
+            {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
+             :parse_options=>{:col_sep => ";", :quote_char => "'"}}
+             
+             data2.options.should == 
+             {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
+              :parse_options=>{:col_sep => ";", :quote_char => "'"}}
+
           end
         end
       end
@@ -104,9 +113,13 @@ describe RStore::FileCrawler do
         # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
         it "should return a hash for the file" do
 
-          crawler.file_options_hash.should == {"/home/sovonex/Desktop/temp/rstore/spec/test_dir/empty.csv" => 
-                                                      {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
-                                                       :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
+          data = crawler.data_hash["#{File.expand_path("/home/sovonex/Desktop/temp/rstore/spec/test_dir/empty.csv" )}"]
+
+          data.path.should == "#{File.expand_path("/home/sovonex/Desktop/temp/rstore/spec/test_dir/empty.csv" )}"
+          data.options.should == 
+            {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
+             :parse_options=>{:col_sep => ";", :quote_char => "'"}}
+
         end
       end
 
