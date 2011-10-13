@@ -2,6 +2,7 @@
 
 require 'open-uri'
 require 'rstore/configuration'
+require 'rstore/data'
 require 'rstore/core_ext/string'
 
 module RStore
@@ -11,8 +12,9 @@ module RStore
     #   attr_accessor :file_queue
     # end
 
-    attr_accessor :file_options_hash
-    
+    attr_reader :file_options_hash
+    attr_reader :data_hash
+
     attr_reader :file_options, :parse_options 
     attr_reader :path
     attr_reader :file_paths, :file_type
@@ -21,14 +23,16 @@ module RStore
 
 
     def initialize file_or_folder, file_type, options={}
-      @path              = file_or_folder
-      @file_type         = file_type
-      @config            = Configuration.new(file_or_folder, options)
-      @file_options      = @config.file_options
-      @parse_options     = @config.parse_options
-      self.file_paths    = @path
+      @path                  = file_or_folder
+      @file_type             = file_type
+      @config                = Configuration.new(file_or_folder, options)
+      @file_options          = @config.file_options
+      @parse_options         = @config.parse_options
+      self.file_paths        = @path
       self.file_options_hash = @file_paths
+      self.data_hash         = @file_options_hash
     end
+
 
     def file_paths= path
       return @file_paths unless @file_paths.nil?
@@ -51,6 +55,15 @@ module RStore
         files << file
       end
       @file_paths = files
+    end
+
+
+    def data_hash= options_hash
+      hash = Hash[options_hash.map do |path, options|
+        data = Data.new(path, '', :raw, options)
+        [path, data]
+      end]
+      @data_hash = hash
     end
 
 
