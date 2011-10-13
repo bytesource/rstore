@@ -29,10 +29,7 @@ module RStore
       @type      = extract_type path
     end
 
-    {:options=>
-     {:file_options=>{:recursive=>false, :has_headers=>true, :selector=>""}, 
-      :parse_options=>{:row_sep=>:auto, :col_sep=>",", :quote_char=>"\"", :field_size_limit=>nil, :skip_blanks=>false}}}
-
+  
     def extract_type path
       path, filename = File.split(path)
       filename.match(/\.(?<type>.*)$/)[:type].to_sym
@@ -95,11 +92,9 @@ module RStore
     def valid_options? options
       if options
         if options.is_a?(Hash)
-          if options[:options]
-            if options[:options][:file_options] && options[:options][:parse_options]
-              if options[:options][:file_options].is_a?(Hash) && options[:options][:parse_options].is_a?(Hash)
-                return true
-              end
+          if options[:file_options] && options[:parse_options]
+            if options[:file_options].is_a?(Hash) && options[:parse_options].is_a?(Hash)
+              return true
             end
           end
         end
