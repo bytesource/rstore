@@ -5,7 +5,7 @@ require 'spec_helper'
 describe RStore::Configuration do
 
   parse_options = {row_sep: '\n', col_sep: ';', quote_char: "'", field_size_limit: nil, skip_blanks: true}
-  file_options  = {recursive: true, has_headers: true, selector: 'pre div.line'}
+  file_options  = {has_headers: true, selector: 'pre div.line'}  # removed :recursive
 
   all_options   = parse_options.merge(file_options)
 
@@ -19,8 +19,9 @@ describe RStore::Configuration do
     context "when successfull" do
 
       specify { config.parse_options.should == parse_options }
-      specify { config.file_options.should  == file_options }
-      specify { config.path.should  == path }
+      specify { config.file_options.should  == file_options.merge(:recursive => false) }
+      specify { config.options.should       == file_options.merge(:recursive => false).merge(parse_options) }
+      specify { config.path.should          == path }
 
       specify { described_class.default_file_options.should  == {recursive: false, has_headers: true, selector: ''} }
       specify { described_class.default_parse_options.should == {row_sep: :auto, col_sep: ",", quote_char: '"', 
@@ -29,7 +30,7 @@ describe RStore::Configuration do
                                                                  :parse_options =>  described_class.default_parse_options} }
 
       specify { config[:parse_options].should == parse_options }
-      specify { config[:file_options].should  == file_options }
+      specify { config[:file_options].should  == file_options.merge(:recursive => false) }
       specify { config[:path].should  == path }
       specify { lambda { config[:does_not_exist] }.should  raise_exception }
     end

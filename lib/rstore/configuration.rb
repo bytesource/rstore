@@ -26,7 +26,7 @@ module RStore
               selector:    lambda { |value| value.is_a?(String) }})
 
 
-    attr_reader   :file_options, :parse_options
+    attr_reader   :file_options, :parse_options, :options
     attr_reader   :path
 
 
@@ -35,6 +35,7 @@ module RStore
       all_options        = all_options.dup
       self.parse_options = all_options
       self.file_options  = all_options
+      @options           = @parse_options.merge(@file_options)
       @path = path
 
       raise ArgumentError, arg_error_message(@path, all_options) if all_options.size > 0
