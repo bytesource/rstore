@@ -20,7 +20,7 @@ module RStore
 
 
     def initialize path, content, state, options
-      error_message = "#{path}: The following options are not valid as an argument to #{self.class}:  #{options}"
+      error_message = "#{path}: The following options are not valid as an argument to #{self.class}:\n#{options}"
       raise ArgumentError, error_message  unless valid_options?(options) 
       @path      = path
       @content   = content
@@ -29,6 +29,9 @@ module RStore
       @type      = extract_type path
     end
 
+    {:options=>
+     {:file_options=>{:recursive=>false, :has_headers=>true, :selector=>""}, 
+      :parse_options=>{:row_sep=>:auto, :col_sep=>",", :quote_char=>"\"", :field_size_limit=>nil, :skip_blanks=>false}}}
 
     def extract_type path
       path, filename = File.split(path)
@@ -92,9 +95,11 @@ module RStore
     def valid_options? options
       if options
         if options.is_a?(Hash)
-          if options[:file_options] && options[:parse_options]
-            if options[:file_options].is_a?(Hash) && options[:parse_options].is_a?(Hash)
-               return true
+          if options[:options]
+            if options[:options][:file_options] && options[:options][:parse_options]
+              if options[:options][:file_options].is_a?(Hash) && options[:options][:parse_options].is_a?(Hash)
+                return true
+              end
             end
           end
         end
