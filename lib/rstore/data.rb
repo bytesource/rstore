@@ -94,22 +94,14 @@ module RStore
         if options.is_a?(Hash)
           if options[:file_options] && options[:parse_options]
             if options[:file_options].is_a?(Hash) && options[:parse_options].is_a?(Hash)
-              true
-            else
-              false
+               return true
             end
-          else
-            false
           end
-        else
-          false
         end
-      else
-        false
       end
+      false
     end
-            
-    
+
   end
 end 
  
