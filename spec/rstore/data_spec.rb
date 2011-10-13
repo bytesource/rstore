@@ -14,8 +14,9 @@ describe RStore::Data do
 
   content = CSV.parse(csv)
   path    = '/home/sovonex/temp/fantastic.csv'
+  options = RStore::Configuration.default_options
 
-  let(:data) { described_class.new(path, content, :parsed) }
+  let(:data) { described_class.new(path, content, :parsed, options) }
 
   context "On initialization" do
 
