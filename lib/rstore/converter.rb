@@ -161,7 +161,7 @@ module RStore
 
       begin
         row.each_with_index.map do |field, field_index|
-          @field = field
+          @field_index = field_index
 
           if field.nil?
             validate_null(@allow_null[field_index], field)
@@ -170,11 +170,11 @@ module RStore
           end
         end
       rescue ArgumentError, NullNotAllowedError => e
-        Logger.new(@data.options).print(@data.path, :convert, e, row: row_index, col: @field_index) 
+        Logger.new(@data).print(:convert, e, row: row_index, col: @field_index) 
       end
 
     rescue InvalidRowLengthError => e
-      Logger.new(@data.options).print(@data.path, :convert, e, row: row_index)
+      Logger.new(@data).print(:convert, e, row: row_index)
     end
 
 
@@ -188,7 +188,7 @@ module RStore
 
 
     def validate_null allow_null, field
-      raise NullNotAllowedError, "NULL not allowed" unless allow_null == true
+      raise NullNotAllowedError, "NULL value (empty field) not allowed" unless allow_null == true
       field
     end
 
