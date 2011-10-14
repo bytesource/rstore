@@ -41,7 +41,6 @@ describe RStore::Converter do
   schema  = DB.schema(:test)
   path    = '/home/sovonex/Desktop/my_file.csv'
   options = RStore::Configuration.default_options
-  pp options
 
   let(:data)      { RStore::Data.new(path, content, :parsed, options) }
   let(:converter) { described_class.new(data, DB, :test) }
@@ -75,7 +74,7 @@ describe RStore::Converter do
       context "when the data contains nil where nil is not allowed" do
         new_schema = DB.schema(:test)
 
-        it "should log the error" do
+        it "should raise an exception and output a detailed error message" do
 
           DB.alter_table :test do
             drop_column :boolean_col
@@ -85,21 +84,16 @@ describe RStore::Converter do
 
           converter = described_class.new(data, DB, :test)
           converter.allow_null.should == [true, true, true, true, true, true, false]
-          converter.convert
+          lambda do
+            converter.convert
+          end.should raise_exception(RStore::FileProcessingError)
 
-          RStore::Logger.error_queue.should ==
-            {"/home/sovonex/Desktop/my_file.csv"=>
-             {:convert=>
-              [{:error=>RStore::NullNotAllowedError, :message=>"NULL not allowed", :value=>nil, :row=>1, :col=>7}, 
-               {:error=>RStore::NullNotAllowedError, :message=>"NULL not allowed", :value=>nil, :row=>7, :col=>7}]}}
 
-              RStore::Logger.empty_error_queue
-
-              # Reverse changes
-              DB.alter_table :test do
-                drop_column :boolean_col
-                add_column  :boolean_col, :boolean
-              end
+          # Reverse changes
+          DB.alter_table :test do
+            drop_column :boolean_col
+            add_column  :boolean_col, :boolean
+          end
         end
       end
     end
@@ -125,7 +119,6 @@ describe RStore::Converter do
              ["string7", 7, 7.77, nil, nil, nil, nil]]
 
           converter.state.should == :converted
-          RStore::Logger.error_queue.should be_empty
         end
       end
     end
@@ -146,28 +139,108 @@ describe RStore::Converter do
 
       context :convert do
 
-        it "should log the error, skip the rest of the current row and continue with the next row" do
+        context "non-valid Integer value" do
 
-        converter.convert.content.should == 
-          [["string1", "xxx", "1.12", "2011-2-4", "1:30", "1:30am", nil],   
-           ["string2", 2, "xxx", "2012/2/4", "2:30", "2:30pm", "false"], 
-           [nil, 3, 3.33, "xxx", "3:30", "3:30 a.m.", "True"],        
-           ["string4", 4, nil, nil, "xxx", "4:30 p.m.", "False"],      
-           ["string5", 5, 5.55, "2015-02-04", dt('05:30'), "xxx", "1"],    
-           ["string6", 6, 6.66, "2016-02-04", dt('06:30'),dt('18:30'), "xxx"],
-           ["string7", 7, 7.77, nil, nil, nil, nil]]
+          error_content = content.dup
+          error_content[0] = data_with_errors[0]
 
-        converter.state.should == :error
+          let(:data)      { RStore::Data.new(path, error_content,:parsed, options) }
+          let(:converter) { described_class.new(data, DB, :test) }
 
-        log = RStore::Logger.error_queue[path][:convert]
-        log.size.should  == 6
-        log[0].should == {:error=>ArgumentError,
-                          :message=>"invalid value for Integer(): \"xxx\"",
-                          :value=>"xxx",
-                          :row=>1,
-                          :col=>2}
+          it "should raise an error" do
+
+            lambda do
+              converter.convert
+            end.should raise_exception(RStore::FileProcessingError, /row 2, col 2/)
+          end
+        end
+
+
+        context "non-valid Float value" do
+
+          error_content = content.dup
+          error_content[1] = data_with_errors[1]
+
+          let(:data)      { RStore::Data.new(path, error_content,:parsed, options) }
+          let(:converter) { described_class.new(data, DB, :test) }
+
+          it "should raise an error" do
+
+            lambda do
+              converter.convert
+            end.should raise_exception(RStore::FileProcessingError, /row 3, col 3/)
+          end
+        end
+
+
+        context "non-valid Date value" do
+
+          error_content = content.dup
+          error_content[2] = data_with_errors[2]
+
+          let(:data)      { RStore::Data.new(path, error_content,:parsed, options) }
+          let(:converter) { described_class.new(data, DB, :test) }
+
+          it "should raise an error" do
+
+            lambda do
+              converter.convert
+            end.should raise_exception(RStore::FileProcessingError, /row 4, col 4/)
+          end
+        end
+
+
+        context "non-valid DateTime value" do
+
+          error_content = content.dup
+          error_content[3] = data_with_errors[3]
+
+          let(:data)      { RStore::Data.new(path, error_content,:parsed, options) }
+          let(:converter) { described_class.new(data, DB, :test) }
+
+          it "should raise an error" do
+
+            lambda do
+              converter.convert
+            end.should raise_exception(RStore::FileProcessingError, /row 5, col 5/)
+          end
+        end
+
+
+        context "non-valid Time value" do
+
+          error_content = content.dup
+          error_content[4] = data_with_errors[4]
+
+          let(:data)      { RStore::Data.new(path, error_content,:parsed, options) }
+          let(:converter) { described_class.new(data, DB, :test) }
+
+          it "should raise an error" do
+
+            lambda do
+              converter.convert
+            end.should raise_exception(RStore::FileProcessingError, /row 6, col 6/)
+          end
+        end
+
+
+        context "non-valid Boolean value" do
+
+          error_content = content.dup
+          error_content[5] = data_with_errors[5]
+
+          let(:data)      { RStore::Data.new(path, error_content,:parsed, options) }
+          let(:converter) { described_class.new(data, DB, :test) }
+
+          it "should raise an error" do
+
+            lambda do
+              converter.convert
+            end.should raise_exception(RStore::FileProcessingError, /row 7, col 7/)
+          end
         end
       end
     end
   end
 end
+

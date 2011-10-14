@@ -1,8 +1,5 @@
 # encoding: utf-8
 require 'rstore/logger'
-require 'rstore/exceptions'
-
-require 'pry'
 
 module RStore
   class Converter
@@ -137,12 +134,12 @@ module RStore
     def convert
       content = @data.content.dup
 
-      content.each_with_index.map do |row, row_index|
+      converted = content.each_with_index.map do |row, row_index|
 
         convert_row(row, row_index)
       end
       @state = :converted 
-      Data.new(@data.path, content, @state)
+      Data.new(@data.path, converted, @state, @data.options)
     end
 
 
@@ -170,11 +167,15 @@ module RStore
           end
         end
       rescue ArgumentError, NullNotAllowedError => e
-        Logger.new(@data).print(:convert, e, row: row_index, col: @field_index) 
+        logger = Logger.new(@data)
+        logger.log(:convert, e, row: row_index, col: @field_index)
+        logger.error
       end
 
     rescue InvalidRowLengthError => e
-      Logger.new(@data).print(:convert, e, row: row_index)
+      logger = Logger.new(@data)
+      logger.log(:convert, e, row: row_index)
+      logger.error
     end
 
 
