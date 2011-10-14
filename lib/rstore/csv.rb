@@ -74,6 +74,7 @@ module RStore
       raise Exception, "Please specify at least one source file using the 'from' method" if @files_with_options.empty?
       raise Exception, "Please specify a valid database and table name using the 'to' method" if @database.nil? || @table.nil?
 
+      # USE DATA OBJECT HASH!!!!!!!!!!!!
       @files_with_options.each do |path, options|
         data = read_data path, options[:file_options]
         next  if data == ''
@@ -97,8 +98,11 @@ module RStore
     end
 
 
-    def read_data path, options
-      data = ''
+    def read_data data_object
+      path    = data_object.path
+      options = data_object.options
+      data    = ''
+
       begin
         if path.url?
 
@@ -113,7 +117,10 @@ module RStore
           data = File.read(path)
         end 
       rescue => e
-        Logger.new(options).print(path, :fetch, e)
+        logger = Logger.new(@data)
+        logger.log(path, :fetch, e)
+        logger.error
+
       end
       data
     end
