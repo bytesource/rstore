@@ -25,6 +25,10 @@ module RStore
     #  @error_queue = Hash.new {|h,k| h[k] = Hash.new{|h,k| h[k] = []}}
     #end
 
+    attr_accessor :data
+    attr_accessor :message
+    
+
     KnownStates = 
       {:fetch   => "loading files", 
        :parse   => "parsing file content",
@@ -34,11 +38,12 @@ module RStore
 
 
     def initialize data_object
-      @data = data_object
+      @data    = data_object
+      @message = ''
     end
 
 
-    def print state, error, loc={}
+    def log state, error, loc={}
       raise ArgumentError "#{state} is an invalid state vor #{self.class}"  unless valid_state? state
 
       loc = correct_location(loc)
@@ -46,7 +51,7 @@ module RStore
       type_of_error = error.class
       error_message = error.to_s
       location      = "Location     : #{location_to_s(loc)}" 
-      location      = loc.size == 0 ? '' : location
+      location      = loc.empty? ? '' : location
 
       report = <<-TEXT.gsub(/^\s+/, '')
       An error occured while #{KnownStates[state]}:
@@ -60,7 +65,12 @@ module RStore
       =============
       TEXT
 
-      raise FileProcessingError, report
+      @message = report
+    end
+
+
+    def error
+      raise FileProcessingError, @message
     end
 
 
@@ -73,13 +83,18 @@ module RStore
 
     
     def correct_location location
-      row = location[:row]  # row_index
-      col = location[:col]  # field_index
-
-      row = correct_row(row)  if row
-      col = col+1
-
-      {row: row, col: col}
+ 
+      if location[:row]        # row_index
+        row = correct_row(location[:row])
+        if location[:col]      # col_index
+          col = location[:col]+1
+          {row: row, col: col}
+        else
+          {row: row}
+        end
+      else
+        location
+      end
     end
 
 

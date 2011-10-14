@@ -19,21 +19,24 @@ describe RStore::Logger do
     error_information2 = [:convert, ArgumentError, {row: 2}]
     error_information3 = [:convert, ArgumentError]
 
-    context :print do
+    context :log do
 
       it "should raise an error and output a well formatted error message" do
 
         lambda do
-          logger.print(*error_information1)
+          logger.log(*error_information1)
+          logger.error
         end.should raise_exception(RStore::FileProcessingError, /row 4, col 2/)
 
         lambda do
-          logger.print(*error_information2)
+          logger.log(*error_information2)
+          logger.error
         end.should raise_exception(RStore::FileProcessingError, /row 4[^,]/)
 
         lambda do
-          logger.print(*error_information3)
-        end.should raise_exception(RStore::FileProcessingError)
+          logger.log(*error_information3)
+          logger.error
+        end.should raise_exception(RStore::FileProcessingError, /ArgumentError\n=+/m)
 
         # RStore::FileProcessingError:
         # An error occured while converting field values into their corresponding datatypes:
