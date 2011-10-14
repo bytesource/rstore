@@ -36,7 +36,7 @@ describe RStore::Logger do
         lambda do
           logger.log(*error_information3)
           logger.error
-        end.should raise_exception(RStore::FileProcessingError, /ArgumentError\n=+/m)
+        end.should raise_exception(RStore::FileProcessingError, /ArgumentError\n=+/)
 
         # RStore::FileProcessingError:
         # An error occured while converting field values into their corresponding datatypes:
