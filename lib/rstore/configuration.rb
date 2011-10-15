@@ -8,8 +8,8 @@ module RStore
 
 
     class << self
-      attr_reader :default_file_options
-      attr_reader :default_parse_options
+      #attr_reader :default_file_options
+      #attr_reader :default_parse_options
       attr_reader :default_options
     end
 
@@ -20,7 +20,9 @@ module RStore
     @default_options         = {file_options: @default_file_options, parse_options: @default_parse_options}
 
 
-    Validations = Hash.new { |h,k| lambda { |value| true }}.
+    # Validations for RStore::CSV specific options
+    # @default_parse_options will not be validated here, as validation occurs on calling CSV.parse
+    Validations = Hash.new { |h,k| lambda { |value| value }}.
       merge!({recursive:   lambda { |value| value.boolean_or_nil? },
               has_headers: lambda { |value| value.boolean_or_nil? },
               selector:    lambda { |value| value.is_a?(String) }})
@@ -66,10 +68,10 @@ module RStore
     end
 
 
-    def self.update_default_file_options options
+    def self.update_default_options options
       raise ArgumentError, "#{options} must be an instance of Hash" unless options.is_a?(Hash)
-      new_options = Configuration.default_file_options.merge(options)
-      raise ArgumentError, "#{options} contains unknown option key" if new_options.size > Configuration.default_file_options.size
+      new_options = Configuration.default_options.merge(options)
+      raise ArgumentError, "#{options} contains unknown option key" if new_options.size > Configuration.default_options.size
       new_options.each do |option, value|
         error_message = "'#{value}' (#{value.class}) is not a valid value for option #{option.inspect}"
         raise ArgumentError, error_message unless valid_value?(option, value)
@@ -82,16 +84,35 @@ module RStore
     # Helper methods
     # ------------------------------------------
 
-    def extract_options provided_options, supported_options
+    #def extract_options provided_options, supported_options
 
-      provided_options_copy = provided_options.dup
-      supported_options = supported_options.keys
+    #  provided_options_copy = provided_options.dup
+    #  supported_options = supported_options.keys
 
-      provided_options_copy.inject({}) do |extracted, (option, value)|
-        if supported_options.include?(option)
-          if Configuration.valid_value?(option, value)
-            extracted[option] = value 
-            provided_options.delete(option)
+    #  provided_options_copy.inject({}) do |extracted, (option, value)|
+    #    if supported_options.include?(option)
+    #      if Configuration.valid_value?(option, value)
+    #        extracted[option] = value 
+    #        provided_options.delete(option)
+    #      else
+    #        raise ArgumentError, "path #{@path}: '#{value}' (#{value.class}) is not a valid value for option #{option.inspect}"
+    #      end
+    #    end
+    #  extracted
+    #  end
+    #end
+
+    def extract_options defaults, passed
+
+      defaults_copy = defaults.dup
+      passed        = passed.keys
+
+      defaults_copy.inject({}) do |acc, (option, value)|
+        if passed.include?(option)
+            if Configuration.valid_value?(option, value)
+              acc[option] = value 
+              defaults.delete(option)
+            end
           else
             raise ArgumentError, "path #{@path}: '#{value}' (#{value.class}) is not a valid value for option #{option.inspect}"
           end
@@ -99,7 +120,6 @@ module RStore
       extracted
       end
     end
-
 
     def self.valid_value? option, value
       Validations[option][value]
