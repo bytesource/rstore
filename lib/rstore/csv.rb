@@ -8,8 +8,6 @@ require 'rstore/base_db'
 require 'rstore/base_table'
 require 'rstore/core_ext/string'
 
-require 'pry'
-
 # RStore::CSV.new do
 #   from '~/temp/', header: true, recursive: true
 #   from 'http://www.sovonex.com/summary.csv', selector: 'pre div.line'
@@ -60,16 +58,11 @@ module RStore
     end
 
 
-    # If a block is given, it is passed the opened Database object, which is closed when the block exits. For example:
-    # Sequel.connect('sqlite://blog.db'){|db| puts db[:users].count}
-
     def run
-      return  if ran_once?
-      # raise Exception, "You can invoke the 'run' method only once on a single instance of #{self.class}"  if ran_once?
+      return  if ran_once?   # Ignore subsequent calls to #run 
       raise Exception, "Please specify at least one source file using the 'from' method" if @data_hash.empty?
       raise Exception, "Please specify a valid database and table name using the 'to' method" if @database.nil? || @table.nil?
 
-      # USE DATA OBJECT HASH!!!!!!!!!!!!
       @data_hash.each do |path, data|
         content = read_data(data)
         @data_array << Data.new(path, content, :raw, data.options)  
@@ -80,15 +73,14 @@ module RStore
         create_table(db)
         name = @table.name
 
-        @data_array.each do |data_object|
-          data_object.parse_csv.convert_fields(db, name).into_db(db, name)
+        db.transaction do   # outer transaction
+          @data_array.each do |data|
+            data.parse_csv.convert_fields(db, name).into_db(db, name)
+          end
         end
 
         @ran_once = true
       end
-     # Logger.print
-     # @errors = Logger.error_queue
-     # Logger.empty_error_queue
     end
 
 
