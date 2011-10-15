@@ -21,23 +21,17 @@ require 'pry'
 module RStore
   class CSV
 
-
     attr_reader :database, :table
-    attr_reader :data_stream
+    attr_reader :data_array
     attr_reader :errors
-    
-    
-    
-    
     
 
     def initialize &block
-      @files_with_options = {}
-      @data_stream        = []
+      @data_hash = {}
+      @data_array        = []
       @database           = nil
       @table              = nil
       @ran_once           = false
-      @errors             = {}
 
       instance_eval(&block) if block_given?
 
@@ -46,7 +40,7 @@ module RStore
 
     def from source, options={}
       crawler = FileCrawler.new(source, :csv, options)
-      @files_with_options.merge!(crawler.file_options_hash)
+      @data_hash.merge!(crawler.data_hash)
     end
 
 
@@ -70,15 +64,16 @@ module RStore
     # Sequel.connect('sqlite://blog.db'){|db| puts db[:users].count}
 
     def run
-      raise Exception, "You can invoke the 'run' method only once on a single instance of #{self.class}"  if ran_once?
-      raise Exception, "Please specify at least one source file using the 'from' method" if @files_with_options.empty?
+      return  if ran_once?
+      # raise Exception, "You can invoke the 'run' method only once on a single instance of #{self.class}"  if ran_once?
+      raise Exception, "Please specify at least one source file using the 'from' method" if @data_hash.empty?
       raise Exception, "Please specify a valid database and table name using the 'to' method" if @database.nil? || @table.nil?
 
       # USE DATA OBJECT HASH!!!!!!!!!!!!
-      @files_with_options.each do |path, options|
-        data = read_data path, options[:file_options]
-        next  if data == ''
-        @data_stream << Data.new(path, data, :raw, options)  
+      @data_hash.each do |path, data|
+        content = read_data(data)
+        next  if content == ''
+        @data_array << Data.new(path, content, :raw, data.options)  
       end
 
       @database.connect do |db|
@@ -86,7 +81,7 @@ module RStore
         create_table(db)
         name = @table.name
 
-        @data_stream.each do |data_object|
+        @data_array.each do |data_object|
           data_object.parse_csv.convert_fields(db, name).into_db(db, name)
         end
 

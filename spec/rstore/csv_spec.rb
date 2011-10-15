@@ -13,7 +13,7 @@ describe RStore::CSV do
     info(adapter: 'mysql', 
          host:    'localhost', 
          user:    'root', 
-         password:'xxx')
+         password:'moinmoin')
   end
 
   class DataTable < RStore::BaseTable
@@ -68,7 +68,6 @@ describe RStore::CSV do
             run
           end
 
-          store.errors.empty?.should == true
           store.ran_once?.should == true
 
           DB = PlastronicsDB.connect
@@ -90,21 +89,21 @@ describe RStore::CSV do
           # -- -- dir_2/
           # -- -- -- test.csv         # our target file (contents will be stored in database)
 
-          it "should report the error, skip the file and continue with the remaining files" do
+          it "should raise an exception, report the error and roll back any data already inserted into the database" do
 
-            store = RStore::CSV.new do
-              from '../test_dir/', :recursive => true
-              to   'plastronics.data'
-              run
-            end
+            @error_path = "#{File.expand_path('../test_dir/empty.csv')}"
 
-            store.errors.empty?.should == false # has error
-            store.ran_once?.should == true
+            lambda do
+              RStore::CSV.new do
+                from '../test_dir/', :recursive => true
+                to   'plastronics.data'
+                run
+              end
+            end.should raise_exception(RStore::FileProcessingError, /#{@error_path}/)
+
 
             DB = PlastronicsDB.connect
-            DB[@name].all.should == 
-              [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
-               {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
+            DB[@name].all.should be_empty 
 
           end
         end
@@ -113,11 +112,13 @@ describe RStore::CSV do
 
           it "should throw an exception and abort" do
 
+            lambda do
             store = RStore::CSV.new do
               from '../test_dir/', :recursive => 'yes'
               to   'plastronics.data'
               run
             end
+            end.should raise_exception(ArgumentError, /yes/)
           end
         end
       end
@@ -140,7 +141,6 @@ end
     #      run
     #    end
 
-    #    store2.errors.empty?.should == true
     #    store2.ran_once?.should == true
     #    DB[name].first.should == 
     #      {:id=>1,
