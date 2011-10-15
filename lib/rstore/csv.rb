@@ -72,7 +72,6 @@ module RStore
       # USE DATA OBJECT HASH!!!!!!!!!!!!
       @data_hash.each do |path, data|
         content = read_data(data)
-        next  if content == ''
         @data_array << Data.new(path, content, :raw, data.options)  
       end
 
@@ -104,20 +103,22 @@ module RStore
           doc = Nokogiri::HTML(open(path))
 
           selector = options[:selector]
-          data = doc.css(selector).inject("") do |result, link|
+          content = doc.css(selector).inject("") do |result, link|
             result << link.content << "\n"
             result
           end
         else
-          data = File.read(path)
+          content = File.read(path)
         end 
+
+      raise ArgumentError "Empty content!"  if content.empty?
       rescue => e
         logger = Logger.new(@data)
         logger.log(path, :fetch, e)
         logger.error
-
       end
-      data
+      
+      content
     end
 
 
