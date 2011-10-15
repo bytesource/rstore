@@ -156,64 +156,67 @@ describe RStore::FileCrawler do
       end
     end
 
-    #describe "given a URL" do
+    describe "given a URL" do
 
-    #  context "on success" do
+      context "on success" do
 
-    #    url1 = 'http://github.com/circle/fastercsv/blob/master/test/test_data.csv'
-    #    url2 = 'www.sovonex.com/drill-collars.php' # does require a file in an URL to be of a specific file type.
-    #    urls = [url1, url2]
-    #    let(:crawler) { described_class }
+        url1 = 'http://github.com/circle/fastercsv/blob/master/test/test_data.csv'
+        url2 = 'www.sovonex.com/drill-collars.php' # does require a file in an URL to be of a specific file type.
+        urls = [url1, url2]
+        let(:crawler) { described_class }
 
-    #    # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
-    #    it "should return a hash for the url" do
+        # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
+        it "should return a hash for the url" do
 
-    #      c1 = crawler.new(url1, file_type, options)
-    #      c2 = crawler.new(url2, file_type, options)
+          c1 = crawler.new(url1, file_type, options)
+          c2 = crawler.new(url2, file_type, options)
 
+          data1 = c1.data_hash["#{urls[0].gsub(/http/,'https')}"]
+          data2 = c2.data_hash["http://#{urls[1]}"]
 
+          data1.path.should == "#{urls[0].gsub(/http/,'https')}"
+          data2.path.should == "http://#{urls[1]}"
 
-    #      c1.file_options_hash.should == {"#{urls[0].gsub(/http/,'https')}"=>
-    #                                                  {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
-    #                                                   :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
+          data1.options.should == {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
+                                                       :parse_options=>{:col_sep => ";", :quote_char => "'"}}
 
-    #     c2.file_options_hash.should ==  {"http://#{urls[1]}"=>
-    #                                                  {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
-    #                                                   :parse_options=>{:col_sep => ";", :quote_char => "'"}}}
-    #    end
-    #  end
+          data2.options.should == {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
+                                                       :parse_options=>{:col_sep => ";", :quote_char => "'"}}
 
-    #  context "on failure" do
+        end
+      end
 
-    #    context "when the url has the wrong format" do
+      context "on failure" do
 
-    #      wrong_format = 'http:/www.sovonex.com/test.csv' # one slash missing
+        context "when the url has the wrong format" do
 
-    #      let(:crawler) { described_class } 
+          wrong_format = 'http:/www.sovonex.com/test.csv' # one slash missing
 
-    #      it "should throw an exception" do
+          let(:crawler) { described_class } 
 
-    #        lambda do
-    #          crawler.new(wrong_format, file_type) 
-    #        end.should raise_exception(ArgumentError,"'#{wrong_format}' is not a valid path")
+          it "should throw an exception" do
 
-    #      end
-    #    end
+            lambda do
+              crawler.new(wrong_format, file_type) 
+            end.should raise_exception(ArgumentError,"'#{wrong_format}' is not a valid path")
 
-    #    context "when the remote file does not exist" do
+          end
+        end
 
-    #      does_not_exist = 'http://www.sovonex.com/does-not_exist.csv'
+        context "when the remote file does not exist" do
 
-    #      let(:crawler) { described_class.new(does_not_exist, file_type) }
+          does_not_exist = 'http://www.sovonex.com/does-not_exist.csv'
 
-    #      it "should throw an exception" do
+          let(:crawler) { described_class.new(does_not_exist, file_type) }
 
-    #        lambda do
-    #          crawler.add
-    #        end.should raise_exception(ArgumentError,/Could not connect to #{does_not_exist}/)
-    #      end
-    #    end
-    #  end
-    #end
+          it "should throw an exception" do
+
+            lambda do
+              crawler.add
+            end.should raise_exception(ArgumentError,/Could not connect to #{does_not_exist}/)
+          end
+        end
+      end
+    end
   end
 end
