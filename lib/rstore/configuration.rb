@@ -33,10 +33,10 @@ module RStore
 
     def initialize path, all_options
       all_options        = all_options.dup
+      @path = path
       self.parse_options = all_options
       self.file_options  = all_options
       @options           = @parse_options.merge(@file_options)
-      @path = path
 
       raise ArgumentError, arg_error_message(@path, all_options) if all_options.size > 0
     end
