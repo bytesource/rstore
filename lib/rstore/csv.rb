@@ -143,6 +143,11 @@ module RStore
       Configuration.change_default_options(options)
     end
 
+    
+    def self.reset_default_options
+      Configuration.reset_default_options
+    end
+
 
   end
 end

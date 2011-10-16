@@ -13,7 +13,7 @@ describe RStore::CSV do
     info(adapter: 'mysql', 
          host:    'localhost', 
          user:    'root', 
-         password:'xxx')
+         password:'moinmoin')
   end
 
   class DataTable < RStore::BaseTable
@@ -74,6 +74,29 @@ describe RStore::CSV do
           DB[@name].all.should == 
             [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
              {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
+        end
+
+        context "changing default options" do
+
+          it "should store the data into the table without errors" do
+
+           RStore::CSV.change_default_options(:recursive => true) 
+
+            store = RStore::CSV.new do
+              from '../test_dir/dir_1'
+              to   'plastronics.data'
+              run
+            end
+
+            store.ran_once?.should == true
+
+            DB = PlastronicsDB.connect
+            DB[@name].all.should == 
+              [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
+               {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
+
+            RStore::CSV.reset_default_options
+          end
         end
       end
 
