@@ -31,7 +31,6 @@ module RStore
     attr_reader   :path
 
 
-
     def initialize path, options
       new_options  = options.dup
 
@@ -43,22 +42,6 @@ module RStore
       @parse_options = extract_with(Configuration.default_parse_options)
     end
 
-
-    #def options= new_options
-    #  result = new_options.dup.inject({}) do |acc, (option, value)|
-    #    if self.default_options.include?(option)
-    #      if self.valid_value?(option.value)
-    #        acc[option] = value
-    #        new_options.delete(option)
-    #      else
-    #        raise ArgumentError, "path #{@path}: '#{value}' (#{value.class}) is not a valid value for option #{option.inspect}"
-    #      end
-    #    end
-    #  acc
-    #  end
-
-    #  @options = result
-    #end
 
     def options= options
 
@@ -105,19 +88,6 @@ module RStore
     end
 
 
-
-    #def parse_options= new_options
-    #  new_settings = extract_options(new_options, Configuration.default_parse_options)
-    #  @parse_options = new_settings
-    #end
-
-
-    #def file_options= new_options
-    #  new_settings = extract_options(new_options, Configuration.default_file_options)
-    #  @file_options = Configuration.default_file_options.merge(new_settings)
-    #end
-
-
     def [] key
       target = instance_variables.find do |var|
         var.to_s.gsub(/@/,'').to_sym == key
@@ -130,51 +100,8 @@ module RStore
     end
 
 
-    
-
-
     # Helper methods
     # ------------------------------------------
-
-    #def extract_options provided_options, supported_options
-
-    #  provided_options_copy = provided_options.dup
-    #  supported_options = supported_options.keys
-
-    #  provided_options_copy.inject({}) do |extracted, (option, value)|
-    #    if supported_options.include?(option)
-    #      if Configuration.valid_value?(option, value)
-    #        extracted[option] = value 
-    #        provided_options.delete(option)
-    #      else
-    #        raise ArgumentError, "path #{@path}: '#{value}' (#{value.class}) is not a valid value for option #{option.inspect}"
-    #      end
-    #    end
-    #  extracted
-    #  end
-    #end
-
-        
-
-
-
-
-    #def extract_options default_options, new_options
-
-    #  new_options = new_options.keys
-
-    #  default_options.dup.inject({}) do |acc, (option, value)|
-    #    if new_options.include?(option)
-    #      if Configuration.valid_value?(option, value)
-    #        acc[option] = value 
-    #        default_options.delete(option)
-    #      end
-    #    else
-    #      raise ArgumentError, "path #{@path}: '#{value}' (#{value.class}) is not a valid value for option #{option.inspect}"
-    #    end
-    #  acc
-    #  end
-    #end
 
 
     def self.valid_value? option, value
