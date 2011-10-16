@@ -26,11 +26,15 @@ module RStore
     
 
     def initialize &block
-      @data_hash = {}
-      @data_array        = []
-      @database           = nil
-      @table              = nil
-      @ran_once           = false
+      @data_hash  = {}
+      @data_array = []
+      @database   = nil
+      @table      = nil
+
+      # Tracking method calls to #from, #to, and #run.
+      @from = false
+      @to   = false
+      @run  = false
 
       instance_eval(&block) if block_given?
 
@@ -40,12 +44,14 @@ module RStore
     def from source, options={}
       crawler = FileCrawler.new(source, :csv, options)
       @data_hash.merge!(crawler.data_hash)
+      @from = true
     end
 
 
-
     def to db_table
-      raise ArgumentError, "The name of the database and table have to be separated with a dot (.)" unless delimiter_correct?(db_table)
+      raise ArgumentError, "The name of the database and table have to be separated with a dot (.)"  unless delimiter_correct?(db_table)
+      raise Exception,     "At least one method 'from' has to be called before method 'to'"          unless @from == true
+
       db, tb = db_table.split('.')
 
       database = BaseDB.db_classes[db.to_sym]
@@ -56,13 +62,14 @@ module RStore
 
       @database = database
       @table    = table
+      @to       = true
     end
 
 
     def run
       return  if ran_once?   # Ignore subsequent calls to #run 
-      raise Exception, "Please specify at least one source file using the 'from' method" if @data_hash.empty?
-      raise Exception, "Please specify a valid database and table name using the 'to' method" if @database.nil? || @table.nil?
+      raise Exception, "At least one method 'from' has to be called before method 'run'"  unless @from == true
+      raise Exception, "Method 'to' has to be called before method 'run'"                 unless @to   == true
 
       @data_hash.each do |path, data|
         content = read_data(data)
@@ -80,7 +87,7 @@ module RStore
           end
         end
 
-        @ran_once = true
+        @run = true
       end
     end
 
@@ -135,7 +142,7 @@ module RStore
     end
 
     def ran_once?
-      @ran_once == true
+      @run == true
     end
 
 
