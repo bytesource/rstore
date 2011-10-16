@@ -84,7 +84,12 @@ module RStore
         raise ArgumentError, error_message unless valid_value?(option, value)
       end
 
-      @default_file_options = new_options
+      @default_options = new_options
+    end
+
+
+    def self.reset_default_options
+      @default_options = @default_file_options.merge(@default_parse_options)
     end
 
 

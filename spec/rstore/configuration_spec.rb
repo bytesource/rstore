@@ -81,7 +81,11 @@ describe RStore::Configuration do
           defaults = config.default_options
 
           config.change_default_options(options)
-          config.default_file_options.should == defaults.merge(options)
+          config.default_options.should == defaults.merge(options)
+
+          # reset default options
+          config.reset_default_options
+          config.default_options.should == defaults
         end
       end
 
