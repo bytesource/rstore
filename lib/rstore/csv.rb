@@ -88,6 +88,12 @@ module RStore
         end
 
         @run = true
+        message = <<-TEXT.gsub(/^\s+/, '')
+        ===============================
+        All data has been successfully inserted into table '#{database.name}.#{table.name}'"
+        ===============================
+        TEXT
+        puts message
       end
     end
 
