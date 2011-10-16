@@ -13,7 +13,7 @@ describe RStore::CSV do
     info(adapter: 'mysql', 
          host:    'localhost', 
          user:    'root', 
-         password:'moinmoin')
+         password:'xxx')
   end
 
   class DataTable < RStore::BaseTable
