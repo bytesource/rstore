@@ -4,6 +4,7 @@ require 'nokogiri'
 require 'rstore/data'
 require 'rstore/file_crawler'
 require 'rstore/converter'
+require 'rstore/configuration'
 require 'rstore/base_db'
 require 'rstore/base_table'
 require 'rstore/core_ext/string'
@@ -136,6 +137,12 @@ module RStore
     def ran_once?
       @ran_once == true
     end
+
+
+    def self.change_default_options options
+      Configuration.change_default_options(options)
+    end
+
 
   end
 end
