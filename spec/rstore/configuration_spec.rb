@@ -4,10 +4,10 @@ require 'spec_helper'
 
 describe RStore::Configuration do
 
-  parse_options = {row_sep: '\n', col_sep: ';', quote_char: "'", field_size_limit: nil, skip_blanks: true}
-  file_options  = {has_headers: true, selector: 'pre div.line'}  # removed :recursive
+  file_options  = {has_headers: true, selector: 'pre div.line'}  # :recursive not included
+  parse_options = {row_sep: '\n', col_sep: ';', quote_char: "'", field_size_limit: nil} # :skip_blanks not inlcuded
 
-  all_options   = parse_options.merge(file_options)
+  all_options   = file_options.merge(parse_options)
 
   path = '/home/sovonex/Desktop/temp/test.csv'
 
@@ -18,36 +18,23 @@ describe RStore::Configuration do
 
     context "when successfull" do
 
-      specify { config.parse_options.should == parse_options }
-      specify { config.file_options.should  == file_options.merge(:recursive => false) }
-      specify { config.options.should       == file_options.merge(:recursive => false).merge(parse_options) }
-      specify { config.path.should          == path }
+      # Always returns all options available, e.g. #file_options returns all file options, not just the ones passes on initialization.
 
-      specify { described_class.default_file_options.should  == {recursive: false, has_headers: true, selector: ''} }
-      specify { described_class.default_parse_options.should == {row_sep: :auto, col_sep: ",", quote_char: '"', 
-                                                                 field_size_limit: nil, skip_blanks: false} }
-      specify { described_class.default_options.should       == {:file_options  =>  described_class.default_file_options,
-                                                                 :parse_options =>  described_class.default_parse_options} }
+      specify { config.options.should        == file_options.merge(:recursive => false).merge(parse_options).merge(:skip_blanks => false) }
+      specify { config.file_options.should   == RStore::Configuration.default_file_options.merge(file_options) }
+      specify { config.parse_options.should  == RStore::Configuration.default_parse_options.merge(parse_options) }
+      specify { config.path.should           == path }
 
-      specify { config[:parse_options].should == parse_options }
-      specify { config[:file_options].should  == file_options.merge(:recursive => false) }
-      specify { config[:path].should  == path }
+      specify { config[:options].should       == file_options.merge(:recursive => false).merge(parse_options).merge(:skip_blanks => false) }
+      specify { config[:file_options].should  == RStore::Configuration.default_file_options.merge(file_options) }
+      specify { config[:parse_options].should == RStore::Configuration.default_parse_options.merge(parse_options) }
+      specify { config[:path].should          == path }
+      
       specify { lambda { config[:does_not_exist] }.should  raise_exception }
+
     end
 
-    context "when a file option is not given as a parameter" do
-      options = all_options.dup
-      options.delete(:recursive)
-      options.delete(:selector)
-
-      let(:config) { described_class.new(path, options) }
-
-      it "should return the default option" do
-        config.file_options.should == {:recursive=>false, :has_headers=>true, :selector => ''}
-
-      end
-    end
-
+    
     context "on failure" do
 
       context "when option hash contains unknown option keys" do
@@ -62,6 +49,7 @@ describe RStore::Configuration do
       end
 
       context "when a file option has the wrong value" do
+
         wrong_selector = all_options.merge(:selector => [])            # valid: String
         wrong_recursive = all_options.merge(:recursive => 'true')      # valid: true, false, nil
         wrong_has_headers = all_options.merge(:has_headers => 'false') # valid: true, false, nil
@@ -71,9 +59,9 @@ describe RStore::Configuration do
 
         it "should throw an exception" do
 
-          wrong_values.each do |options|
+          wrong_values.each do |option|
             lambda do
-              described_class.new(path, options)
+              described_class.new(path, option)
             end.should raise_exception(ArgumentError)
           end
         end
