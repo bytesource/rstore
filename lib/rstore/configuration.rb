@@ -92,7 +92,7 @@ module RStore
     end
 
 
-    def self.update_default_options options
+    def self.change_default_options options
       raise ArgumentError, "#{options} must be an instance of Hash" unless options.is_a?(Hash)
       new_options = Configuration.default_options.merge(options)
       raise ArgumentError, "#{options} contains unknown option key" if new_options.size > Configuration.default_options.size

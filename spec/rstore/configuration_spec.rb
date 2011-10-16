@@ -68,7 +68,7 @@ describe RStore::Configuration do
       end
     end
 
-    context "self.update_default_options" do
+    context "self.change_default_options" do
 
       let(:config) { described_class }
 
@@ -80,7 +80,7 @@ describe RStore::Configuration do
 
           defaults = config.default_options
 
-          config.update_default_options(options)
+          config.change_default_options(options)
           config.default_file_options.should == defaults.merge(options)
         end
       end
@@ -89,19 +89,19 @@ describe RStore::Configuration do
 
         it "should raise an exception if the parameter is not an instance of Hash" do
           lambda do
-            config.update_default_options([1,2,3])
+            config.change_default_options([1,2,3])
           end.should raise_exception(ArgumentError, /must be an instance of Hash/) 
         end
 
         it "should raise an exception if the parameter contains an unknown option key" do
           lambda do
-            config.update_default_options({selector: 'body', unknown: 'body'})
+            config.change_default_options({selector: 'body', unknown: 'body'})
           end.should raise_exception(ArgumentError, /contains unknown option key/)
         end
 
         it "should raise an exception if a key does not contain the correct value" do 
           lambda do 
-            config.update_default_options({selector: true})
+            config.change_default_options({selector: true})
           end.should raise_exception(ArgumentError, /is not a valid value for option/) 
         end
       end
