@@ -58,7 +58,7 @@ describe RStore::CSV do
 
     context "on success" do
 
-      context "given a directory" do
+      context "when given a directory" do
 
 
         it "should store the data into the table without errors" do
@@ -77,7 +77,29 @@ describe RStore::CSV do
              {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
         end
 
-        context "changing default options" do
+        context "when calling #to before #from" do
+
+          it "should store the data into the table without errors" do
+
+            store = RStore::CSV.new do
+              to   'plastronics.data'
+              from '../test_dir/dir_1', :recursive => true
+              run
+            end
+
+            store.ran_once?.should == true
+
+            DB = PlastronicsDB.connect
+            DB[@name].all.should == 
+              [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
+               {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
+          end
+        end
+
+
+
+
+        context "when changing default options" do
 
           it "should store the data into the table without errors" do
 
@@ -91,10 +113,16 @@ describe RStore::CSV do
 
             store.ran_once?.should == true
 
-            DB = PlastronicsDB.connect
-            DB[@name].all.should == 
+            store.connection do |db|
+              db[@name].all.should == 
               [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
                {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
+            end
+
+            #DB = PlastronicsDB.connect
+            #DB[@name].all.should == 
+            #  [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
+            #   {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
 
             RStore::CSV.reset_default_options
           end
@@ -114,6 +142,26 @@ describe RStore::CSV do
                 run
               end
             end.should raise_exception(Exception, /At least one method 'from' has to be called/)
+
+            DB = PlastronicsDB.connect
+            #run has no been called, so table 'plastronics.data' does not exist (as it had been dropped in #before(:each)
+            DB.create_table(@name, &DataTable.table_info) unless DB.table_exists?(@name) 
+            DB[@name].all.should be_empty 
+
+          end
+        end
+
+        context "when method #to is missing" do
+
+          it "should throw an exception" do
+
+            lambda do
+              RStore::CSV.new do
+                from '../test_dir/dir_1'
+                #to   'plastronics.data'
+                run
+              end
+            end.should raise_exception(Exception, /Method 'to' has to be called before method 'run'/)
 
             DB = PlastronicsDB.connect
             #run has no been called, so table 'plastronics.data' does not exist (as it had been dropped in #before(:each)

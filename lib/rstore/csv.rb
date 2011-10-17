@@ -50,7 +50,6 @@ module RStore
 
     def to db_table
       raise ArgumentError, "The name of the database and table have to be separated with a dot (.)"  unless delimiter_correct?(db_table)
-      raise Exception,     "At least one method 'from' has to be called before method 'to'"          unless @from == true
 
       db, tb = db_table.split('.')
 
@@ -140,6 +139,11 @@ module RStore
       if @database.connection_info.is_a?(Hash)
         Sequel::MySQL.convert_invalid_date_time = nil  if @database.connection_info[:adapter] == 'mysql'
       end
+    end
+
+
+    def connection &block
+      @database.connect &block
     end
     
     
