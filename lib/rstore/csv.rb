@@ -48,7 +48,29 @@ module RStore
     end
 
 
+    #def to db_table
+    #  raise ArgumentError, "The name of the database and table have to be separated with a dot (.)"  unless delimiter_correct?(db_table)
+
+    #  db, tb = db_table.split('.')
+
+    #  database = BaseDB.db_classes[db.to_sym]
+    #  table    = BaseTable.table_classes[tb.to_sym]
+
+    #  raise Exception, "Database '#{db}' not found"  if database.nil?
+    #  raise Exception, "Table '#{tb}' not found"     if table.nil?
+
+    #  @database = database
+    #  @table    = table
+    #  @to       = true
+    #end
+
     def to db_table
+      @database, @table = CSV.database_table(db_table)
+      @to       = true
+    end
+
+
+    def self.database_table db_table
       raise ArgumentError, "The name of the database and table have to be separated with a dot (.)"  unless delimiter_correct?(db_table)
 
       db, tb = db_table.split('.')
@@ -59,9 +81,7 @@ module RStore
       raise Exception, "Database '#{db}' not found"  if database.nil?
       raise Exception, "Table '#{tb}' not found"     if table.nil?
 
-      @database = database
-      @table    = table
-      @to       = true
+      [database, table]
     end
 
 
@@ -142,12 +162,17 @@ module RStore
     end
 
 
-    def connection &block
-      @database.connect &block
+    def self.connect_to db_table, &block
+      database, table = database_table(db_table)
+      database.connect do |db|
+        block.call(db, table)
+      end
     end
+
+    #RStore::CSV.connect('plastronics.data')
     
     
-    def delimiter_correct? name
+    def self.delimiter_correct? name
       !!(name =~ /^[^\.]+\.[^\.]+$/)
     end
 
