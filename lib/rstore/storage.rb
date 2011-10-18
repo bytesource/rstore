@@ -56,18 +56,13 @@ module RStore
         end
       rescue Exception => e
         logger = Logger.new(@data)
-        logger.log(@data.path, :store, e, row: @row_index)
+        logger.log(:store, e, row: @row_index)
         logger.error
       
       end
       @state = :stored
       @state
     end
-
-
-
-
-
   end
 end
 

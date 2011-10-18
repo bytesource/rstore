@@ -37,9 +37,10 @@ describe RStore::Storage do
   content = CSV.parse(csv).drop(1)
   schema  = DB.schema(:test)
   path    = '/home/sovonex/Desktop/my_file.csv'
+  options = RStore::Configuration.default_options
 
-  let(:data)      { RStore::Data.new(path, content, :parsed) }
-  let(:converter) { RStore::Converter.new(data, schema) }
+  let(:data)      { RStore::Data.new(path, content, :parsed, options) }
+  let(:converter) { RStore::Converter.new(data, DB, :test) }
 
   let(:storage)   { described_class.new(converter.convert, DB, :test) }
 
@@ -63,7 +64,6 @@ describe RStore::Storage do
            :time_col=>dt('16:30'),
            :boolean_col=>false}
 
-        RStore::Logger.error_queue.should be_empty
       end
     end
 
@@ -78,10 +78,11 @@ describe RStore::Storage do
 
   context :insert do
 
+
     context "on failure" do
 
-      data      =  RStore::Data.new(path, content, :parsed)
-      converter =  RStore::Converter.new(data, schema) 
+      data      =  RStore::Data.new(path, content, :parsed, options)
+      converter =  RStore::Converter.new(data, DB, :test) 
 
       validated_data = converter.convert
       pp validated_data.content[1][3]
@@ -95,15 +96,12 @@ describe RStore::Storage do
 
       it "should log the error and roll back the data already inserted from the current file" do
 
+        lambda do
         storage.insert
-        DB[:test].all.should == []
-        RStore::Logger.error_queue.should == 
-          {"/home/sovonex/Desktop/my_file.csv"=>
-           {:store=>
-            [{:error=>Sequel::InvalidValue,
-              :message=>"ArgumentError: invalid date",
-              :row=>2}]}}
+        end.should raise_exception(RStore::FileProcessingError, /row 3[^,]/)
 
+        DB[:test].all.should == []
+        
       end
     end
 
@@ -112,7 +110,6 @@ describe RStore::Storage do
 
       it "should insert all data into the database table" do
 
-        RStore::Logger.empty_error_queue
         storage.insert
         types = DB[:test].all[0].map do |k,v|
           v.class
@@ -130,7 +127,6 @@ describe RStore::Storage do
         #   :boolean_col=>nil}
         # [Fixnum, String, Fixnum, Float, Date, Time, Time, NilClass]
 
-        RStore::Logger.error_queue.should be_empty
 
       end
     end
