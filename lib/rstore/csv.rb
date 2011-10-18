@@ -118,17 +118,18 @@ module RStore
         #all.data.into_db(db, name) 
 
 
-        ready = @data_array.inject([]) do |acc, data|
-          acc << data.parse_csv.convert_fields(db, name)
-          acc
+        ready = @data_array.map do |data|
+          data.parse_csv.convert_fields(db, name)
         end
 
+        insert_all(ready, db, name)
 
-        db.transaction do 
-          ready.each do |data|
-            data.into_db(db, name)
-          end
-        end
+
+        #db.transaction do 
+        #  ready.each do |data|
+        #    data.into_db(db, name)
+        #  end
+        #end
 
         #db.transaction do   # outer transaction
         #  @data_array.each do |data|
@@ -145,6 +146,21 @@ module RStore
         puts message
       end
     end
+
+
+    def insert_all data_stream, database, name
+      database.transaction do 
+        data_stream.each do |data|
+          data.into_db(database, name)
+        end
+      end
+    end
+
+    private :insert_all
+
+        #db.transaction do   # outer transaction
+        #  @data_array.each do |data|
+        #    dat
 
 
     def read_data data_object

@@ -194,14 +194,6 @@ describe RStore::CSV do
 
         context "when the content of one of the csv files loaded cannot be parsed" do
 
-          # Directory struture:
-          # test_dir/
-          # -- csv.bad                # wrong file format (this file will not be loaded) 
-          # -- empty.csv              # not really empty, but content is not valid csv (the error will be reported)
-          # -- dir_1/
-          # -- -- dir_2/
-          # -- -- -- test.csv         # our target file (contents will be stored in database)
-
           # Directory structure: 
           # test_dir/
           # -- dir_a/ 
@@ -247,6 +239,120 @@ describe RStore::CSV do
             end.should raise_exception(ArgumentError, /yes/)
           end
         end
+      end
+    end
+  end
+
+  context :run do
+
+    context "on failure" do
+
+      before(:each) do
+        @name = DataTable.name 
+        DB    = PlastronicsDB.connect
+        DB.drop_table(@name)  if DB.table_exists?(@name)
+      end
+
+      it "should raise an exception, report the error and roll back any data already inserted into the database" do
+
+        store = RStore::CSV.new do
+          from '../test_dir/dir_1', :recursive => true
+          to   'plastronics.data'
+        end
+
+        db    = store.database.connect
+        store.create_table db
+        table = store.table
+        name  = table.name
+
+        options = RStore::Configuration.default_options
+
+        # Mocking up a Data objects with converted content
+        content = [
+          [["string1", 1, 1.12], ["string2", 2, 2.22]],   # correctly converted content
+          [["string1", 1, 1.12], ["string2", 2, 2.22]],   # correctly converted content
+          [["string1", 1, 1.12], ["string2", 2, :error]]] # Sequel will throw an exception on :error
+
+        data_array = content.map do |csv|
+          RStore::Data.new('dummy_path.csv', csv, :converted, options)
+        end
+
+        #lambda do
+        #  store.send(:insert_all, data_array, db, name)
+        #end.should raise_exception(RStore::FileProcessingError)
+
+        #RStore::CSV.connect_to('plastronics.data') do |db, table|
+        #  db[table.name].all.should == nil
+        #end
+
+        prepared_content = 
+          [{:col1=>"string1", :col2=>1, :col3=>1.12}, 
+           {:col1=>"string2", :col2=>2, :col3=>2.22}, 
+           {:col1=>"string3", :col2=>1, :col3=>1.12}, 
+           {:col1=>"string4", :col2=>2, :col3=>2.22}, 
+           {:col1=>"string5", :col2=>2, :col3=>:invalid}, 
+           {:col1=>"string6", :col2=>1, :col3=>1.12}]
+
+
+        DB = Sequel.connect(adapter: 'mysql', 
+                            host:    'localhost', 
+                            database:'plastronics', 
+                            user:    'root', 
+                            password:'moinmoin')
+
+
+        unless DB.table_exists?(:data)
+          DB.create_table(:data) do
+            primary_key :id, :allow_null => false
+            String      :col1
+            Integer     :col2
+            Float       :col3
+          end
+        end
+
+        dataset = DB[:data]
+
+        lambda do
+          DB.transaction do
+            dataset.insert(prepared_content[0])
+            dataset.insert(prepared_content[1])
+            dataset.insert(prepared_content[4])
+          end
+        end.should raise_exception  # OK
+
+        DB[:data].all.should == []
+        # Result:
+        # [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12}, 
+        # {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
+        #
+        # Failure/Error: DB[:data].all.should == []
+        # expected: []
+        # got: [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12}, 
+        # {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
+
+
+
+
+
+
+        #RStore::CSV.connect_to('plastronics.data') do |db, table|
+        #  name    = table.name
+        #  dataset = db[name]
+        #  lambda do
+        #    db.transaction do
+        #      dataset.insert(prepared_content[0])
+        #      dataset.insert(prepared_content[1])
+        #      dataset.insert(prepared_content[4])
+        #      #prepared_content.each do |row|
+        #      #  dataset.insert(row)
+        #      #end
+        #    end
+        #  end.should raise_exception
+
+        #  db[name].all.should == nil
+        #end
+
+
       end
     end
   end
