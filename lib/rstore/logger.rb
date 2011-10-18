@@ -113,7 +113,7 @@ module RStore
 
 
     def with_headers?
-      @data.options[:file_options][:has_headers]
+      @data.options[:has_headers]
     end
 
   end
