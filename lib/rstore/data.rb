@@ -21,7 +21,7 @@ module RStore
 
     def initialize path, content, state, options
       error_message = "#{path}: The following options are not valid as an argument to #{self.class}:\n#{options}"
-      raise ArgumentError, error_message  unless valid_options?(options) 
+      raise ArgumentError, error_message  unless options.is_a?(Hash) 
       @path      = path
       @content   = content
       self.state = state
@@ -87,20 +87,20 @@ module RStore
       KnownStates.map { |s| s.inspect }.join(', ')
     end
 
-    # It is easy to pass in the the wrong options, so although the following implementation
-    # might look quite ridicilous, it really helps avoid messing things up internally.
-    def valid_options? options
-      if options
-        if options.is_a?(Hash)
-          if options[:file_options] && options[:parse_options]
-            if options[:file_options].is_a?(Hash) && options[:parse_options].is_a?(Hash)
-              return true
-            end
-          end
-        end
-      end
-      false
-    end
+    ## It is easy to pass in the the wrong options, so although the following implementation
+    ## might look quite ridicilous, it really helps avoid messing things up internally.
+    #def valid_options? options
+    #  if options
+    #    if options.is_a?(Hash)
+    #      if options[:file_options] && options[:parse_options]
+    #        if options[:file_options].is_a?(Hash) && options[:parse_options].is_a?(Hash)
+    #          return true
+    #        end
+    #      end
+    #    end
+    #  end
+    #  false
+    #end
 
   end
 end 
