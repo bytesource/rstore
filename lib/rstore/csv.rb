@@ -100,11 +100,41 @@ module RStore
         create_table(db)
         name = @table.name
 
-        db.transaction do   # outer transaction
-          @data_array.each do |data|
-            data.parse_csv.convert_fields(db, name).into_db(db, name)
+        ## The following is a dirty hack to make the transaction work the way I want, that is:
+        ## Either ALL data from all files is inserted into the database or none.
+        #batch_content = @data_array.inject([]) do |acc, data|
+
+        #  data.parse_csv.convert_fields(db, name).content.each do |row|
+        #    acc << row
+        #  end
+
+        #  acc
+        #end
+
+
+        ## The Data class had been designed to work with the content of a single file.
+        ## Here we are working with batch data, so the path information is lost.
+        #all_data = Data.new('all_data.csv', batch_content, :converted, @data_array[0].options)
+        #all.data.into_db(db, name) 
+
+
+        ready = @data_array.inject([]) do |acc, data|
+          acc << data.parse_csv.convert_fields(db, name)
+          acc
+        end
+
+
+        db.transaction do 
+          ready.each do |data|
+            data.into_db(db, name)
           end
         end
+
+        #db.transaction do   # outer transaction
+        #  @data_array.each do |data|
+        #    data.parse_csv.convert_fields(db, name).into_db(db, name)
+        #  end
+        #end
 
         @run = true
         message = <<-TEXT.gsub(/^\s+/, '')

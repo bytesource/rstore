@@ -13,7 +13,7 @@ describe RStore::CSV do
     info(adapter: 'mysql', 
          host:    'localhost', 
          user:    'root', 
-         password:'moinmoin')
+         password:'xxx')
   end
 
   class DataTable < RStore::BaseTable
@@ -202,21 +202,34 @@ describe RStore::CSV do
           # -- -- dir_2/
           # -- -- -- test.csv         # our target file (contents will be stored in database)
 
+          # Directory structure: 
+          # test_dir/
+          # -- dir_a/ 
+          # -- -- test.csv            # csv file with valid content
+          # -- -- dir_b/
+          # -- -- -- dir_c/
+          # -- -- -- not_valid.csv    # csv file whose's content is not valid
+
+          #NOTE: The valid data of 'test.csv' will be inserted into the database BEFORE the error in 'not_valid.csv'
+          #      is encountered. Therefore a roll-back has to set the state of the database to before RStore::CSV was called.  
+
           it "should raise an exception, report the error and roll back any data already inserted into the database" do
 
-            @error_path = "#{File.expand_path('../test_dir/empty.csv')}"
+            @error_path = "#{File.expand_path('../test_dir/dir_a/dir_b/dir_c/not_valid.csv')}"
 
             lambda do
               RStore::CSV.new do
-                from '../test_dir/', :recursive => true
+                from '../test_dir/dir_a/', :recursive => true
                 to   'plastronics.data'
                 run
               end
             end.should raise_exception(RStore::FileProcessingError, /#{@error_path}/)
 
 
-            DB = PlastronicsDB.connect
-            DB[@name].all.should be_empty 
+            RStore::CSV.connect_to('plastronics.data') do |db, table|
+              name = table.name
+              db[name].all.should be_empty
+            end
 
           end
         end
