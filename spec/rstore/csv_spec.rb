@@ -13,7 +13,7 @@ describe RStore::CSV do
     info(adapter: 'mysql', 
          host:    'localhost', 
          user:    'root', 
-         password:'xxx')
+         password:'moinmoin')
   end
 
   class DataTable < RStore::BaseTable
@@ -25,7 +25,6 @@ describe RStore::CSV do
     end
   end
 
-  # WGCI,"",CJV,774336218,16654904,"=""5772776577792""",79/99/72,5432103,73164359,4,ZG727999.PHN,E9792-,79/75/72,79/75/72,.77
 
   class FasterCSVTable < RStore::BaseTable
     create do
@@ -97,8 +96,28 @@ describe RStore::CSV do
           end
         end
 
+        context "when calling #run more than once on the same instance" do
 
+          it "should store the data into the table only once" do
 
+            store = RStore::CSV.new do
+              to   'plastronics.data'
+              from '../test_dir/dir_1', :recursive => true
+              run
+              run      # calling #run a second time
+            end
+
+            store.run  # calling #run a third time
+
+            store.ran_once?.should == true
+
+            RStore::CSV.connect_to('plastronics.data') do |db, table|
+              db[table.name].all.should == 
+                [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
+                 {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
+            end
+          end
+        end
 
         context "when changing default options" do
 
