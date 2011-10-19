@@ -50,7 +50,8 @@ module RStore
             @row_index = row_index
             dataset.insert(row)
             # Sequel often only throws an exception when retrieving an incorrect record, 
-            # so we return the last record inserted to trigger any such exceptions.
+            # The following therefore is to catch invalid data of data types that are
+            # not checked by RStore::Converter 
             dataset.order(@primary_key).last
           end
         end
