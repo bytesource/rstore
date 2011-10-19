@@ -48,22 +48,6 @@ module RStore
     end
 
 
-    #def to db_table
-    #  raise ArgumentError, "The name of the database and table have to be separated with a dot (.)"  unless delimiter_correct?(db_table)
-
-    #  db, tb = db_table.split('.')
-
-    #  database = BaseDB.db_classes[db.to_sym]
-    #  table    = BaseTable.table_classes[tb.to_sym]
-
-    #  raise Exception, "Database '#{db}' not found"  if database.nil?
-    #  raise Exception, "Table '#{tb}' not found"     if table.nil?
-
-    #  @database = database
-    #  @table    = table
-    #  @to       = true
-    #end
-
     def to db_table
       @database, @table = CSV.database_table(db_table)
       @to       = true
@@ -100,42 +84,11 @@ module RStore
         create_table(db)
         name = @table.name
 
-        ## The following is a dirty hack to make the transaction work the way I want, that is:
-        ## Either ALL data from all files is inserted into the database or none.
-        #batch_content = @data_array.inject([]) do |acc, data|
-
-        #  data.parse_csv.convert_fields(db, name).content.each do |row|
-        #    acc << row
-        #  end
-
-        #  acc
-        #end
-
-
-        ## The Data class had been designed to work with the content of a single file.
-        ## Here we are working with batch data, so the path information is lost.
-        #all_data = Data.new('all_data.csv', batch_content, :converted, @data_array[0].options)
-        #all.data.into_db(db, name) 
-
-
-        ready = @data_array.map do |data|
+        prepared_data_array = @data_array.map do |data|
           data.parse_csv.convert_fields(db, name)
         end
 
-        insert_all(ready, db, name)
-
-
-        #db.transaction do 
-        #  ready.each do |data|
-        #    data.into_db(db, name)
-        #  end
-        #end
-
-        #db.transaction do   # outer transaction
-        #  @data_array.each do |data|
-        #    data.parse_csv.convert_fields(db, name).into_db(db, name)
-        #  end
-        #end
+        insert_all(prepared_data_array, db, name)
 
         @run = true
         message = <<-TEXT.gsub(/^\s+/, '')
@@ -149,7 +102,7 @@ module RStore
 
 
     def insert_all data_stream, database, name
-      database.transaction do 
+      database.transaction do  # outer transaction
         data_stream.each do |data|
           data.into_db(database, name)
         end
@@ -157,10 +110,6 @@ module RStore
     end
 
     private :insert_all
-
-        #db.transaction do   # outer transaction
-        #  @data_array.each do |data|
-        #    dat
 
 
     def read_data data_object
@@ -197,14 +146,19 @@ module RStore
 
       name = @table.name
 
+      if @database.connection_info.is_a?(Hash)
+        if @database.connection_info[:adapter] == 'mysql'
+          # http://sequel.rubyforge.org/rdoc/files/doc/release_notes/2_10_0_txt.html
+          Sequel::MySQL.default_engine = 'InnoDB'
+          # http://stackoverflow.com/questions/1671401/unable-to-output-mysql-tables-which-involve-dates-in-sequel
+          Sequel::MySQL.convert_invalid_date_time = nil 
+        end
+      end
+
       unless db.table_exists?(name)
         db.create_table(name, &@table.table_info)
       end
 
-      # http://stackoverflow.com/questions/1671401/unable-to-output-mysql-tables-which-involve-dates-in-sequel
-      if @database.connection_info.is_a?(Hash)
-        Sequel::MySQL.convert_invalid_date_time = nil  if @database.connection_info[:adapter] == 'mysql'
-      end
     end
 
 
@@ -215,7 +169,6 @@ module RStore
       end
     end
 
-    #RStore::CSV.connect('plastronics.data')
     
     
     def self.delimiter_correct? name
