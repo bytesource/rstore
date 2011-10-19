@@ -85,11 +85,8 @@ describe RStore::Storage do
       converter =  RStore::Converter.new(data, DB, :test) 
 
       validated_data = converter.convert
-      pp validated_data.content[1][3]
-      puts "--------------------"
       validated_data.content[1][3] = 'xxx'   # 4 -> 'xxx'
-      pp validated_data.content[1][3]
-      validated_data_with_error = validated_data
+      validated_data_with_error    = validated_data
 
       let(:storage)   { described_class.new(validated_data_with_error, DB, :test) }
 
