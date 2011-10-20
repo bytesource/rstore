@@ -13,7 +13,7 @@ describe RStore::CSV do
     info(adapter: 'mysql', 
          host:    'localhost', 
          user:    'root', 
-         password:'xxx')
+         password:'moinmoin')
   end
 
   class DataTable < RStore::BaseTable
@@ -142,6 +142,29 @@ describe RStore::CSV do
             RStore::CSV.reset_default_options
           end
         end
+
+        context "when using more than one #from function" do
+
+          it "should store the data from all files into the table without errors" do
+
+            store = RStore::CSV.new do
+              from '../test_dir/dir_1', :recursive => true
+              from '../test_dir/dir_a/test.csv'
+              to   'plastronics.data'
+              run
+            end
+
+            store.ran_once?.should == true
+
+            RStore::CSV.connect_to('plastronics.data') do |db, table|
+              db[table.name].all.should == 
+                [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
+                 {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22},
+                 {:id=>3, :col1=>"string1", :col2=>1, :col3=>1.12},
+                 {:id=>4, :col1=>"string2", :col2=>2, :col3=>2.22}]
+            end
+          end
+        end
       end
 
       context "on failure" do
@@ -243,7 +266,7 @@ describe RStore::CSV do
     end
   end
 
-  context :run do
+  context :insert_all do
 
     context "on failure" do
 
@@ -273,85 +296,46 @@ describe RStore::CSV do
           [["string1", 1, 1.12], ["string2", 2, 2.22]],   # correctly converted content
           [["string1", 1, 1.12], ["string2", 2, :error]]] # Sequel will throw an exception on :error
 
-        data_array = content.map do |csv|
-          RStore::Data.new('dummy_path.csv', csv, :converted, options)
-        end
-
-        #lambda do
-        #  store.send(:insert_all, data_array, db, name)
-        #end.should raise_exception(RStore::FileProcessingError)
-
-        #RStore::CSV.connect_to('plastronics.data') do |db, table|
-        #  db[table.name].all.should == nil
-        #end
-
-        prepared_content = 
-          [{:col1=>"string1", :col2=>1, :col3=>1.12}, 
-           {:col1=>"string2", :col2=>2, :col3=>2.22}, 
-           {:col1=>"string3", :col2=>1, :col3=>1.12}, 
-           {:col1=>"string4", :col2=>2, :col3=>2.22}, 
-           {:col1=>"string5", :col2=>2, :col3=>:invalid}, 
-           {:col1=>"string6", :col2=>1, :col3=>1.12}]
-
-
-        DB = Sequel.connect(adapter: 'mysql', 
-                            host:    'localhost', 
-                            database:'plastronics', 
-                            user:    'root', 
-                            password:'moinmoin')
-
-
-        unless DB.table_exists?(:data)
-          DB.create_table(:data) do
-            primary_key :id, :allow_null => false
-            String      :col1
-            Integer     :col2
-            Float       :col3
+          data_array = content.map do |csv|
+            RStore::Data.new('dummy_path.csv', csv, :converted, options)
           end
-        end
 
-        dataset = DB[:data]
+          prepared_content = 
+            [{:col1=>"string1", :col2=>1, :col3=>1.12}, 
+             {:col1=>"string2", :col2=>2, :col3=>2.22}, 
+             {:col1=>"string3", :col2=>1, :col3=>1.12}, 
+             {:col1=>"string4", :col2=>2, :col3=>2.22}, 
+             {:col1=>"string5", :col2=>2, :col3=>:invalid}, 
+             {:col1=>"string6", :col2=>1, :col3=>1.12}]
 
-        lambda do
-          DB.transaction do
-            dataset.insert(prepared_content[0])
-            dataset.insert(prepared_content[1])
-            dataset.insert(prepared_content[4])
+
+          DB = Sequel.connect(adapter: 'mysql', 
+                              host:    'localhost', 
+                              database:'plastronics', 
+                              user:    'root', 
+                              password:'moinmoin')
+
+
+          unless DB.table_exists?(:data)
+            DB.create_table(:data) do
+              primary_key :id, :allow_null => false
+              String      :col1
+              Integer     :col2
+              Float       :col3
+            end
           end
-        end.should raise_exception  # OK
 
-        DB[:data].all.should == []
-        # Result:
-        # [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12}, 
-        # {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
-        #
-        # Failure/Error: DB[:data].all.should == []
-        # expected: []
-        # got: [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12}, 
-        # {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
+          dataset = DB[:data]
 
+          lambda do
+            DB.transaction do
+              dataset.insert(prepared_content[0])
+              dataset.insert(prepared_content[1])
+              dataset.insert(prepared_content[4])
+            end
+          end.should raise_exception  # OK
 
-
-
-
-
-        #RStore::CSV.connect_to('plastronics.data') do |db, table|
-        #  name    = table.name
-        #  dataset = db[name]
-        #  lambda do
-        #    db.transaction do
-        #      dataset.insert(prepared_content[0])
-        #      dataset.insert(prepared_content[1])
-        #      dataset.insert(prepared_content[4])
-        #      #prepared_content.each do |row|
-        #      #  dataset.insert(row)
-        #      #end
-        #    end
-        #  end.should raise_exception
-
-        #  db[name].all.should == nil
-        #end
-
+          DB[:data].all.should == []
 
       end
     end
