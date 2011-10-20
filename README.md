@@ -32,7 +32,7 @@ end
 
 # 2)
 # Store table information in a subclass of RStore::BaseTable
-# Naming convention: name => NameDB
+# Naming convention: name => NameTable
 class ProductsTable < RStore::BaseTable
 
   create do
