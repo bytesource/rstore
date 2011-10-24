@@ -2,6 +2,8 @@
 
 ### A library for batch processing csv files into a database 
 
+Uses the CSV library for parsing and the fantastic Sequel ORM for database managment
+
 #### Sample Usage
 
 ``` ruby
@@ -55,25 +57,26 @@ end
 
 # 3) 
 # Enter csv data into the database
-# The 'from' method accepts a path to a file or directory as well as an URL.
-# The 'to' metthod accepts a string of the form 'db_name.table_name'
+# The 'from' method accepts a path to a directory, file, or URL.
+# The 'to' metthod accepts a string of the form 'db_name.table_name'.
 RStore::CSV.new do
-  from '../easter/children', :recursive => true
-  from '../christmas/children/toys.csv'
-  to   'company.products'
-  run
+  from '../easter/children', :recursive => true                   # select a directory or
+  from '../christmas/children/toys.csv'                           # file, or
+  from 'www.example.com/sweets.csv', :selector => 'pre div.line'  # URL
+  to   'company.products'                                         # provide database and table name
+  run                                                             # run the program
 end
+
+
 
 
 # 4)
 # Optional convenience method enabling you to use
 # the main features of Sequel ODM with on your database table
-RStore::CSV.connect_to('company.products') do |db, table|
-  name = table.name
-
-  db[name].all                                         # fetch everything (sample output below)
-  db[name].filter(:id => 2).update(:on_stock => true)  # update entry
-  db[name].filter(:id => 3).delete                     # delete entry
+RStore::CSV.connect_to('company.products') do |db, table|  # db = Sequel database object, table = RStore BaseTable object
+  db[table.name].all                                             # fetch everything (sample output below)
+  db[table.name].filter(:id => 2).update(:on_stock => true)      # update entry
+  db[table.name].filter(:id => 3).delete                         # delete entry
 end
 
 ```
@@ -84,6 +87,36 @@ end
 * Customizable using additional options
 * Validation of field values. At the moment validation is supported for the following types:
   String, Integer, Float, Date, DateTime, Time, Boolean 
+* Descriptive error messages pointing helping you to find any invalid data quickly.
+* Either all data from all files is inserted or no data.
+
+* Only write your database and table classes once
+
+### Available Options
+
+RStore::CSV uses two kinds of options, file options and parse options
+
+**File Options**
+File options are used when fetching csv data from a source. The following options are recognized:
+*Option*          *Default*   *Description*
+:has_headers        true      When set to false, the first line of a file is processed as data, otherwise it is discarded.
+:recursive          false     When set to true and a directory is given, recursively search for files. Non-csv files are skipped. 
+:selector           ''        Mandatory css selector a URL is given. For more details please see the [Nokogiri documentation](http://nokogiri.org)
+
+**Parse Options**
+Parse options are arguments to CSV.parse. The following options are recognized:
+*Option*          *Default*   *Description*
+:col_sep            ","       The String placed between each field.
+:row_sep            :auto     The String appended to the end of each row.
+:quote_char         '"'       The character used to quote fields.
+:field_size_limit   nil       The maximum size CSV will read ahead looking for the closing quote for a field.
+:skip_blanks        false     When set to a true value, CSV will skip over any rows with no content.
+
+More information on these options can be found at [CSV standard library documentation](http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html#method-c-new)
+
+
+
+
 
 #### Database Requirements
 
