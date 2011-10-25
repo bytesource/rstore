@@ -20,17 +20,16 @@ Uses the CSV library for parsing and Sequel ORM for database managment.
 
 Sample csv file
 
-> "product","quantity","price","created_at","min_demand","max_demand","on_stock"
-> "toy1","1","1.12","2011-2-4","1:30","1:30am","true"
-> "toy2","2","2.22","2012/2/4","2:30","2:30pm","false
-> "toy3","3","3.33","2013/2/4","3:30","3:30 a.m.","True
-> "toy4","4",,,"4:30","4:30 p.m.","False"
-> "toy4","5","5.55","2015-2-4","5:30","5:30AM","1"
-> "toy5","6","6.66","2016/2/4","6:30","6:30 P.M.","0"
-> "toy6","7","7.77",,,,"false"
+> "product","quantity","price","created_at","min_demand","max_demand","on_stock"  
+> "toy1","1","1.12","2011-2-4","1:30","1:30am","true"  
+> "toy2","2","2.22","2012/2/4","2:30","2:30pm","false  
+> "toy3","3","3.33","2013/2/4","3:30","3:30 a.m.","True  
+> "toy4","4",,,"4:30","4:30 p.m.","False"  
+> "toy4","5","5.55","2015-2-4","5:30","5:30AM","1"  
+> "toy5","6","6.66","2016/2/4","6:30","6:30 P.M.","0"  
+> "toy6","7","7.77",,,,"false"  
 
-1)
-Load gem
+1) Load gem
 
 ``` ruby
 
@@ -38,8 +37,7 @@ require 'rstore/csv'
 
 ```
 
-2)
-Store database information in a subclass of `RStore::BaseDB`
+2) Store database information in a subclass of `RStore::BaseDB`  
 Naming convention: name => NameDB
 
 ``` ruby
@@ -55,8 +53,7 @@ end
 
 ```
 
-3)
-Store table information in a subclass of `RStore::BaseTable`
+3) Store table information in a subclass of `RStore::BaseTable`  
 Naming convention: name => NameDB
 
 ``` ruby
@@ -78,16 +75,14 @@ end
 
 ```
 
-Note: 
-
-You can either put the database and table class definitions in the same file or store them 
+**Note**:  
+You can either put the database and table class definitions in the same file or store them  
 anywhere you like just `require` them when you need them.
 
 
-4) 
-Enter csv data into the database
-The `from` method accepts a path to a file or directory as well as an URL.
-The `to` metthod accepts a string of the form *db_name.table_name*
+4) Enter csv data into the database  
+The `from` method accepts a path to a file or directory as well as an URL.  
+The `to` metthod accepts a string of the form *db_name.table_name*  
 
 ```ruby
 RStore::CSV.new do
@@ -100,7 +95,7 @@ end
 
 ```
 
-Optional convenience method enabling you to use
+Optional convenience method enabling you to use  
 the main features of Sequel ODM with on your database table
 
 ```ruby
@@ -134,18 +129,26 @@ Output of `db[table.name].all[3]`
 **File Options**
 File options are used for fetching csv data from a source. The following options are recognized:
 
-* **:has_headers**, default: *true*. When set to false, the first line of a file is processed as data, otherwise it is discarded.
-* **:recursive**, default: *false*. When set to true and a directory is given, recursively search for files. Non-csv files are skipped. 
-* **:selector**, default: *''*. Mandatory css selector with an URL. For more details please see the [Nokogiri documentation](http://nokogiri.org)
+* **:has_headers**, default `true` 
+    * When set to false, the first line of a file is processed as data, otherwise it is discarded.
+* **:recursive**, default `false` 
+    * When set to true and a directory is given, recursively search for files. Non-csv files are skipped. 
+* **:selector**, default `""` 
+    * Mandatory css selector with an URL. For more details please see the [Nokogiri documentation](http://nokogiri.org)
 
 **Parse Options**
 Parse options are arguments to `CSV::parse`. The following options are recognized:
 
-* **:col_sep**            ","       The String placed between each field.
-* **:row_sep**            :auto     The String appended to the end of each row.
-* **:quote_char**         '"'       The character used to quote fields.
-* **:field_size_limit**   nil       The maximum size CSV will read ahead looking for the closing quote for a field.
-* **:skip_blanks**        false     When set to a true value, CSV will skip over any rows with no content.
+* **:col_sep**, default `","`
+    * The String placed between each field.
+* **:row_sep**, default `:auto`
+    * The String appended to the end of each row.
+* **:quote_char**, default `'"'`
+    * The character used to quote fields.
+* **:field_size_limit**, default `nil`
+    * The maximum size CSV will read ahead looking for the closing quote for a field.
+* **:skip_blanks**, default `false`
+    * When set to a true value, CSV will skip over any rows with no content.
 
 More information on these options can be found at [CSV standard library documentation](http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html#method-c-new)
 
