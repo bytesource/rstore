@@ -6,15 +6,17 @@ Uses the CSV library for parsing and Sequel ORM for database managment.
 
 ### Special Features
 
-* Batch processing of csv files
-* Fetches data from different sources: files, directories, URLs
-* Customizable using additional options (see section *Available Options* below for details)
-* Validation of field values. At the moment validation of the following types is supported:
-  * String, Integer, Float, Date, DateTime, Time, Boolean 
-* Descriptive error messages pointing helping you to find any invalid data quickly.
-* Safe transactions: Either all data of all files is inserted or none.
+* **Batch processing** of csv files
+* Fetches data from different sources: **files, directories, URLs**
+* **Customizable** using additional options (also see section *Available Options*)
+* **Validation of field values**. At the moment validation of the following types is supported:
+  * `String`, `Integer`, `Float`, `Date`, `DateTime`, `Time`, `Boolean` 
+* **Descriptive error messages** pointing helping you to find any invalid data quickly.
+* **Safe transactions**: Either all data of all files is inserted or none (also see section *Database Requirements*)
 * You only need to write your database and table classes once. After that, just `require` them.
 
+
+One insert per instance!!!
 
 ## Sample Usage
 
