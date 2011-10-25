@@ -126,28 +126,28 @@ Output of `db[table.name].all[3]`
 
 `RStore::CSV#from` accepts two kinds of options, file options and parse options.
 
-**File Options**
+**File Options**  
 File options are used for fetching csv data from a source. The following options are recognized:
 
-* **:has_headers**, default `true` 
+* **:has_headers**, default: `true` 
     * When set to false, the first line of a file is processed as data, otherwise it is discarded.
-* **:recursive**, default `false` 
+* **:recursive**, default: `false` 
     * When set to true and a directory is given, recursively search for files. Non-csv files are skipped. 
-* **:selector**, default `""` 
+* **:selector**, default: `""` 
     * Mandatory css selector with an URL. For more details please see the [Nokogiri documentation](http://nokogiri.org)
-
-**Parse Options**
+  
+**Parse Options**  
 Parse options are arguments to `CSV::parse`. The following options are recognized:
 
-* **:col_sep**, default `","`
+* **:col_sep**, default: `","`
     * The String placed between each field.
-* **:row_sep**, default `:auto`
+* **:row_sep**, default: `:auto`
     * The String appended to the end of each row.
-* **:quote_char**, default `'"'`
+* **:quote_char**, default: `'"'`
     * The character used to quote fields.
-* **:field_size_limit**, default `nil`
+* **:field_size_limit**, default: `nil`
     * The maximum size CSV will read ahead looking for the closing quote for a field.
-* **:skip_blanks**, default `false`
+* **:skip_blanks**, default: `false`
     * When set to a true value, CSV will skip over any rows with no content.
 
 More information on these options can be found at [CSV standard library documentation](http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html#method-c-new)
