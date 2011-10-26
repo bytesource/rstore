@@ -19,7 +19,7 @@ Uses [CSV][1] for parsing, [Nokogiri][2] for URL handling, and [Sequel][3] ORM f
 * Specify your database and table classes once, then just `require` them when needed.  
 * **Safe and transparent data storage**: 
   * Using database transactions: Either all files are inserted or none (also see section *Database Requirements*)  
-  * The `run` method can only be run once on a single instance of `RStore::CSV` to avoid double entries  
+  * To avoid double entry of data, the `run` method can only be run once on a single instance of `RStore::CSV`.
 
 
 ## Sample Usage
@@ -164,9 +164,11 @@ More information on these options can be found at [CSV standard library document
 ## Database Requirements
 
 1. Expects the database table to have an addition column storing an auto-incrementing primary key
-2. Requires the database to support transactions:
-    Most other database platforms support transactions natively.
-    In MySQL, you'll need to be running InnoDB or BDB table types rather than the more common MyISAM. 
+2. Requires the database to support transactions:  
+   Most other database platforms support transactions natively.  
+   In MySQL, you'll need to be running `InnoDB` or `BDB` table types rather than the more common `MyISAM`.  
+   If you are using MySQL and the table has not been created yet, RStore::CSV will take care of using the  
+   correct table type upon creation.
 
 
 
