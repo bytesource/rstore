@@ -1,22 +1,26 @@
 # RStore 
 
-### A library for batch processing csv files into a database
+### A library for batch storage of csv data into a database
 
-Uses the CSV library for parsing and Sequel ORM for database managment.
+Uses [CSV][1] for parsing, [Nokogiri][2] for URL handling, and [Sequel][3] ORM for database management.
+
+[1]: http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html
+[2]: http://sequel.rubyforge.org/
+[3]: http://nokogiri.org/
 
 ### Special Features
 
-* **Batch processing** of csv files
-* Fetches data from different sources: **files, directories, URLs**
-* **Customizable** using additional options (also see section *Available Options*)
-* **Validation of field values**. At the moment validation of the following types is supported:
-  * `String`, `Integer`, `Float`, `Date`, `DateTime`, `Time`, `Boolean` 
-* **Descriptive error messages** pointing helping you to find any invalid data quickly.
-* **Safe transactions**: Either all data of all files is inserted or none (also see section *Database Requirements*)
-* You only need to write your database and table classes once. After that, just `require` them.
+* **Batch processing** of csv files  
+* Fetches data from different sources: **files, directories, URLs**  
+* **Customizable** using additional options (also see section *Available Options*)  
+* **Validation of field values**. At the moment validation of the following types is supported:  
+  * `String`, `Integer`, `Float`, `Date`, `DateTime`, `Time`, and `Boolean` 
+* **Descriptive error messages** pointing helping you to find any invalid data quickly.  
+* Specify your database and table classes once, then just `require` them when needed.  
+* **Safe and transparent data storage**: 
+  * Using database transactions: Either all files are inserted or none (also see section *Database Requirements*)  
+  * The `run` method can only be run once on a single instance of `RStore::CSV` to avoid double entries  
 
-
-One insert per instance!!!
 
 ## Sample Usage
 
@@ -47,10 +51,11 @@ class CompanyDB < RStore::BaseDB
 
   # Same as Sequel.connect, except that you don't need to
   # provide the :database key.
-  connect(:adapter  => 'mysql', 
-          :host     => 'localhost',
-          :user     => 'root',
-          :password => 'xxx')
+  info(:adapter  => 'mysql', 
+       :host     => 'localhost',
+       :user     => 'root',
+       :password => 'xxx')
+
 end
 
 ```
@@ -61,7 +66,8 @@ Naming convention: name => NameDB
 ``` ruby
 class ProductsTable < RStore::BaseTable
 
-  # Same as #create in Sequel
+  # Specify the database table the same way
+  # you do in Sequel
   create do
     primary_key :id, :allow_null => false
     String      :product
@@ -97,15 +103,15 @@ end
 
 ```
 
-Optional convenience method enabling you to use  
-the main features of Sequel ODM with on your database table
+There is also a convenience method enabling you to use  
+all of [Sequels query methods](http://sequel.rubyforge.org/rdoc/files/doc/querying_rdoc.html)
 
-```ruby
-RStore::CSV.connect_to('company.products') do |db, table|    # db = Sequel database object, table = RStore::BaseTable object
-  db[table.name].all                                         # fetch everything (sample output below)
-  db[table.name].all[3]                                      # *)
-  db[table.name].filter(:id => 2).update(:on_stock => true)  # update entry
-  db[table.name].filter(:id => 3).delete                     # delete entry
+``` ruby
+RStore::CSV.query('company.products') do |table|    # table = Sequel::Dataset object 
+  table.all                                         # fetch everything 
+  table.all[3]                                      # fetch row number 4 (see output below)
+  table.filter(:id => 2).update(:on_stock => true)  # update entry
+  table.filter(:id => 3).delete                     # delete entry
 end
 
 ```
