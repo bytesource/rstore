@@ -69,8 +69,8 @@ describe RStore::CSV do
 
           store.ran_once?.should == true
 
-          RStore::CSV.connect_to('plastronics.data') do |db, table|
-            db[table.name].all.should == 
+          RStore::CSV.query('plastronics.data') do |table|
+            table.all.should == 
               [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
                {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
           end
@@ -88,8 +88,8 @@ describe RStore::CSV do
 
             store.ran_once?.should == true
 
-            RStore::CSV.connect_to('plastronics.data') do |db, table|
-              db[table.name].all.should == 
+            RStore::CSV.query('plastronics.data') do |table|
+              table.all.should == 
                 [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
                  {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
             end
@@ -111,8 +111,8 @@ describe RStore::CSV do
 
             store.ran_once?.should == true
 
-            RStore::CSV.connect_to('plastronics.data') do |db, table|
-              db[table.name].all.should == 
+            RStore::CSV.query('plastronics.data') do |table|
+              table.all.should == 
                 [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
                  {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
             end
@@ -133,8 +133,8 @@ describe RStore::CSV do
 
             store.ran_once?.should == true
 
-            RStore::CSV.connect_to('plastronics.data') do |db, table|
-              db[table.name].all.should == 
+            RStore::CSV.query('plastronics.data') do |table|
+              table.all.should == 
                 [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
                  {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
             end
@@ -156,8 +156,8 @@ describe RStore::CSV do
 
             store.ran_once?.should == true
 
-            RStore::CSV.connect_to('plastronics.data') do |db, table|
-              db[table.name].all.should == 
+            RStore::CSV.query('plastronics.data') do |table|
+              table.all.should == 
                 [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
                  {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22},
                  {:id=>3, :col1=>"string1", :col2=>1, :col3=>1.12},
@@ -173,6 +173,13 @@ describe RStore::CSV do
 
           it "should throw an exception" do
 
+            # As #from is missing, no table won't be created automatically.
+            DB   = PlastronicsDB.connect
+            name = DataTable.name
+            info = DataTable.table_info
+
+            DB.create_table(name, &info)
+
             lambda do
               RStore::CSV.new do
                 #from '../test_dir/dir_1'
@@ -180,12 +187,6 @@ describe RStore::CSV do
                 run
               end
             end.should raise_exception(Exception, /At least one method 'from' has to be called/)
-
-
-            RStore::CSV.connect_to('plastronics.data') do |db, table|
-              name = table.name
-              db.create_table(name, &table.table_info)
-            end
 
             DB[@name].all.should be_empty 
 
@@ -196,6 +197,14 @@ describe RStore::CSV do
 
           it "should throw an exception" do
 
+            #run will not be called, so table 'plastronics.data' does not exist (as it had been dropped in #before(:each)
+            DB   = PlastronicsDB.connect
+            name = DataTable.name
+            info = DataTable.table_info
+
+            DB.create_table(name, &info)
+
+
             lambda do
               RStore::CSV.new do
                 from '../test_dir/dir_1'
@@ -204,14 +213,7 @@ describe RStore::CSV do
               end
             end.should raise_exception(Exception, /Method 'to' has to be called before method 'run'/)
 
-            RStore::CSV.connect_to('plastronics.data') do |db, table|
-              name = table.name
-              #run has no been called, so table 'plastronics.data' does not exist (as it had been dropped in #before(:each)
-              unless db.table_exists?(name)
-                db.create_table(name, &table.table_info)
-              end
-            end
-
+            DB[@name].all.should be_empty 
           end
         end
 
@@ -241,9 +243,8 @@ describe RStore::CSV do
             end.should raise_exception(RStore::FileProcessingError, /#{@error_path}/)
 
 
-            RStore::CSV.connect_to('plastronics.data') do |db, table|
-              name = table.name
-              db[name].all.should be_empty
+            RStore::CSV.query('plastronics.data') do |table|
+              table.all.should be_empty
             end
 
           end
@@ -358,9 +359,8 @@ end
 #    end
 
 #    store2.ran_once?.should == true
-#    RStore::CSV.connect_to('plastronics.fastercsv') do |db, table|
-#      name = table.name
-#      db[name].first.should == 
+#    RStore::CSV.query('plastronics.fastercsv') do |table|
+#      table.first.should == 
 #        {:id=>1,
 #         :col1=>"GPNLWG",
 #         :col2=>"",

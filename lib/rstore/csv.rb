@@ -162,10 +162,10 @@ module RStore
     end
 
 
-    def self.connect_to db_table, &block
+    def self.query db_table, &block
       database, table = database_table(db_table)
       database.connect do |db|
-        block.call(db, table)
+        block.call(db[table.name]) # Sequel::Dataset
       end
     end
 
