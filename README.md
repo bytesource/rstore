@@ -120,10 +120,10 @@ end
 Output of `db[table.name].all[3]`
 
 ``` ruby 
-# {:produce    => "string4",
+# {:produce    => "toy4",
 #  :quantity   => 4,
 #  :price      => nil,
-#  :create_at  => nil,
+#  :created_at  => nil,
 #  :min_demand => <DateTime: 2011-10-25T04:30:00+00:00 (39293755/16,0/1,2299161)>,
 #  :max_demand => <DateTime: 2011-10-25T16:30:00+00:00 (39293763/16,0/1,2299161)>,
 #  :on_stock   => false}
@@ -164,7 +164,7 @@ More information on these options can be found at [CSV standard library document
 ## Database Requirements
 
 1. Expects the database table to have an addition column storing an auto-incrementing primary key
-2. Requires the database to support transactions:  
+2. **Requires the database to support transactions**:  
    Most other database platforms support transactions natively.  
    In MySQL, you'll need to be running `InnoDB` or `BDB` table types rather than the more common `MyISAM`.  
    If you are using MySQL and the table has not been created yet, RStore::CSV will take care of using the  
