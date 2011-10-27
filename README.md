@@ -8,7 +8,7 @@ Uses [CSV][1] for parsing, [Nokogiri][2] for URL handling, and [Sequel][3] ORM f
 [2]: http://sequel.rubyforge.org/
 [3]: http://nokogiri.org/
 
-### Special Features
+## Special Features
 
 * **Batch processing** of csv files  
 * Fetches data from different sources: **files, directories, URLs**  
@@ -101,20 +101,20 @@ RStore::CSV.new do
 end
 
 ```
-### Additional Functions
+### Additional Features
 --- 
 
 You can change and reset the default options (see section *Available Options* below for details)
 
 ``` ruby
-# Search directory recursively for files and handle the first row as data
+# Search directories recursively and handle the first row of a file as data by default
 RStore::CSV.change_default_options(:recursive => true, :has_headers => false) 
 
 RStore::CSV.new do
   from 'dir1'              
   from 'dir2'
   from 'dir3'
-  to   'plastronics.data'
+  to   'company.products'
   run
 end
 
@@ -152,9 +152,9 @@ Output of `db[table.name].all[3]`
 
 ## Available Options
 
-We can distinguish two kinds of options, file options and parse options.
+The method `from` accepts two kinds of options, file options and parse options:
 
-**File Options**  
+### File Options
 File options are used for fetching csv data from a source. The following options are recognized:
 
 * **:has_headers**, default: `true` 
@@ -165,7 +165,7 @@ File options are used for fetching csv data from a source. The following options
     * Mandatory css selector with an URL. For more details please see the [Nokogiri documentation](http://nokogiri.org)
  
   
-**Parse Options**  
+### Parse Options
 Parse options are arguments to `CSV::parse`. The following options are recognized:
 
 * **:col_sep**, default: `","`
@@ -183,8 +183,8 @@ More information on these options can be found at [CSV standard library document
 
 
 ## Database Requirements
-
-1. Expects the database table to have an addition column storing an auto-incrementing primary key
+  
+1. Expects the database table to have an addition column storing an auto-incrementing primary key.
 2. **Requires the database to support transactions**:  
    Most other database platforms support transactions natively.  
    In MySQL, you'll need to be running `InnoDB` or `BDB` table types rather than the more common `MyISAM`.  
