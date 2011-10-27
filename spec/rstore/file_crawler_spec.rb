@@ -52,6 +52,8 @@ describe RStore::FileCrawler do
           # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
           it "should return a hash for all files of the current directory" do
 
+            crawler.data_hash.size.should == 1
+
             data = crawler.data_hash["#{File.expand_path('../test_dir/empty.csv')}"]
 
             data.path.should == "#{File.expand_path('../test_dir/empty.csv')}"
