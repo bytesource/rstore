@@ -26,7 +26,8 @@ describe RStore::BaseDB do
 
     it "Subclass#connection_info: should return a hash with the connection info" do
 
-      subclass.connection_info.should == {:adapter => 'mysql', :password => 'xxx', :database => 'plastronics'}
+      subclass.connection_info.should == 
+        {:adapter => 'mysql', :user => 'root', :password => 'xxx', :host => 'localhost', :database => 'plastronics'}
 
     end
   end

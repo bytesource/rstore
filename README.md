@@ -84,8 +84,8 @@ end
 ```
 
 **Note**:  
-You can either put the database and table class definitions in the same file or store them  
-anywhere you like just `require` them when you need them.
+You can put the database and table class definitions in separate files
+and `require` them when needed.
 
 
 4) Enter csv data into the database  
@@ -120,19 +120,19 @@ end
 Output of `db[table.name].all[3]`
 
 ``` ruby 
-# {:produce    => "toy4",
-#  :quantity   => 4,
-#  :price      => nil,
+# {:product     => "toy4",
+#  :quantity    => 4,
+#  :price       => nil,
 #  :created_at  => nil,
-#  :min_demand => <DateTime: 2011-10-25T04:30:00+00:00 (39293755/16,0/1,2299161)>,
-#  :max_demand => <DateTime: 2011-10-25T16:30:00+00:00 (39293763/16,0/1,2299161)>,
-#  :on_stock   => false}
+#  :min_demand  => <DateTime: 2011-10-25T04:30:00+00:00 (39293755/16,0/1,2299161)>,
+#  :max_demand  => <DateTime: 2011-10-25T16:30:00+00:00 (39293763/16,0/1,2299161)>,
+#  :on_stock    => false}
 
 ```
 
 ## Available Options
 
-`RStore::CSV#from` accepts two kinds of options, file options and parse options.
+We can distinguish two kinds of options, file options and parse options.
 
 **File Options**  
 File options are used for fetching csv data from a source. The following options are recognized:
@@ -143,6 +143,7 @@ File options are used for fetching csv data from a source. The following options
     * When set to true and a directory is given, recursively search for files. Non-csv files are skipped. 
 * **:selector**, default: `""` 
     * Mandatory css selector with an URL. For more details please see the [Nokogiri documentation](http://nokogiri.org)
+ 
   
 **Parse Options**  
 Parse options are arguments to `CSV::parse`. The following options are recognized:
