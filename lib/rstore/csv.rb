@@ -107,7 +107,6 @@ module RStore
     def read_data data_object
       path    = data_object.path
       options = data_object.options
-      data    = ''
 
       begin
         if path.url?
@@ -123,10 +122,11 @@ module RStore
           content = File.read(path)
         end 
 
-      raise ArgumentError "Empty content!"  if content.empty?
-      rescue => e
-        logger = Logger.new(@data)
-        logger.log(path, :fetch, e)
+      raise ArgumentError, "Empty content!"  if content.empty?
+
+      rescue Exception => e
+        logger = Logger.new(data_object)
+        logger.log(:fetch, e)
         logger.error
       end
       
