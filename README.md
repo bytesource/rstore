@@ -25,7 +25,7 @@ Uses [CSV][1] for parsing, [Nokogiri][2] for URL handling, and [Sequel][3] ORM f
 ## Installation
 
 ``` batch
-gem install 'rstore/csv'
+gem install 'rstore'
 ```
 ## Sample Usage
 
@@ -66,7 +66,7 @@ end
 ```
 
 3) Store table information in a subclass of `RStore::BaseTable`  
-Naming convention: name => NameDB
+Naming convention: name => NameTable
 
 ``` ruby
 class ProductsTable < RStore::BaseTable
