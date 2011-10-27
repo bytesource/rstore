@@ -16,7 +16,7 @@ Uses [CSV][1] for parsing, [Nokogiri][2] for URL handling, and [Sequel][3] ORM f
 * **Validation of field values**. At the moment validation of the following types is supported:  
   * `String`, `Integer`, `Float`, `Date`, `DateTime`, `Time`, and `Boolean` 
 * **Descriptive error messages** pointing helping you to find any invalid data quickly.  
-* Specify your database and table classes once, then just `require` them when needed.  
+* Specify your database and table classes only once, then just `require` them when needed.  
 * **Safe and transparent data storage**: 
   * Using database transactions: Either all files are inserted or none (also see section *Database Requirements*)  
   * To avoid double entry of data, the `run` method can only be run once on a single instance of `RStore::CSV`.
@@ -42,7 +42,6 @@ Sample csv file
 require 'rstore/csv'
 
 ```
-
 2) Store database information in a subclass of `RStore::BaseDB`  
 Naming convention: name => NameDB
 
@@ -100,6 +99,27 @@ RStore::CSV.new do
   to   'company.products'                                         # provide database and table name
   run                                                             # run the program
 end
+
+```
+### Additional Functions
+--- 
+
+You can change and reset the default options (see section *Available Options* below for details)
+
+``` ruby
+# Search directory recursively for files and handle the first row as data
+RStore::CSV.change_default_options(:recursive => true, :has_headers => false) 
+
+RStore::CSV.new do
+  from 'dir1'              
+  from 'dir2'
+  from 'dir3'
+  to   'plastronics.data'
+  run
+end
+
+# Restore default options
+RStore::CSV.reset_default_options
 
 ```
 
