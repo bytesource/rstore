@@ -12,7 +12,7 @@ RSpec::Core::RakeTask.new :spec
 #   t.spec_files = FileList['spec/**/*_spec.rb']
 # end
 
-gem_spec = eval(File.read('csvtable.gemspec'))
+gem_spec = eval(File.read('rstore.gemspec'))
 
 Rake::GemPackageTask.new( gem_spec ) do |t|
   t.need_zip = true
