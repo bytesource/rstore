@@ -56,7 +56,7 @@ describe RStore::FileCrawler do
 
             data.path.should == "#{File.expand_path('../test_dir/empty.csv')}"
             data.options.should == {:file_options=>{:recursive=>false, :has_headers=>true, :selector => ""}, 
-                                    :parse_options=>{}}
+                                    :parse_options=>{row_sep: :auto, col_sep: ",", quote_char: '"', field_size_limit: nil, skip_blanks: false}}
           end
         end
 
@@ -74,11 +74,11 @@ describe RStore::FileCrawler do
 
           data1.options.should == 
             {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
-             :parse_options=>{:col_sep => ";", :quote_char => "'"}}
-             
-             data2.options.should == 
-             {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
-              :parse_options=>{:col_sep => ";", :quote_char => "'"}}
+             :parse_options=>{row_sep: :auto, col_sep: ";", quote_char: "'", field_size_limit: nil, skip_blanks: false}}
+
+          data2.options.should == 
+            {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
+             :parse_options=>{row_sep: :auto, col_sep: ";", quote_char: "'", field_size_limit: nil, skip_blanks: false}}
 
           end
         end
@@ -118,7 +118,7 @@ describe RStore::FileCrawler do
           data.path.should == "#{File.expand_path("/home/sovonex/Desktop/temp/rstore/spec/test_dir/empty.csv" )}"
           data.options.should == 
             {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
-             :parse_options=>{:col_sep => ";", :quote_char => "'"}}
+             :parse_options=>{row_sep: :auto, col_sep: ";", quote_char: "'", field_size_limit: nil, skip_blanks: false}}
 
         end
       end
@@ -178,10 +178,10 @@ describe RStore::FileCrawler do
           data2.path.should == "http://#{urls[1]}"
 
           data1.options.should == {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
-                                                       :parse_options=>{:col_sep => ";", :quote_char => "'"}}
+             :parse_options=>{row_sep: :auto, col_sep: ";", quote_char: "'", field_size_limit: nil, skip_blanks: false}}
 
           data2.options.should == {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
-                                                       :parse_options=>{:col_sep => ";", :quote_char => "'"}}
+             :parse_options=>{row_sep: :auto, col_sep: ";", quote_char: "'", field_size_limit: nil, skip_blanks: false}}
 
         end
       end
