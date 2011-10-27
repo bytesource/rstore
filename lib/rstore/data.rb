@@ -46,25 +46,21 @@ module RStore
         csv = csv.drop(1)  if file_options[:has_headers] == true  # drop the first row if it is a header 
       rescue => e
         Logger.new(@options).print(@data.path, :parse, e)
-        @state = :error
       end
 
-      @state = :parsed  unless @state == :error
+      @state = :parsed
         Data.new(@path, csv, @state, @options)
     end
 
 
 
     def convert_fields database, table_name
-      return self  if @state == :error
-
       converter = Converter.new(self, database, table_name)
       converter.convert
     end
 
 
     def into_db database, table_name
-      return  if @state == :error
       Storage.new(self, database, table_name).insert
     end
 
@@ -75,32 +71,11 @@ module RStore
       @state = state
     end
 
-
-    def has_error?
-      @state == :error
-    end
-
-
     # Helper methods --------------------------------
 
     def print_valid_states
       KnownStates.map { |s| s.inspect }.join(', ')
     end
-
-    ## It is easy to pass in the the wrong options, so although the following implementation
-    ## might look quite ridicilous, it really helps avoid messing things up internally.
-    #def valid_options? options
-    #  if options
-    #    if options.is_a?(Hash)
-    #      if options[:file_options] && options[:parse_options]
-    #        if options[:file_options].is_a?(Hash) && options[:parse_options].is_a?(Hash)
-    #          return true
-    #        end
-    #      end
-    #    end
-    #  end
-    #  false
-    #end
 
   end
 end 
