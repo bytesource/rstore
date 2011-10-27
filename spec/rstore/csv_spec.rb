@@ -263,6 +263,20 @@ describe RStore::CSV do
             end.should raise_exception(ArgumentError, /yes/)
           end
         end
+
+        context "when the file is empty" do
+
+          it "should throw an exception and abort" do
+
+            lambda do
+              store = RStore::CSV.new do
+                from '../test_dir/empty.csv'
+                to   'plastronics.data'
+                run
+              end
+            end.should raise_exception(RStore::FileProcessingError, /Empty content!/)
+          end
+        end
       end
     end
   end
@@ -341,41 +355,42 @@ describe RStore::CSV do
       end
     end
   end
+
+  context "given an URL" do
+
+    name = FasterCSVTable.name 
+
+    DB = PlastronicsDB.connect
+    DB.drop_table(name) if DB.table_exists?(name)
+
+    it "should store the data into the table without errors" do
+
+      store2 = RStore::CSV.new do
+        from 'http://github.com/circle/fastercsv/blob/master/test/test_data.csv', :selector => 'pre div.line', :skip_blanks => true
+        to   'plastronics.fastercsv'
+        run
+      end
+
+      store2.ran_once?.should == true
+      RStore::CSV.query('plastronics.fastercsv') do |table|
+        table.first.should == 
+          {:id=>1,
+           :col1=>"GPNLWG",
+           :col2=>"",
+           :col3=>"PNX",
+           :col4=>"994190320",
+           :col5=>"5089227",
+           :col6=>"=\"6996479699989\"",
+           :col7=>"90/00/92",
+           :col8=>"6452735",
+           :col9=>"95784560",
+           :col10=>"6",
+           :col11=>"MG929000.OCS",
+           :col12=>"W0902-",
+           :col13=>"09/90/96",
+           :col14=>"09/90/96",
+           :col15=>"-002.59"}
+      end
+    end
+  end
 end
-
-#context "given an URL" do
-
-#  name = FasterCSVTable.name 
-
-#  DB = PlastronicsDB.connect
-#  DB.drop_table(name) if DB.table_exists?(name)
-
-#  it "should store the data into the table without errors" do
-
-#    store2 = RStore::CSV.new do
-#      from 'http://github.com/circle/fastercsv/blob/master/test/test_data.csv', :selector => 'pre div.line', :skip_blanks => true
-#      to   'plastronics.fastercsv'
-#      run
-#    end
-
-#    store2.ran_once?.should == true
-#    RStore::CSV.query('plastronics.fastercsv') do |table|
-#      table.first.should == 
-#        {:id=>1,
-#         :col1=>"GPNLWG",
-#         :col2=>"",
-#         :col3=>"PNX",
-#         :col4=>"994190320",
-#         :col5=>"5089227",
-#         :col6=>"=\"6996479699989\"",
-#         :col7=>"90/00/92",
-#         :col8=>"6452735",
-#         :col9=>"95784560",
-#         :col10=>"6",
-#         :col11=>"MG929000.OCS",
-#         :col12=>"W0902-",
-#         :col13=>"09/90/96",
-#         :col14=>"09/90/96",
-#         :col15=>"-002.59"}
-#    end
-#
