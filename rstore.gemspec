@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.has_rdoc = false
   s.required_ruby_version = '>= 1.9.1'
   s.rubyforge_project = 'rstore'
-  s.add_dependency = 'nokogiri'
-  s.add_development_dependency = 'rspec'
+  s.add_dependency 'nokogiri'
+  s.add_development_dependency 'rspec'
   s.files = Dir["{lib}/**/*.rb", "*.md"]
 end
