@@ -22,6 +22,11 @@ Uses [CSV][1] for parsing, [Nokogiri][2] for URL handling, and [Sequel][3] ORM f
   * To avoid double entry of data, the `run` method can only be run once on a single instance of `RStore::CSV`.
 
 
+## Installation
+
+``` batch
+gem install 'rstore/csv'
+```
 ## Sample Usage
 
 Sample csv file
@@ -34,6 +39,7 @@ Sample csv file
 > "toy4","5","5.55","2015-2-4","5:30","5:30AM","1"  
 > "toy5","6","6.66","2016/2/4","6:30","6:30 P.M.","0"  
 > "toy6","7","7.77",,,,"false"  
+
 
 1) Load gem
 
@@ -179,7 +185,7 @@ Parse options are arguments to `CSV::parse`. The following options are recognize
 * **:skip_blanks**, default: `false`
     * When set to a true value, CSV will skip over any rows with no content.
 
-More information on these options can be found at [CSV standard library documentation](http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html#method-c-new)
+For more information on the parse options, please see the [CSV standard library documentation](http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html#method-c-new).
 
 
 ## Database Requirements
@@ -190,6 +196,10 @@ More information on these options can be found at [CSV standard library document
    In MySQL, you'll need to be running `InnoDB` or `BDB` table types rather than the more common `MyISAM`.  
    If you are using MySQL and the table has not been created yet, RStore::CSV will take care of using the  
    correct table type upon creation.
+
+## Feedback
+
+Any suggestions or criticism are highly welcome! Whatever your feedback, it will help me make this gem better!
 
 
 
