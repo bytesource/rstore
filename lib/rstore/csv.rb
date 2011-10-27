@@ -1,6 +1,5 @@
 # encoding: utf-8
 require 'open-uri'
-require 'nokogiri'
 require 'rstore/data'
 require 'rstore/file_crawler'
 require 'rstore/converter'
@@ -8,13 +7,6 @@ require 'rstore/configuration'
 require 'rstore/base_db'
 require 'rstore/base_table'
 require 'rstore/core_ext/string'
-
-# RStore::CSV.new do
-#   from '~/temp/', header: true, recursive: true
-#   from 'http://www.sovonex.com/summary.csv', selector: 'pre div.line'
-#   to   'plastronics.project'
-#   run
-# end
 
 
 module RStore
@@ -119,7 +111,7 @@ module RStore
 
       begin
         if path.url?
-
+          require 'nokogiri'
           doc = Nokogiri::HTML(open(path))
 
           selector = options[:selector]
