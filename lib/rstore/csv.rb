@@ -113,8 +113,8 @@ module RStore
         if path.url?
           require 'nokogiri'
           doc = Nokogiri::HTML(open(path))
+          selector = options[:file_options][:selector]
 
-          selector = options[:selector]
           content = doc.css(selector).inject("") do |result, link|
             result << link.content << "\n"
             result
