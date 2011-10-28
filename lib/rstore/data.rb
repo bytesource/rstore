@@ -26,14 +26,13 @@ module RStore
       @content   = content
       self.state = state
       @options   = options
-      @type      = extract_type path
     end
 
   
-    def extract_type path
-      path, filename = File.split(path)
-      filename.match(/\.(?<type>.*)$/)[:type].to_sym
-    end
+    #def extract_type path
+    #  path, filename = File.split(path)
+    #  filename.match(/\.(?<type>.*)$/)[:type].to_sym
+    #end
 
     def parse_csv
       raise InvalidStateError, "#{state.inspect} is not a valid Data state for method 'to_csv'"  unless state == :raw
