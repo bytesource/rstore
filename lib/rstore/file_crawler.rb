@@ -46,11 +46,26 @@ module RStore
       else                                            # Either a file or a non-existing directory path
         file = File.expand_path(path)
         raise ArgumentError, "'#{path}' is not a valid path" unless File.exists?(file)
-        raise ArgumentError, ErrorMessage                    unless can_read?(path)
+
+        error_message = <<-MESSAGE.gsub(/^\s+/,'')
+                           Not a #{@file_type} file.
+                           NOTE: Non-#{@file_type} files in a directory path
+                                 are silently skipped WITHOUT raising an exception
+                           MESSAGE
+
+        raise ArgumentError, error_message                    unless can_read?(path)
 
         files << file
       end
+
       @file_paths = files
+    rescue Exception => e
+        # Dirty hack to be able to call instantiate Logger.
+        data = Data.new(path, '', :raw, Configuration.default_options)
+
+        logger = Logger.new(data)
+        logger.log(:fetch, e)
+        logger.error
     end
 
 
@@ -111,17 +126,10 @@ module RStore
           address = address.gsub(/http/,'https')
           retry
         else 
-          raise ArgumentError, "Could not connect to #{url}. Please check it this URL is correct."
+          raise ArgumentError, "Could not connect to #{url}. Please check if this URL is correct."
         end
       end
     end
-
-
-    ErrorMessage = <<-MESSAGE
-        File '#{@path}' is not a #{@file_type} file.
-        NOTE: Non-#{@file_type} files in a directory path
-              are silently skipped WITHOUT raising an exception
-    MESSAGE
 
   end
 end

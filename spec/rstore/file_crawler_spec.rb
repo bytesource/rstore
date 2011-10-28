@@ -98,7 +98,7 @@ describe RStore::FileCrawler do
 
             lambda do
               crawler.new(wrong_dir_path, file_type, options)
-            end.should raise_exception(ArgumentError,"'#{wrong_dir_path}' is not a valid path")
+            end.should raise_exception(RStore::FileProcessingError,/'#{wrong_dir_path}' is not a valid path/)
 
           end
         end
@@ -137,7 +137,7 @@ describe RStore::FileCrawler do
 
             lambda do
               crawler.new(wrong_file_path, file_type, options)
-            end.should raise_exception(ArgumentError,"'#{wrong_file_path}' is not a valid path")
+            end.should raise_exception(RStore::FileProcessingError,/'#{wrong_file_path}' is not a valid path/)
 
           end
         end
@@ -152,7 +152,7 @@ describe RStore::FileCrawler do
 
             lambda do
               crawler.add
-            end.should raise_exception(ArgumentError)
+            end.should raise_exception(RStore::FileProcessingError)
           end
         end
       end
@@ -200,7 +200,7 @@ describe RStore::FileCrawler do
 
             lambda do
               crawler.new(wrong_format, file_type) 
-            end.should raise_exception(ArgumentError,"'#{wrong_format}' is not a valid path")
+            end.should raise_exception(RStore::FileProcessingError,/'#{wrong_format}' is not a valid path/)
 
           end
         end
@@ -215,7 +215,7 @@ describe RStore::FileCrawler do
 
             lambda do
               crawler.add
-            end.should raise_exception(ArgumentError,/Could not connect to #{does_not_exist}/)
+            end.should raise_exception(RStore::FileProcessingError,/Could not connect to #{does_not_exist}/)
           end
         end
       end
