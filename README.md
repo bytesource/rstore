@@ -2,11 +2,7 @@
 
 ### A library for batch storage of csv data into a database
 
-Uses [CSV][1] for parsing, [Nokogiri][2] for URL handling, and [Sequel][3] ORM for database management.
-
-[1]: http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html
-[2]: http://sequel.rubyforge.org/
-[3]: http://nokogiri.org/
+Uses the CSV standard library for parsing, *Nokogiri* for URL handling, and *Sequel* ORM for database management.
 
 ## Special Features
 
@@ -189,7 +185,7 @@ File options are used for fetching csv data from a source. The following options
 * **:recursive**, default: `false` 
     * When set to true and a directory is given, recursively search for files. Non-csv files are skipped. 
 * **:selector**, default: `""` 
-    * Mandatory css selector with an URL. For more details please see the [Nokogiri documentation](http://nokogiri.org)
+    * Mandatory css selector with an URL. For more details please see the section *Further Reading* below 
  
   
 ### Parse Options
@@ -206,7 +202,7 @@ Parse options are arguments to `CSV::parse`. The following options are recognize
 * **:skip_blanks**, default: `false`
     * When set to a true value, CSV will skip over any rows with no content.
 
-For more information on the parse options, please see the [CSV standard library documentation](http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html#method-c-new).
+For more information on the parse options, please see section *Further Reading* below.
 
 
 ## Database Requirements
@@ -217,6 +213,26 @@ For more information on the parse options, please see the [CSV standard library 
    In MySQL, you'll need to be running `InnoDB` or `BDB` table types rather than the more common `MyISAM`.  
    If you are using MySQL and the table has not been created yet, RStore::CSV will take care of using the  
    correct table type upon creation.
+
+## Further Reading  
+
+* Sequel
+  * [Cheat sheet][sequel_cheat]
+  * [Connecting to a database][sequel_connect]
+  * [Querying][sequel_query]
+* CSV
+  * [Parse options documentation][csv_options]
+  * [Common Format and MIME Type][csv_standard] for Comma-Separated Values (CSV) Files
+* Nokogiri
+  * [Project Site][nokogiri_home]
+
+[sequel_cheat]: http://sequel.rubyforge.org/rdoc/files/doc/cheat_sheet_rdoc.html
+[sequel_connect]: http://sequel.rubyforge.org/rdoc/files/doc/opening_databases_rdoc.html
+[sequel_query]: http://sequel.rubyforge.org/rdoc/files/doc/querying_rdoc.html
+[csv_options]: http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html#method-c-new
+[csv_standard]: http://www.ietf.org/rfc/rfc4180.txt
+[nokogiri_home]: http://nokogiri.org/ 
+
 
 ## Feedback
 
