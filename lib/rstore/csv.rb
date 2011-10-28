@@ -86,6 +86,12 @@ module RStore
         message = <<-TEXT.gsub(/^\s+/, '')
         ===============================
         All data has been successfully inserted into table '#{database.name}.#{table.name}'"
+        -------------------------------
+        You can retrieve all table data with the following code:
+        -------------------------------
+        #{self.class}.query('#{database.name}.#{table.name}') do |table|
+          table.all
+        end
         ===============================
         TEXT
         puts message
