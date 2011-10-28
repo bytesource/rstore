@@ -18,6 +18,16 @@ Uses the CSV standard library for parsing, *Nokogiri* for URL handling, and *Seq
   * To avoid double entry of data, the `run` method can only be run once on a single instance of `RStore::CSV`.
 
 
+## Database Requirements
+  
+1. Expects the database table to have an addition column storing an auto-incrementing primary key.
+2. **Requires the database to support transactions**:  
+   Most other database platforms support transactions natively.  
+   In MySQL, you'll need to be running `InnoDB` or `BDB` table types rather than the more common `MyISAM`.  
+   If you are using MySQL and the table has not been created yet, RStore::CSV will take care of using the  
+   correct table type upon creation.
+
+
 ## Installation
 
 ``` batch
@@ -204,15 +214,6 @@ Parse options are arguments to `CSV::parse`. The following options are recognize
 
 For more information on the parse options, please see section *Further Reading* below.
 
-
-## Database Requirements
-  
-1. Expects the database table to have an addition column storing an auto-incrementing primary key.
-2. **Requires the database to support transactions**:  
-   Most other database platforms support transactions natively.  
-   In MySQL, you'll need to be running `InnoDB` or `BDB` table types rather than the more common `MyISAM`.  
-   If you are using MySQL and the table has not been created yet, RStore::CSV will take care of using the  
-   correct table type upon creation.
 
 ## Further Reading  
 
