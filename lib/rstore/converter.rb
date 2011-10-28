@@ -1,5 +1,6 @@
 # encoding: utf-8
 require 'rstore/logger'
+require 'bigdecimal'
 
 module RStore
   class Converter
@@ -34,12 +35,17 @@ module RStore
     end
 
     Converters = Hash.new {|h,k| h[k] = lambda { |field| field }}.
-      merge!({string:   lambda { |field| field },
-              date:     lambda { |field| Date.parse(field).to_s },
-              datetime: lambda { |field| DateTime.parse(field).to_s }, 
-              integer:  lambda { |field| Integer(field) },
-              float:    lambda { |field| Float(field) },
-              boolean:  lambda { |field| boolean_converter[field] }})
+      merge!({string:     lambda { |field| field },
+              date:       lambda { |field| Date.parse(field).to_s },
+              datetime:   lambda { |field| DateTime.parse(field).to_s }, 
+              # Convert to DateTime, because DateTime also checks if the argument is valid
+              time:       lambda { |field| DateTime.parse(field).to_s },
+              integer:    lambda { |field| Integer(field) },
+              float:      lambda { |field| Float(field) },
+              numeric:    lambda { |field| Float(field) },  # Handle Numeric as Float
+              # Check with Float first, then convert, because Float throws an error on invalid values such as 'x'.
+              bigdecimal: lambda { |field| Float(field); BigDecimal.new(field)},
+              boolean:    lambda { |field| boolean_converter[field] }})
 
 
     def initialize data_object, database, table_name
@@ -66,7 +72,7 @@ module RStore
       schema.map do |(_, property_hash)|
         # Sequel handles Time as Datetime:
         type = property_hash[target]
-        type = (type == :time) ? :datetime : type
+        #type = (type == :time) ? :datetime : type
         type
       end
     end
