@@ -130,7 +130,7 @@ RStore::CSV.reset_default_options
 ```
 
 There is also a convenience method enabling you to use  
-all of [Sequels query methods](http://sequel.rubyforge.org/rdoc/files/doc/querying_rdoc.html)
+all of [Sequels query methods](http://sequel.rubyforge.org/rdoc/files/doc/querying_rdoc.html).
 
 ``` ruby
 RStore::CSV.query('company.products') do |table|    # table = Sequel::Dataset object 
@@ -155,6 +155,27 @@ Output of `db[table.name].all[3]`
 #  :on_stock    => false}
 
 ```
+
+Access all of Sequels functionality by using the convenience methods   
+`BaseDB.connect`, `BaseTable.name`, and `BaseTable.table_info`:  
+
+``` ruby
+
+DB     = CompanyDB.connect           # Open connection to 'company' database
+name   = ProductTable.name           # Table name, :products, used as an argument to the following methods.
+layout = ProductsTable.table_info    # The Proc that was passed to ProductsTable.create
+
+DB.create_table(name, &layout)       # Create table
+
+DB.alter_table name do               # Alter table
+  drop_column :created_at
+  add_column  :entry_date, :date
+end
+
+DB.drop_table(name)                  # Drop table
+
+```
+
 
 ## Available Options
 
