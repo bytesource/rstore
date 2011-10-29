@@ -1,0 +1,4 @@
+--no-private
+lib/rstore/csv.rb
+lib/rstore/base_db.rb
+lib/rstore/base_table.rb
