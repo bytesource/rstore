@@ -12,11 +12,27 @@ require 'rstore/core_ext/string'
 module RStore
   class CSV
 
-    attr_reader :database, :table
+    #@return [BaseDB] a subclass of {RStore::BaseDB}
+    attr_reader :database
+    #return [BaseTable] a sublcass of {RStore::BaseTable} 
+    attr_reader :table
+    #@return [Array<Data>] holds `Data` objects that are used internally to store information of a data source.
     attr_reader :data_array
-    attr_reader :errors
     
 
+    # This constructor takes a block which yields an instance of self.
+    # Within the block, normally the following three methods are called:
+    # * {#from}
+    # * {#to}
+    # * {#run}
+    # @example
+    # RStore::CSV.new do
+    #   from '../easter/children', :recursive => true                   # select a directory or
+    #   from '../christmas/children/toys.csv'                           # file, or
+    #   from 'www.example.com/sweets.csv', :selector => 'pre div.line'  # URL
+    #   to   'company.products'                                         # provide database and table name
+    #   run                                                             # run the program
+    # end
     def initialize &block
       @data_hash  = {}
       @data_array = []
@@ -33,6 +49,38 @@ module RStore
     end
 
 
+    # Specify the source of the csv file(s) 
+    # There can be several calls to this method on given instance of `RStore::CSV`.
+    # This method has to be called before {#run}.
+    # @overload from(source, options)
+    #  @param [String] source the relative or full path to a directory, file, or an URL
+    #  @param [Hash] options the options used to customize fetching and parsing of csv data
+    #   @option options [Boolean] :has_headers When set to false, the first line of a file is processed as data, otherwise it is discarded. 
+    #     (default: `true`)
+    #   @option options [Boolean] :recursive When set to true and a directory is given, recursively search for files. Non-csv files are skipped. 
+    #     (default: `false`]
+    #   @option options [String] :selector Mandatory css selector with an URL. Used the same syntax as Nokogiri. 
+    #     (default: `""`)
+    #   @option options [String] :col_sep The String placed between each field. (default: `","`)
+    #   @option options [String, Symbol] :row_sep The String appended to the end of each row. 
+    #     (default: `:auto`)
+    #   @option options [String] :quote_car The character used to quote fields.
+    #     (default: `'"'`)
+    #   @option options [Integer, Nil] :field_size_limit The maximum size CSV will read ahead looking for the closing quote for a field.
+    #     (default: `nil`)
+    #   @option options [Boolean] :skip_blanks When set to a true value, CSV will skip over any rows with no content.
+    #     (default: `false`) 
+    # @overload from(source)
+    #  @param [String] the relative or full path to a directory, file, or an URL. The default options will be used.
+    # @return void
+    # @example
+    # store = RStore::CSV.new
+    # # fetching data from a file
+    # store.from '../christmas/children/toys.csv'
+    # # fetching data from a directory
+    # store.from '../easter/children', :recursive => true
+    # # fetching data from an URL
+    # store.from 'www.example.com/sweets.csv', :selector => 'pre div.line'
     def from source, options={}
       crawler = FileCrawler.new(source, :csv, options)
       @data_hash.merge!(crawler.data_hash)
@@ -40,19 +88,31 @@ module RStore
     end
 
 
+    # Choose the database table to store the csv data into.
+    # This method has to be called before {#run}.
+    # @param [String] db_table the names of the database and table, separated by a dot, e.g. 'database.table'. 
+    #  The name of the database has to correspond to a subclass of `RStore::BaseDB`:
+    #  CompanyDB < RStore::BaseDB -> 'company'
+    #  The name of the table has to correspond to a subclass of `RStore::BaseTable`:
+    #  DataTable < RStore::BaseTable -> 'data'
+    # @return [void]
+    # @example
+    # store = RStore::CSV.new
+    # store.to('company.products')
     def to db_table
       @database, @table = CSV.database_table(db_table)
       @to       = true
     end
 
 
+    #@private
     def self.database_table db_table
       raise ArgumentError, "The name of the database and table have to be separated with a dot (.)"  unless delimiter_correct?(db_table)
 
       db, tb = db_table.split('.')
 
-      database = BaseDB.db_classes[db.to_sym]
-      table    = BaseTable.table_classes[tb.to_sym]
+      database = BaseDB.db_classes[db.downcase.to_sym]
+      table    = BaseTable.table_classes[tb.downcase.to_sym]
 
       raise Exception, "Database '#{db}' not found"  if database.nil?
       raise Exception, "Table '#{tb}' not found"     if table.nil?
@@ -61,6 +121,8 @@ module RStore
     end
 
 
+    # Start processing the csv files, storing the data into a database table.
+    # Both methods, {#from} and {#to}, have to be called before this method.
     def run
       return  if ran_once?   # Ignore subsequent calls to #run 
       raise Exception, "At least one method 'from' has to be called before method 'run'"  unless @from == true
@@ -99,6 +161,7 @@ module RStore
     end
 
 
+    #@private
     def insert_all data_stream, database, name
       database.transaction do  # outer transaction
         data_stream.each do |data|
@@ -110,6 +173,7 @@ module RStore
     private :insert_all
 
 
+    #@private
     def read_data data_object
       path    = data_object.path
       options = data_object.options
@@ -140,6 +204,7 @@ module RStore
     end
 
 
+    #@private
     def create_table db
 
       name = @table.name
@@ -160,15 +225,28 @@ module RStore
     end
 
 
+    # Easy querying by yielding a {http://sequel.rubyforge.org/rdoc/files/doc/dataset_basics_rdoc.html Sequel::Dataset} instance of your table.
+    # @param [String] db_table The name of the database and table, separated by a dot.
+    # @return [void]
+    # @yield
+    # @yieldparam [Sequel::Dataset] table The dataset of your table
+    # @example
+    # RStore::CSV.query('company.products') do |table|    # table = Sequel::Dataset object 
+    #   table.all                                         # fetch everything 
+    #   table.all[3]                                      # fetch row number 4 
+    #   table.filter(:id => 2).update(:on_stock => true)  # update entry
+    #   table.filter(:id => 3).delete                     # delete entry
+    # end
     def self.query db_table, &block
       database, table = database_table(db_table)
       database.connect do |db|
-        block.call(db[table.name]) # Sequel::Dataset
+        block.call(db[table.name]) if block_given?  # Sequel::Dataset
       end
     end
 
     
     
+    #@private
     def self.delimiter_correct? name
       !!(name =~ /^[^\.]+\.[^\.]+$/)
     end
