@@ -5,24 +5,18 @@ require 'bigdecimal'
 module RStore
   class Converter
 
-    # @return [Hash<:convert => Array>]
-    attr_accessor :error_queue
-    # @ return [String] path of the given csv file
-    # @return [Array<Array>] Array of array returned by CSV.parse
+    # @return [Date]
     attr_reader   :data
-    # @return [Array<symbol>] Array of symbols representing the Ruby class set for each column
+    # @return [Array<symbol>] Array of symbols representing the Ruby class set for each table column
     attr_reader   :column_types
     # @return [Array<Boolean>] Array of boolean values indicating if NULL is allowed as a column value
     attr_reader   :allow_null
+    # @return [:symbol]
+    # On intitialization the only allowed value is :parsed.
+    # Will be set to :converted on successfull conversion.
     attr_accessor :state
 
-      #  Converters used to verify the field data is valid. 
-      #  If a conversion fails, an exception is thrown and the processed
-      #  error message (including row index and column index) is stored
-      #  in @error_queue.
-      #  Note: Most of these verifications are done by Sequel, too, but 
-      #  result in a less meaningful error message in case of failure.
-
+    
     boolean_converter = lambda do |field|
       if field.downcase == 'true' || field == '1'
         return true 
@@ -34,6 +28,10 @@ module RStore
       end
     end
 
+    #  Converters used to verify the field data is valid. 
+    #  If a conversion fails, an exception is thrown together
+    #  with a descriptive error message pointing to the field 
+    #  where the error occured.
     Converters = Hash.new {|h,k| h[k] = lambda { |field| field }}.
       merge!({string:     lambda { |field| field },
               date:       lambda { |field| Date.parse(field).to_s },
