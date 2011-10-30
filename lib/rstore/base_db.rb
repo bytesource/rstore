@@ -16,6 +16,12 @@ module RStore
       BaseDB.db_classes[subclass.name] = subclass
     end
 
+    # Define the database connection
+    # Accepts the same one arity parameters as [Sequel.connect](http://sequel.rubyforge.org/rdoc/files/doc/opening_databases_rdoc.html)
+    # @param [String, Hash] hash_or_string
+    #   `String` URI such as `'postgres://user:password@localhost/blog'`
+    #   `Hash`   Option has accepting the following keys:
+    #     
     def self.info hash_or_string
       class << self            # self = #<Class:PlastronicsDB>
         attr_reader :connection_info
