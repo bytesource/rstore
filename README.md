@@ -1,6 +1,6 @@
 # RStore 
 
-### A library for batch storage of csv data into a database
+### A library for easy batch storage of csv data into a database
 
 Uses the CSV standard library for parsing, *Nokogiri* for URL handling, and *Sequel* ORM for database management.
 
@@ -49,7 +49,7 @@ Sample csv file
 
 1) Load gem
 
-``` ruby
+``` ruby    
 
 require 'rstore/csv'
 
@@ -57,7 +57,8 @@ require 'rstore/csv'
 2) Store database information in a subclass of `RStore::BaseDB`  
 Naming convention: name => NameDB
 
-``` ruby
+``` ruby 
+
 class CompanyDB < RStore::BaseDB
 
   # Same as Sequel.connect, except that you don't need to
@@ -74,7 +75,8 @@ end
 3) Store table information in a subclass of `RStore::BaseTable`  
 Naming convention: name => NameTable
 
-``` ruby
+``` ruby 
+
 class ProductsTable < RStore::BaseTable
 
   # Specify the database table the same way
@@ -92,7 +94,7 @@ class ProductsTable < RStore::BaseTable
 
 end
 
-```
+```  
 
 **Note**:  
 You can put the database and table class definitions in separate files
@@ -118,7 +120,7 @@ end
 
 You can change and reset the default options (see section *Available Options* below for details)
 
-``` ruby
+``` ruby  
 # Search directories recursively and handle the first row of a file as data by default
 RStore::CSV.change_default_options(:recursive => true, :has_headers => false) 
 
@@ -138,7 +140,7 @@ RStore::CSV.reset_default_options
 There is also a convenience method enabling you to use  
 all of [Sequels query methods](http://sequel.rubyforge.org/rdoc/files/doc/querying_rdoc.html).
 
-``` ruby
+``` ruby  
 RStore::CSV.query('company.products') do |table|    # table = Sequel::Dataset object 
   table.all                                         # fetch everything 
   table.all[3]                                      # fetch row number 4 (see output below)
@@ -151,7 +153,7 @@ end
 *)
 Output of `db[table.name].all[3]`
 
-``` ruby 
+``` ruby   
 # {:product     => "toy4",
 #  :quantity    => 4,
 #  :price       => nil,
@@ -165,7 +167,7 @@ Output of `db[table.name].all[3]`
 Access all of Sequels functionality by using the convenience methods   
 `BaseDB.connect`, `BaseTable.name`, and `BaseTable.table_info`:  
 
-``` ruby
+``` ruby  
 
 DB     = CompanyDB.connect           # Open connection to 'company' database
 name   = ProductTable.name           # Table name, :products, used as an argument to the following methods.
