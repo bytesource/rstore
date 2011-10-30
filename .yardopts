@@ -1,4 +1,12 @@
+--title 'RStore API Documentation'
+
 --no-private
+--hide-void-return
+
+-M redcarpet
+-m markdown
+
 lib/rstore/csv.rb
 lib/rstore/base_db.rb
 lib/rstore/base_table.rb
+
