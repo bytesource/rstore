@@ -70,7 +70,7 @@ module RStore
     #  @option options [Boolean] :skip_blanks When set to a true value, CSV will skip over any rows with no content.
     #    (default: `false`) 
     # @overload from(source)
-    #  @param [String] The relative or full path to a directory, file, or an URL. The default options will be used.
+    #  @param [String] source The relative or full path to a directory, file, or an URL. The default options will be used.
     # @return [void]
     # @example
     #  store = RStore::CSV.new
