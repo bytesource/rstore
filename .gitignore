@@ -4,3 +4,5 @@
 .*~
 .directory
 pkg/
+.yardoc/
+doc/
