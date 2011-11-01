@@ -33,6 +33,12 @@ Uses the CSV standard library for parsing, *Nokogiri* for URL handling, and *Seq
 ``` batch
 gem install 'rstore'
 ```
+
+## Public API Documentation
+
+A detailed documentation of the public API can be found [here](http://rubydoc.info/github/bytesource/rstore).
+
+
 ## Sample Usage
 
 Sample csv file
