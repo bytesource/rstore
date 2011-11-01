@@ -16,12 +16,13 @@ module RStore
     attr_reader :database
     #@return [BaseTable] a sublcass of {RStore::BaseTable} 
     attr_reader :table
-    #@return [Array<Data>] holds `Data` objects that are used internally to store information of a data source.
+    #@return [Array<Data>] holds `RStore::Data` objects that are used internally to store information from a data source.
     attr_reader :data_array
     
 
-    # This constructor takes a block which yields an instance of `self`.
-    # Within the block, normally the following three methods are called:  
+    # This constructor takes a block yielding an implicit instance of _self_.   
+    # Within the block, the following methods need to be called: 
+    #
     # * {#from}
     # * {#to}
     # * {#run}
@@ -122,6 +123,7 @@ module RStore
 
     # Start processing the csv files, storing the data into a database table.
     # Both methods, {#from} and {#to}, have to be called before this method.
+    # @return [void]
     def run
       return  if ran_once?   # Ignore subsequent calls to #run 
       raise Exception, "At least one method 'from' has to be called before method 'run'"  unless @from == true
