@@ -12,9 +12,9 @@ Uses the CSV standard library for parsing, *Nokogiri* for URL handling, and *Seq
 * **Validation of field values**. At the moment validation of the following types is supported:  
   * `String`, `Integer`, `Float`, `Date`, `DateTime`, `Time`, and `Boolean` 
 * **Descriptive error messages** pointing helping you to find any invalid data quickly.  
-* Specify your database and table classes only once, then just `require` them when needed.  
+* Only define your database and table classes once, then just `require` them when needed.  
 * **Safe and transparent data storage**: 
-  * Using database transactions: Either all files are inserted or none (also see section *Database Requirements*)  
+  * Using database transactions: Either the data from all all files is stored or none (also see section *Database Requirements*)  
   * To avoid double entry of data, the `run` method can only be run once on a single instance of `RStore::CSV`.
 
 
