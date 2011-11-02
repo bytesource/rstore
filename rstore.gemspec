@@ -23,5 +23,5 @@ Gem::Specification.new do |s|
   s.rubyforge_project = 'rstore'
   s.add_dependency 'nokogiri'
   s.add_development_dependency 'rspec'
-  s.files = Dir["{lib}/**/*.rb", "*.md"]
+  s.files = Dir["{lib}/**/*.rb", "*.md", 'Rakefile', 'LICENSE']
 end
