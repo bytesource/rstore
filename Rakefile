@@ -8,7 +8,22 @@ require 'rdoc/task'
 
 task :default => [ :spec, :gem ]
 
-# RSpec::Core::RakeTask.new :spec
+RSpec::Core::RakeTask.new do
+
+  message = <<-MESSAGE
+
+  ====================================
+  | NOTE:
+  | Make sure to provide the correct connection info for database 'PlastronicsDB'
+  | in file 'csv_spec.rb' (line 12).
+  ====================================
+
+  MESSAGE
+
+  puts message
+
+  :spec
+end
 
 gem_spec = eval(File.read('rstore.gemspec'))
 
