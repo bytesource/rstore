@@ -24,7 +24,6 @@ describe RStore::Data do
 
       data.path.should       == '/home/sovonex/temp/fantastic.csv'
       data.state.should      == :parsed
-      data.type.should       == :csv
       data.content.should    == [["col1", "col2", "col3", "生日", "col5", "col6"], 
                                  ["1", "2", "3", "4.433", "5", "-6.43"], 
                                  ["\"test\"", "test2", nil, nil, nil, nil]]
