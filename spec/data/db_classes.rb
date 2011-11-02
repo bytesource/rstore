@@ -1,5 +1,5 @@
 
-class PlastronicsDB < RStore::BaseDB
+class CompanyDB < RStore::BaseDB
   info(:adapter => 'mysql', 
        :host     => 'localhost',
        :user     => 'root',
