@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.summary = 'RStore - A library for easy batch storage of csv data into a database'
   s.email = 'stefan.rohlfing@gmail.com'
   s.homepage = 'http://github.com/bytesource/rstore'
-  s.has_rdoc = false
+  s.has_rdoc = 'yard'
   s.required_ruby_version = '>= 1.9.1'
   s.rubyforge_project = 'rstore'
   s.add_dependency 'nokogiri'
