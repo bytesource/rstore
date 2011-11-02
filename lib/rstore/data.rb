@@ -12,7 +12,6 @@ module RStore
     attr_reader   :path
     attr_reader   :content
     attr_reader   :state
-    attr_reader   :type
     attr_reader   :options
 
 
