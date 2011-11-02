@@ -9,7 +9,10 @@ describe RStore::BaseTable do
   context "When loading BaseTable subclasses" do
 
     it "#table_classes: should contain all subclasses in a hash" do
-     base.table_classes.should == {:project => ProjectTable, :dna => DNATable} 
+
+      expected = {:project => ProjectTable, :dna => DNATable}
+
+      base.table_classes.include_pairs?(expected).should be_true 
     end
 
     it "#table_classes: should also add an ad-hoc subclass to the hash" do
@@ -17,7 +20,9 @@ describe RStore::BaseTable do
       class TestTable < RStore::BaseTable
       end
 
-      base.table_classes.should == {:project => ProjectTable, :dna => DNATable, :test => TestTable} 
+      expected = {:project => ProjectTable, :dna => DNATable, :test => TestTable}
+
+      base.table_classes.include_pairs?(expected).should be_true 
     end
   end
 
@@ -30,3 +35,4 @@ describe RStore::BaseTable do
     end
   end
 end
+

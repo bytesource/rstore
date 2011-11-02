@@ -14,6 +14,7 @@ require 'rstore/configuration'
 require 'rstore/file_crawler'
 require 'rstore/csv'
 require 'rstore/storage'
+require 'rstore/core_ext/hash'
 
 
 module HelperMethods

@@ -9,7 +9,11 @@ describe RStore::BaseDB do
   context "When loading BaseDB subclasses" do
 
     it "#db_classes: should contain all subclasses in a hash" do
-      base.db_classes.should == {:plastronics => PlastronicsDB, :my => MyDB}
+
+      expected = {:company => CompanyDB, :my => MyDB}
+
+
+      base.db_classes.include_pairs?(expected).should be_true 
     end
 
     it "#db_classes: should also add an ad-hoc subclass to the hash" do
@@ -17,17 +21,19 @@ describe RStore::BaseDB do
       class TestDB < RStore::BaseDB
       end
 
-      base.db_classes.should == {:plastronics => PlastronicsDB, :my => MyDB, :test => TestDB}
+      expected = {:company => CompanyDB, :my => MyDB, :test => TestDB}
+
+      base.db_classes.include_pairs?(expected).should be_true 
     end
   end
 
   context "When inspecting a subclass of BaseDB" do
-    let(:subclass) {described_class.db_classes[:plastronics]}
+    let(:subclass) {described_class.db_classes[:company]}
 
     it "Subclass#connection_info: should return a hash with the connection info" do
 
       subclass.connection_info.should == 
-        {:adapter => 'mysql', :user => 'root', :password => 'xxx', :host => 'localhost', :database => 'plastronics'}
+        {:adapter => 'mysql', :user => 'root', :password => 'xxx', :host => 'localhost', :database => 'company'}
 
     end
   end

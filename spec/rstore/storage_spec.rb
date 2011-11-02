@@ -19,10 +19,10 @@ describe RStore::Storage do
   CSV
 
 
-  DB = Sequel.sqlite
+  db = Sequel.sqlite
 
-  unless DB.table_exists?(:test)
-    DB.create_table :test do
+  unless db.table_exists?(:test)
+    db.create_table :test do
       primary_key :id, allow_null: false
       String      :string_col
       Integer     :integer_col
@@ -35,14 +35,14 @@ describe RStore::Storage do
   end
 
   content = CSV.parse(csv).drop(1)
-  schema  = DB.schema(:test)
+  schema  = db.schema(:test)
   path    = '/home/sovonex/Desktop/my_file.csv'
   options = RStore::Configuration.default_options
 
   let(:data)      { RStore::Data.new(path, content, :parsed, options) }
-  let(:converter) { RStore::Converter.new(data, DB, :test) }
+  let(:converter) { RStore::Converter.new(data, db, :test) }
 
-  let(:storage)   { described_class.new(converter.convert, DB, :test) }
+  let(:storage)   { described_class.new(converter.convert, db, :test) }
 
   context "On initialization" do
 
@@ -71,7 +71,7 @@ describe RStore::Storage do
 
       it "should raise exception if the state of the Data object passed is not :converted" do
 
-        lambda { described_class.new(data, DB, :test) }.should raise_exception(/not a valid state on initialization for class Storage/)
+        lambda { described_class.new(data, db, :test) }.should raise_exception(/not a valid state on initialization for class Storage/)
       end
     end
   end
@@ -82,13 +82,13 @@ describe RStore::Storage do
     context "on failure" do
 
       data      =  RStore::Data.new(path, content, :parsed, options)
-      converter =  RStore::Converter.new(data, DB, :test) 
+      converter =  RStore::Converter.new(data, db, :test) 
 
       validated_data = converter.convert
       validated_data.content[1][3] = 'xxx'   # 4 -> 'xxx'
       validated_data_with_error    = validated_data
 
-      let(:storage)   { described_class.new(validated_data_with_error, DB, :test) }
+      let(:storage)   { described_class.new(validated_data_with_error, db, :test) }
 
 
       it "should log the error and roll back the data already inserted from the current file" do
@@ -97,7 +97,7 @@ describe RStore::Storage do
         storage.insert
         end.should raise_exception(RStore::FileProcessingError, /row 3[^,]/)
 
-        DB[:test].all.should == []
+        db[:test].all.should == []
         
       end
     end
@@ -108,7 +108,7 @@ describe RStore::Storage do
       it "should insert all data into the database table" do
 
         storage.insert
-        types = DB[:test].all[0].map do |k,v|
+        types = db[:test].all[0].map do |k,v|
           v.class
         end
         types.should == [Fixnum, String, Fixnum, Float, Date, Time, Time, NilClass]

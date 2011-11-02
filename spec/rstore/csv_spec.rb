@@ -4,7 +4,7 @@ require 'spec_helper'
 
 describe RStore::CSV do
 
-  # csv_data at path '../test_dir/dir_1/dir_2/test.csv':
+  # csv_data at path 'spec/test_dir/dir_1/dir_2/test.csv':
   # "strings","integers","floats"
   # "string1","1","1.12"
   # "string2","2","2.22"
@@ -51,8 +51,8 @@ describe RStore::CSV do
 
     before(:each) do
       @name = DataTable.name 
-      DB    = PlastronicsDB.connect
-      DB.drop_table(@name)  if DB.table_exists?(@name)
+      db    = PlastronicsDB.connect
+      db.drop_table(@name)  if db.table_exists?(@name)
     end
 
     context "on success" do
@@ -62,7 +62,8 @@ describe RStore::CSV do
         it "should store the data into the table without errors" do
 
           store = RStore::CSV.new do
-            from '../test_dir/dir_1', :recursive => true
+            # from '../test_dir/dir_1', :recursive => true
+            from 'spec/test_dir/dir_1', :recursive => true
             to   'plastronics.data'
             run
           end
@@ -82,7 +83,7 @@ describe RStore::CSV do
 
             store = RStore::CSV.new do
               to   'plastronics.data'
-              from '../test_dir/dir_1', :recursive => true
+              from 'spec/test_dir/dir_1', :recursive => true
               run
             end
 
@@ -102,7 +103,7 @@ describe RStore::CSV do
 
             store = RStore::CSV.new do
               to   'plastronics.data'
-              from '../test_dir/dir_1', :recursive => true
+              from 'spec/test_dir/dir_1', :recursive => true
               run
               run      # calling #run a second time
             end
@@ -126,7 +127,7 @@ describe RStore::CSV do
             RStore::CSV.change_default_options(:recursive => true) 
 
             store = RStore::CSV.new do
-              from '../test_dir/dir_1'
+              from 'spec/test_dir/dir_1'
               to   'plastronics.data'
               run
             end
@@ -148,8 +149,8 @@ describe RStore::CSV do
           it "should store the data from all files into the table without errors" do
 
             store = RStore::CSV.new do
-              from '../test_dir/dir_1', :recursive => true
-              from '../test_dir/dir_a/test.csv'
+              from 'spec/test_dir/dir_1', :recursive => true
+              from 'spec/test_dir/dir_a/test.csv'
               to   'plastronics.data'
               run
             end
@@ -174,21 +175,21 @@ describe RStore::CSV do
           it "should throw an exception" do
 
             # As #from is missing, no table won't be created automatically.
-            DB   = PlastronicsDB.connect
+            db   = PlastronicsDB.connect
             name = DataTable.name
             info = DataTable.table_info
 
-            DB.create_table(name, &info)
+            db.create_table(name, &info)
 
             lambda do
               RStore::CSV.new do
-                #from '../test_dir/dir_1'
+                #from 'spec/test_dir/dir_1'
                 to   'plastronics.data'
                 run
               end
             end.should raise_exception(Exception, /At least one method 'from' has to be called/)
 
-            DB[@name].all.should be_empty 
+            db[@name].all.should be_empty 
 
           end
         end
@@ -198,22 +199,22 @@ describe RStore::CSV do
           it "should throw an exception" do
 
             #run will not be called, so table 'plastronics.data' does not exist (as it had been dropped in #before(:each)
-            DB   = PlastronicsDB.connect
+            db   = PlastronicsDB.connect
             name = DataTable.name
             info = DataTable.table_info
 
-            DB.create_table(name, &info)
+            db.create_table(name, &info)
 
 
             lambda do
               RStore::CSV.new do
-                from '../test_dir/dir_1'
+                from 'spec/test_dir/dir_1'
                 #to   'plastronics.data'
                 run
               end
             end.should raise_exception(Exception, /Method 'to' has to be called before method 'run'/)
 
-            DB[@name].all.should be_empty 
+            db[@name].all.should be_empty 
           end
         end
 
@@ -232,11 +233,11 @@ describe RStore::CSV do
 
           it "should raise an exception, report the error and roll back any data already inserted into the database" do
 
-            @error_path = "#{File.expand_path('../test_dir/dir_a/dir_b/dir_c/not_valid.csv')}"
+            @error_path = "#{File.expand_path('spec/test_dir/dir_a/dir_b/dir_c/not_valid.csv')}"
 
             lambda do
               RStore::CSV.new do
-                from '../test_dir/dir_a/', :recursive => true
+                from 'spec/test_dir/dir_a/', :recursive => true
                 to   'plastronics.data'
                 run
               end
@@ -256,7 +257,7 @@ describe RStore::CSV do
 
             lambda do
               store = RStore::CSV.new do
-                from '../test_dir/', :recursive => 'yes'
+                from 'spec/test_dir/', :recursive => 'yes'
                 to   'plastronics.data'
                 run
               end
@@ -270,7 +271,7 @@ describe RStore::CSV do
 
             lambda do
               store = RStore::CSV.new do
-                from '../test_dir/empty.csv'
+                from 'spec/test_dir/empty.csv'
                 to   'plastronics.data'
                 run
               end
@@ -287,14 +288,14 @@ describe RStore::CSV do
 
       before(:each) do
         @name = DataTable.name 
-        DB    = PlastronicsDB.connect
-        DB.drop_table(@name)  if DB.table_exists?(@name)
+        db    = PlastronicsDB.connect
+        db.drop_table(@name)  if db.table_exists?(@name)
       end
 
       it "should raise an exception, report the error and roll back any data already inserted into the database" do
 
         store = RStore::CSV.new do
-          from '../test_dir/dir_1', :recursive => true
+          from 'spec/test_dir/dir_1', :recursive => true
           to   'plastronics.data'
         end
 
@@ -324,15 +325,15 @@ describe RStore::CSV do
              {:col1=>"string6", :col2=>1, :col3=>1.12}]
 
 
-          DB = Sequel.connect(adapter: 'mysql', 
+          db = Sequel.connect(adapter: 'mysql', 
                               host:    'localhost', 
                               database:'plastronics', 
                               user:    'root', 
                               password:'moinmoin')
 
 
-          unless DB.table_exists?(:data)
-            DB.create_table(:data) do
+          unless db.table_exists?(:data)
+            db.create_table(:data) do
               primary_key :id, :allow_null => false
               String      :col1
               Integer     :col2
@@ -340,17 +341,17 @@ describe RStore::CSV do
             end
           end
 
-          dataset = DB[:data]
+          dataset = db[:data]
 
           lambda do
-            DB.transaction do
+            db.transaction do
               dataset.insert(prepared_content[0])
               dataset.insert(prepared_content[1])
               dataset.insert(prepared_content[4])
             end
           end.should raise_exception  # OK
 
-          DB[:data].all.should == []
+          db[:data].all.should == []
 
       end
     end
@@ -360,8 +361,8 @@ describe RStore::CSV do
 
     name = FasterCSVTable.name 
 
-    DB = PlastronicsDB.connect
-    DB.drop_table(name) if DB.table_exists?(name)
+    db = PlastronicsDB.connect
+    db.drop_table(name) if db.table_exists?(name)
 
     it "should store the data into the table without errors" do
 

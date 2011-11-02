@@ -13,7 +13,7 @@ describe RStore::FileCrawler do
   # -- -- -- test.csv
 
   options     = {col_sep: ";", quote_char: "'", recursive: true}
-  test_dir    = '../test_dir'
+  test_dir    = 'spec/test_dir'
   file_type   = :csv
 
   let(:crawler) { described_class.new(test_dir, file_type, options) }
@@ -54,9 +54,9 @@ describe RStore::FileCrawler do
 
             crawler.data_hash.size.should == 1
 
-            data = crawler.data_hash["#{File.expand_path('../test_dir/empty.csv')}"]
+            data = crawler.data_hash["#{File.expand_path('spec/test_dir/empty.csv')}"]
 
-            data.path.should == "#{File.expand_path('../test_dir/empty.csv')}"
+            data.path.should == "#{File.expand_path('spec/test_dir/empty.csv')}"
             data.options.should == {:file_options=>{:recursive=>false, :has_headers=>true, :selector => ""}, 
                                     :parse_options=>{row_sep: :auto, col_sep: ",", quote_char: '"', field_size_limit: nil, skip_blanks: false}}
           end
@@ -68,11 +68,11 @@ describe RStore::FileCrawler do
 
           it "should return a hash for all files of the current directory and subdirectories" do
 
-          data1 = crawler.data_hash["#{File.expand_path('../test_dir/empty.csv')}"]
-          data2 = crawler.data_hash["#{File.expand_path('../test_dir/dir_1/dir_2/test.csv')}"]
+          data1 = crawler.data_hash["#{File.expand_path('spec/test_dir/empty.csv')}"]
+          data2 = crawler.data_hash["#{File.expand_path('spec/test_dir/dir_1/dir_2/test.csv')}"]
 
-          data1.path.should == "#{File.expand_path('../test_dir/empty.csv')}"
-          data2.path.should == "#{File.expand_path('../test_dir/dir_1/dir_2/test.csv')}"
+          data1.path.should == "#{File.expand_path('spec/test_dir/empty.csv')}"
+          data2.path.should == "#{File.expand_path('spec/test_dir/dir_1/dir_2/test.csv')}"
 
           data1.options.should == 
             {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
@@ -109,7 +109,7 @@ describe RStore::FileCrawler do
 
       context "on success" do
 
-        file = '../test_dir/empty.csv'
+        file = 'spec/test_dir/empty.csv'
         let(:crawler) { described_class.new(file, file_type, options) }
 
         # @return: [Hash<filename => {:file_options => Hash, :parse_options => Hash}>]
@@ -144,7 +144,7 @@ describe RStore::FileCrawler do
 
         context "when file type is not csv" do
 
-        wrong_file_type = '../test_dir/csv.bad' # file exists, but has the wrong file type
+        wrong_file_type = 'spec/test_dir/csv.bad' # file exists, but has the wrong file type
 
           let(:crawler) { described_class.new(wrong_file_type, file_type) }
 

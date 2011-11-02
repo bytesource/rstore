@@ -22,10 +22,10 @@ describe RStore::Converter do
 
 
   # Create database table and retrieve the schema:
-  DB = Sequel.sqlite
+  db = Sequel.sqlite
 
-  unless DB.table_exists?(:test)
-    DB.create_table :test do
+  unless db.table_exists?(:test)
+    db.create_table :test do
       primary_key :id, allow_null: false
       String      :string_col
       Integer     :integer_col
@@ -38,12 +38,12 @@ describe RStore::Converter do
   end
 
   content = CSV.parse(csv).drop(1)  # remove header row
-  schema  = DB.schema(:test)
+  schema  = db.schema(:test)
   path    = '/home/sovonex/Desktop/my_file.csv'
   options = RStore::Configuration.default_options
 
   let(:data)      { RStore::Data.new(path, content, :parsed, options) }
-  let(:converter) { described_class.new(data, DB, :test) }
+  let(:converter) { described_class.new(data, db, :test) }
 
 
   context "Initialization" do
@@ -67,22 +67,22 @@ describe RStore::Converter do
 
         it "should raise an exception" do
 
-          lambda { described_class.new(data, DB, :test) }.should raise_exception(/not a valid state for class Converter/)
+          lambda { described_class.new(data, db, :test) }.should raise_exception(/not a valid state for class Converter/)
         end
       end
 
       context "when the data contains nil where nil is not allowed" do
-        new_schema = DB.schema(:test)
+        new_schema = db.schema(:test)
 
         it "should raise an exception and output a detailed error message" do
 
-          DB.alter_table :test do
+          db.alter_table :test do
             drop_column :boolean_col
             add_column  :boolean_col, :boolean, :default => false, :allow_null => false
           end
 
 
-          converter = described_class.new(data, DB, :test)
+          converter = described_class.new(data, db, :test)
           converter.allow_null.should == [true, true, true, true, true, true, false]
           lambda do
             converter.convert
@@ -90,7 +90,7 @@ describe RStore::Converter do
 
 
           # Reverse changes
-          DB.alter_table :test do
+          db.alter_table :test do
             drop_column :boolean_col
             add_column  :boolean_col, :boolean
           end
@@ -135,7 +135,7 @@ describe RStore::Converter do
          ["string7", "7", "7.77", nil, nil, nil, nil]]
 
       let(:data)      { RStore::Data.new(path, data_with_errors,:parsed, options) }
-      let(:converter) { described_class.new(data, DB, :test) }
+      let(:converter) { described_class.new(data, db, :test) }
 
       context :convert do
 
@@ -145,7 +145,7 @@ describe RStore::Converter do
           error_content[0] = data_with_errors[0]
 
           let(:data)      { RStore::Data.new(path, error_content,:parsed, options) }
-          let(:converter) { described_class.new(data, DB, :test) }
+          let(:converter) { described_class.new(data, db, :test) }
 
           it "should raise an error" do
 
@@ -162,7 +162,7 @@ describe RStore::Converter do
           error_content[1] = data_with_errors[1]
 
           let(:data)      { RStore::Data.new(path, error_content,:parsed, options) }
-          let(:converter) { described_class.new(data, DB, :test) }
+          let(:converter) { described_class.new(data, db, :test) }
 
           it "should raise an error" do
 
@@ -179,7 +179,7 @@ describe RStore::Converter do
           error_content[2] = data_with_errors[2]
 
           let(:data)      { RStore::Data.new(path, error_content,:parsed, options) }
-          let(:converter) { described_class.new(data, DB, :test) }
+          let(:converter) { described_class.new(data, db, :test) }
 
           it "should raise an error" do
 
@@ -196,7 +196,7 @@ describe RStore::Converter do
           error_content[3] = data_with_errors[3]
 
           let(:data)      { RStore::Data.new(path, error_content,:parsed, options) }
-          let(:converter) { described_class.new(data, DB, :test) }
+          let(:converter) { described_class.new(data, db, :test) }
 
           it "should raise an error" do
 
@@ -213,7 +213,7 @@ describe RStore::Converter do
           error_content[4] = data_with_errors[4]
 
           let(:data)      { RStore::Data.new(path, error_content,:parsed, options) }
-          let(:converter) { described_class.new(data, DB, :test) }
+          let(:converter) { described_class.new(data, db, :test) }
 
           it "should raise an error" do
 
@@ -230,7 +230,7 @@ describe RStore::Converter do
           error_content[5] = data_with_errors[5]
 
           let(:data)      { RStore::Data.new(path, error_content,:parsed, options) }
-          let(:converter) { described_class.new(data, DB, :test) }
+          let(:converter) { described_class.new(data, db, :test) }
 
           it "should raise an error" do
 
