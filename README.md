@@ -66,7 +66,7 @@ If you have any difficulties installing Nokogiri, please let me know, so that I 
 
 ## Public API Documentation
 
-A detailed documentation of the public API can be found [here](http://rubydoc.info/github/bytesource/rstore).
+The documentation is hosted on *RubyDoc.info*: [RStore Public API documentation](http://rubydoc.info/github/bytesource/rstore).
 
 
 ## Sample Usage
