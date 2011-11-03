@@ -34,7 +34,7 @@ Uses the CSV standard library for parsing, *Nokogiri* for URL handling, and *Seq
 $ gem install rstore
 ```
 
-**Note**:
+**Note**:  
 As `RStore` depends on [Nokogiri](http://nokogiri.org/) for fetching data from URLs, you need to install Nokogiri first to use this feature.
 However, on some operating systems there can be problems due to missing libraries,
 so you might want to take a look at the following installation instructions: 
