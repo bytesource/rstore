@@ -31,7 +31,7 @@ Uses the CSV standard library for parsing, *Nokogiri* for URL handling, and *Seq
 ## Installation
 
 ``` batch
-gem install 'rstore'
+gem install rstore
 ```
 
 ## Public API Documentation
