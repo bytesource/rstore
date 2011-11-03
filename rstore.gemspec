@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.description = <<-DESCRIPTION
   RStore makes batch processing of csv files a breeze. 
   Automatically fetches data files, directories, URLs
-  :: Customizable using additional options 
+  :: Customizable using additional options
   :: Validation of field values
   :: Descriptive error messages
   :: Safe and transparent data storage using database transactions
