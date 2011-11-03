@@ -39,20 +39,22 @@ As `RStore` depends on [Nokogiri](http://nokogiri.org/) for fetching data from U
 However, on some operating systems there can be problems due to missing libraries,
 so you might want to take a look at the following installation instructions: 
 
-**Debian**
+**Debian**  
 Users of Debian Linux (e.g. Ubuntu) need to run:  
 
 ``` bash
-$ sudo apt-get install libxslt1-dev libxml2-dev
+$ sudo apt-get install libxslt1-dev libxml2-dev 
+
 $ gem install nokogiri
 
 ```
 
-**Mac OS X**
+**Mac OS X**  
 The following instruction should work, but I haven't tested them personally  
 
 ``` bash
 $ sudo port install libxml2 libxslt
+
 $ gem install nokogiri
 
 ```
