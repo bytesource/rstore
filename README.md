@@ -30,9 +30,37 @@ Uses the CSV standard library for parsing, *Nokogiri* for URL handling, and *Seq
 
 ## Installation
 
-``` batch
-gem install rstore
+``` bash
+$ gem install rstore
 ```
+
+**Note**:
+As `RStore` depends on [Nokogiri](http://nokogiri.org/) for fetching data from URLs, you need to install Nokogiri first to use this feature.
+However, on some operating systems there can be problems due to missing libraries,
+so you might want to take a look at the following installation instructions: 
+
+**Debian**
+Users of Debian Linux (e.g. Ubuntu) need to run:  
+
+``` bash
+$ sudo apt-get install libxslt1-dev libxml2-dev
+$ gem install nokogiri
+
+```
+
+**Mac OS X**
+The following instruction should work, but I haven't tested them personally  
+
+``` bash
+$ sudo port install libxml2 libxslt
+$ gem install nokogiri
+
+```
+
+Source: [Installing Nokogiri](http://nokogiri.org/tutorials/installing_nokogiri.html)
+
+If you have any difficulties installing Nokogiri, please let me know, so that I can help you.
+
 
 ## Public API Documentation
 
