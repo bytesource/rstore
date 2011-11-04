@@ -3,8 +3,8 @@
 --no-private
 --hide-void-return
 
--M redcarpet
--m markdown
+--markup-provider=redcarpet
+--markup=markdown
 
 lib/rstore/csv.rb
 lib/rstore/base_db.rb
