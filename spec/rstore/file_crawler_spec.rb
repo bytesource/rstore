@@ -57,7 +57,7 @@ describe RStore::FileCrawler do
             data = crawler.data_hash["#{File.expand_path('spec/test_dir/empty.csv')}"]
 
             data.path.should == "#{File.expand_path('spec/test_dir/empty.csv')}"
-            data.options.should == {:file_options=>{:recursive=>false, :has_headers=>true, :selector => ""}, 
+            data.options.should == {:file_options=>{:recursive=>false, :has_headers=>true, :selector => "", digit_seps: [',' ,'.']},
                                     :parse_options=>{row_sep: :auto, col_sep: ",", quote_char: '"', field_size_limit: nil, skip_blanks: false}}
           end
         end
@@ -74,12 +74,12 @@ describe RStore::FileCrawler do
           data1.path.should == "#{File.expand_path('spec/test_dir/empty.csv')}"
           data2.path.should == "#{File.expand_path('spec/test_dir/dir_1/dir_2/test.csv')}"
 
-          data1.options.should == 
-            {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
+          data1.options.should ==
+            {:file_options=>{:recursive=>true, :has_headers=>true, :selector => "", digit_seps: [',' ,'.']},
              :parse_options=>{row_sep: :auto, col_sep: ";", quote_char: "'", field_size_limit: nil, skip_blanks: false}}
 
-          data2.options.should == 
-            {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
+          data2.options.should ==
+            {:file_options=>{:recursive=>true, :has_headers=>true, :selector => "", digit_seps: [',' ,'.']},
              :parse_options=>{row_sep: :auto, col_sep: ";", quote_char: "'", field_size_limit: nil, skip_blanks: false}}
 
           end
@@ -118,8 +118,8 @@ describe RStore::FileCrawler do
           data = crawler.data_hash["#{File.expand_path("/home/sovonex/Desktop/temp/rstore/spec/test_dir/empty.csv" )}"]
 
           data.path.should == "#{File.expand_path("/home/sovonex/Desktop/temp/rstore/spec/test_dir/empty.csv" )}"
-          data.options.should == 
-            {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
+          data.options.should ==
+            {:file_options=>{:recursive=>true, :has_headers=>true, :selector => "", digit_seps: [',' ,'.']},
              :parse_options=>{row_sep: :auto, col_sep: ";", quote_char: "'", field_size_limit: nil, skip_blanks: false}}
 
         end
@@ -179,10 +179,10 @@ describe RStore::FileCrawler do
           data1.path.should == "#{urls[0].gsub(/http/,'https')}"
           data2.path.should == "http://#{urls[1]}"
 
-          data1.options.should == {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
+          data1.options.should == {:file_options=>{:recursive=>true, :has_headers=>true, :selector => "", digit_seps: [',' ,'.']},
              :parse_options=>{row_sep: :auto, col_sep: ";", quote_char: "'", field_size_limit: nil, skip_blanks: false}}
 
-          data2.options.should == {:file_options=>{:recursive=>true, :has_headers=>true, :selector => ""}, 
+          data2.options.should == {:file_options=>{:recursive=>true, :has_headers=>true, :selector => "", digit_seps: [',' ,'.']},
              :parse_options=>{row_sep: :auto, col_sep: ";", quote_char: "'", field_size_limit: nil, skip_blanks: false}}
 
         end
@@ -194,12 +194,12 @@ describe RStore::FileCrawler do
 
           wrong_format = 'http:/www.sovonex.com/test.csv' # one slash missing
 
-          let(:crawler) { described_class } 
+          let(:crawler) { described_class }
 
           it "should throw an exception" do
 
             lambda do
-              crawler.new(wrong_format, file_type) 
+              crawler.new(wrong_format, file_type)
             end.should raise_exception(RStore::FileProcessingError,/'#{wrong_format}' is not a valid path/)
 
           end

@@ -4,7 +4,7 @@ require 'spec_helper'
 
 describe RStore::Configuration do
 
-  file_options  = {has_headers: true, selector: 'pre div.line'}  # :recursive not included
+  file_options  = {has_headers: true, selector: 'pre div.line', digit_seps: [',' ,'.']}  # :recursive not included
   parse_options = {row_sep: '\n', col_sep: ';', quote_char: "'", field_size_limit: nil} # :skip_blanks not inlcuded
 
   all_options   = file_options.merge(parse_options)
@@ -29,12 +29,12 @@ describe RStore::Configuration do
       specify { config[:file_options].should  == RStore::Configuration.default_file_options.merge(file_options) }
       specify { config[:parse_options].should == RStore::Configuration.default_parse_options.merge(parse_options) }
       specify { config[:path].should          == path }
-      
+
       specify { lambda { config[:does_not_exist] }.should  raise_exception }
 
     end
 
-    
+
     context "on failure" do
 
       context "when option hash contains unknown option keys" do
@@ -55,7 +55,7 @@ describe RStore::Configuration do
         wrong_has_headers = all_options.merge(:has_headers => 'false') # valid: true, false, nil
         wrong_values = [wrong_selector, wrong_recursive, wrong_has_headers]
 
-      
+
 
         it "should throw an exception" do
 
@@ -94,7 +94,7 @@ describe RStore::Configuration do
         it "should raise an exception if the parameter is not an instance of Hash" do
           lambda do
             config.change_default_options([1,2,3])
-          end.should raise_exception(ArgumentError, /must be an instance of Hash/) 
+          end.should raise_exception(ArgumentError, /must be an instance of Hash/)
         end
 
         it "should raise an exception if the parameter contains an unknown option key" do
@@ -103,10 +103,10 @@ describe RStore::Configuration do
           end.should raise_exception(ArgumentError, /contains unknown option key/)
         end
 
-        it "should raise an exception if a key does not contain the correct value" do 
-          lambda do 
+        it "should raise an exception if a key does not contain the correct value" do
+          lambda do
             config.change_default_options({selector: true})
-          end.should raise_exception(ArgumentError, /is not a valid value for option/) 
+          end.should raise_exception(ArgumentError, /is not a valid value for option/)
         end
       end
     end
