@@ -16,26 +16,26 @@ module RStore
     # Will be set to :converted on successfull conversion.
     attr_accessor :state
 
-    
+
     boolean_converter = lambda do |field|
       if field.downcase == 'true' || field == '1'
-        return true 
+        return true
       end
-      if field.downcase == 'false' || field == '0' 
+      if field.downcase == 'false' || field == '0'
         return false
       else
         raise ArgumentError, "invalid value for Boolean() '#{field}'"
       end
     end
 
-    #  Converters used to verify the field data is valid. 
+    #  Converters used to verify the field data is valid.
     #  If a conversion fails, an exception is thrown together
-    #  with a descriptive error message pointing to the field 
+    #  with a descriptive error message pointing to the field
     #  where the error occured.
     Converters = Hash.new {|h,k| h[k] = lambda { |field| field }}.
       merge!({string:     lambda { |field| field },
               date:       lambda { |field| Date.parse(field).to_s },
-              datetime:   lambda { |field| DateTime.parse(field).to_s }, 
+              datetime:   lambda { |field| DateTime.parse(field).to_s },
               # Convert to DateTime, because DateTime also checks if the argument is valid
               time:       lambda { |field| DateTime.parse(field).to_s },
               integer:    lambda { |field| Integer(field) },
@@ -61,7 +61,7 @@ module RStore
     def extract_from_schema target
 
       schema = @schema.dup
-     
+
       # Delete primary key column entry
       schema.delete_if do |(_, property_hash)|
         property_hash[:primary_key] == true
@@ -71,8 +71,24 @@ module RStore
         # Sequel handles Time as Datetime:
         type = property_hash[target]
         #type = (type == :time) ? :datetime : type
-        type
+      type
       end
+    end
+
+
+    def normalize_digit_separators num_as_string, separators
+      # Test if :digit_seps has been passed as an option
+      return num_as_string if separators.nil?
+
+      thousands_sep = separators[0]
+      decimal_mark  = separators[1]
+
+      # Remove thousands separator first,so that is does not infer with the second step
+      # of replacing the decimal mark with the default.
+      num_as_string.gsub!(thousands_sep, '')
+      puts "num_as_string after first gsub: #{num_as_string}"
+      num_as_string.gsub!(decimal_mark, Configuration.default_file_options[:digit_seps][1])
+      num_as_string
     end
 
 
@@ -84,19 +100,19 @@ module RStore
 
         convert_row(row, row_index)
       end
-      @state = :converted 
+      @state = :converted
       Data.new(@data.path, converted, @state, @data.options)
     end
 
 
-   
+
     def convert_row row, row_index
-      # CSV.parse adjusts the size of each row to equal the size of the longest row 
+      # CSV.parse adjusts the size of each row to equal the size of the longest row
       # by adding nil where necessary.
       error_message = <<-ERROR.gsub(/^\s+/,'')
       Row length does not match number of columns. Please verify that:
       1. The database table fits the csv table data
-      2. There is no primary key on a data column (you always need to 
+      2. There is no primary key on a data column (you always need to
       define a separate column for an auto-incrementing primary key)
       ERROR
 
@@ -130,7 +146,9 @@ module RStore
 
 
     def convert_type column_type, field
-      Converters[column_type][field]
+      puts "field: #{field}, digit_seps: #{@data.options[:digit_seps]}"
+      value = [:float, :bigdecimal].include?(column_type) ? normalize_digit_separators(field, @data.options[:digit_seps]) : field
+      Converters[column_type][value]
     end
 
 
@@ -141,4 +159,4 @@ module RStore
 
   end
 end
- 
+
