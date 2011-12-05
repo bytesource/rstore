@@ -12,7 +12,7 @@ module RStore
 
 
     # Supported options
-    @default_file_options    = {recursive: false, has_headers: true, selector: ''}
+    @default_file_options    = {recursive: false, has_headers: true, selector: '', digit_seps: [',', '.']}
     @default_parse_options   = {row_sep: :auto, col_sep: ",", quote_char: '"', field_size_limit: nil, skip_blanks: false}.freeze
     @default_options         = @default_file_options.merge(@default_parse_options)
 
@@ -59,7 +59,7 @@ module RStore
       acc
       end
 
-      @options = result 
+      @options = result
     end
 
 
@@ -67,7 +67,7 @@ module RStore
       keys = options.keys
       @options.inject({}) do |acc, (option, value)|
         if keys.include?(option)
-          acc[option] = value 
+          acc[option] = value
         end
 
       acc
@@ -123,4 +123,4 @@ module RStore
   end
 end
 
- 
+
