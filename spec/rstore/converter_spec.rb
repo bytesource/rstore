@@ -104,12 +104,36 @@ describe RStore::Converter do
 
     context "on success" do
 
+      context :normalize_digit_separators do
+
+        it "should convert the thousands separator and decimal mark into the form understood by Ruby" do
+
+          german_ints   = ["123", "123.456", "123.456.789"]
+          german_floats = ["123,99", "123.456,99", "123.456.789,99"]
+          german_nums   = german_ints + german_floats
+
+          german_decimal_seps = ['.', ',']
+
+          converted_ints     = ["123", "123456", "123456789"]
+          converted_floats   = ["123.99", "123456.99", "123456789.99"]
+          converted_nums     = converted_ints + converted_floats
+
+          with_standard_seps = german_nums.map do |number|
+            converter.normalize_digit_separators(number, german_decimal_seps)
+          end
+
+          with_standard_seps.each do |number|
+            converted_nums.include?(number).should be_true
+          end
+        end
+      end
+
 
       context :convert do
 
         it "should convert all items into the correct type" do
 
-          converter.convert.content.should == 
+          converter.convert.content.should ==
             [["string1", 1, 1.12, "2011-02-04", dt('01:30'), dt('01:30'), nil],
              ["string2", 2, 2.22, "2012-02-04", dt('02:30'), dt('14:30'), false],
              [nil, 3, 3.33, "2013-02-04", dt('03:30'), dt('03:30'), true],
@@ -125,7 +149,7 @@ describe RStore::Converter do
 
     context "on failure" do
 
-      data_with_errors = 
+      data_with_errors =
         [["string1", "xxx", "1.12", "2011-2-4", "1:30", "1:30am", nil],     # '1'       -> 'xxx'
          ["string2", "2", "xxx", "2012/2/4", "2:30", "2:30pm", "false"],    # '2.2'     -> 'xxx'
          [nil, "3", "3.33", "xxx", "3:30", "3:30 a.m.", "True"],            # '20132/4' -> 'xxx'
