@@ -76,6 +76,13 @@ module RStore
     end
 
 
+    # If the option key :digit_seps is passed,
+    # remove the thousands separator and convert the decimal mark (if present)
+    # into a point (.) that is understood by Ruby.
+    # The purpose of this function is to allow smooth parsing of numbers
+    # written in another standard than used in the US.
+    # Example: 100,000.34 is written as 100.000,34 in Germany.
+    # See also: http://en.wikipedia.org/wiki/Decimal_mark
     def normalize_digit_separators num_as_string, separators
       # Test if :digit_seps has been passed as an option
       return num_as_string if separators.nil?
@@ -83,12 +90,11 @@ module RStore
       thousands_sep = separators[0]
       decimal_mark  = separators[1]
 
+      default_decimal_mark = Configuration.default_file_options[:digit_seps][1]
+
       # Remove thousands separator first,so that is does not infer with the second step
       # of replacing the decimal mark with the default.
-      num_as_string.gsub!(thousands_sep, '')
-      puts "num_as_string after first gsub: #{num_as_string}"
-      num_as_string.gsub!(decimal_mark, Configuration.default_file_options[:digit_seps][1])
-      num_as_string
+      num_as_string.gsub(thousands_sep, '').gsub(decimal_mark, default_decimal_mark)
     end
 
 
@@ -146,8 +152,9 @@ module RStore
 
 
     def convert_type column_type, field
-      puts "field: #{field}, digit_seps: #{@data.options[:digit_seps]}"
-      value = [:float, :bigdecimal].include?(column_type) ? normalize_digit_separators(field, @data.options[:digit_seps]) : field
+      types = [:float, :bigdecimal, :integer, :numeric]
+      value = types.include?(column_type) ? normalize_digit_separators(field, @data.options[:digit_seps]) : field
+
       Converters[column_type][value]
     end
 
