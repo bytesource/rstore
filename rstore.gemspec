@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.authors = ["Stefan Rohlfing"]
   s.date = Time.now.strftime('%Y-%m-%d')
   s.description = <<-DESCRIPTION
-  RStore makes batch processing of csv files a breeze. 
+  RStore makes batch processing of csv files a breeze.
   Automatically fetches data files, directories, URLs
   :: Customizable using additional options
   :: Validation of field values
@@ -21,5 +21,5 @@ Gem::Specification.new do |s|
   s.rubyforge_project = 'rstore'
   s.add_dependency 'nokogiri'
   s.add_development_dependency 'rspec'
-  s.files = Dir["{lib, spec}/**/*.rb", "*.md", 'Rakefile', 'LICENSE']
+  s.files = Dir["{lib}/**/*.rb", "*.md", 'Rakefile', 'LICENSE', 'ChangeLog']
 end
