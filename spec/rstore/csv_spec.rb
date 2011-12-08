@@ -10,10 +10,10 @@ describe RStore::CSV do
   # "string2","2","2.22"
 
   class PlastronicsDB < RStore::BaseDB
-    info(adapter: 'mysql', 
-         host:    'localhost', 
-         user:    'root', 
-         password:'moinmoin')
+    info(adapter: 'mysql',
+         host:    'localhost',
+         user:    'root',
+         password:'xxx')
   end
 
   class DataTable < RStore::BaseTable
@@ -50,7 +50,7 @@ describe RStore::CSV do
   context "On initialization" do
 
     before(:each) do
-      @name = DataTable.name 
+      @name = DataTable.name
       db    = PlastronicsDB.connect
       db.drop_table(@name)  if db.table_exists?(@name)
     end
@@ -71,7 +71,7 @@ describe RStore::CSV do
           store.ran_once?.should == true
 
           RStore::CSV.query('plastronics.data') do |table|
-            table.all.should == 
+            table.all.should ==
               [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
                {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
           end
@@ -90,7 +90,7 @@ describe RStore::CSV do
             store.ran_once?.should == true
 
             RStore::CSV.query('plastronics.data') do |table|
-              table.all.should == 
+              table.all.should ==
                 [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
                  {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
             end
@@ -113,7 +113,7 @@ describe RStore::CSV do
             store.ran_once?.should == true
 
             RStore::CSV.query('plastronics.data') do |table|
-              table.all.should == 
+              table.all.should ==
                 [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
                  {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
             end
@@ -124,7 +124,7 @@ describe RStore::CSV do
 
           it "should store the data into the table without errors" do
 
-            RStore::CSV.change_default_options(:recursive => true) 
+            RStore::CSV.change_default_options(:recursive => true)
 
             store = RStore::CSV.new do
               from 'spec/test_dir/dir_1'
@@ -135,7 +135,7 @@ describe RStore::CSV do
             store.ran_once?.should == true
 
             RStore::CSV.query('plastronics.data') do |table|
-              table.all.should == 
+              table.all.should ==
                 [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
                  {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22}]
             end
@@ -158,7 +158,7 @@ describe RStore::CSV do
             store.ran_once?.should == true
 
             RStore::CSV.query('plastronics.data') do |table|
-              table.all.should == 
+              table.all.should ==
                 [{:id=>1, :col1=>"string1", :col2=>1, :col3=>1.12},
                  {:id=>2, :col1=>"string2", :col2=>2, :col3=>2.22},
                  {:id=>3, :col1=>"string1", :col2=>1, :col3=>1.12},
@@ -189,7 +189,7 @@ describe RStore::CSV do
               end
             end.should raise_exception(Exception, /At least one method 'from' has to be called/)
 
-            db[@name].all.should be_empty 
+            db[@name].all.should be_empty
 
           end
         end
@@ -214,22 +214,22 @@ describe RStore::CSV do
               end
             end.should raise_exception(Exception, /Method 'to' has to be called before method 'run'/)
 
-            db[@name].all.should be_empty 
+            db[@name].all.should be_empty
           end
         end
 
         context "when the content of one of the csv files loaded cannot be parsed" do
 
-          # Directory structure: 
+          # Directory structure:
           # test_dir/
-          # -- dir_a/ 
+          # -- dir_a/
           # -- -- test.csv            # csv file with valid content
           # -- -- dir_b/
           # -- -- -- dir_c/
           # -- -- -- not_valid.csv    # csv file whose's content is not valid
 
           #NOTE: The valid data of 'test.csv' will be inserted into the database BEFORE the error in 'not_valid.csv'
-          #      is encountered. Therefore a roll-back has to set the state of the database to before RStore::CSV was called.  
+          #      is encountered. Therefore a roll-back has to set the state of the database to before RStore::CSV was called.
 
           it "should raise an exception, report the error and roll back any data already inserted into the database" do
 
@@ -287,7 +287,7 @@ describe RStore::CSV do
     context "on failure" do
 
       before(:each) do
-        @name = DataTable.name 
+        @name = DataTable.name
         db    = PlastronicsDB.connect
         db.drop_table(@name)  if db.table_exists?(@name)
       end
@@ -316,19 +316,19 @@ describe RStore::CSV do
             RStore::Data.new('dummy_path.csv', csv, :converted, options)
           end
 
-          prepared_content = 
-            [{:col1=>"string1", :col2=>1, :col3=>1.12}, 
-             {:col1=>"string2", :col2=>2, :col3=>2.22}, 
-             {:col1=>"string3", :col2=>1, :col3=>1.12}, 
-             {:col1=>"string4", :col2=>2, :col3=>2.22}, 
-             {:col1=>"string5", :col2=>2, :col3=>:invalid}, 
+          prepared_content =
+            [{:col1=>"string1", :col2=>1, :col3=>1.12},
+             {:col1=>"string2", :col2=>2, :col3=>2.22},
+             {:col1=>"string3", :col2=>1, :col3=>1.12},
+             {:col1=>"string4", :col2=>2, :col3=>2.22},
+             {:col1=>"string5", :col2=>2, :col3=>:invalid},
              {:col1=>"string6", :col2=>1, :col3=>1.12}]
 
 
-          db = Sequel.connect(adapter: 'mysql', 
-                              host:    'localhost', 
-                              database:'plastronics', 
-                              user:    'root', 
+          db = Sequel.connect(adapter: 'mysql',
+                              host:    'localhost',
+                              database:'plastronics',
+                              user:    'root',
                               password:'moinmoin')
 
 
@@ -359,7 +359,7 @@ describe RStore::CSV do
 
   context "given an URL" do
 
-    name = FasterCSVTable.name 
+    name = FasterCSVTable.name
 
     db = PlastronicsDB.connect
     db.drop_table(name) if db.table_exists?(name)
@@ -374,7 +374,7 @@ describe RStore::CSV do
 
       store2.ran_once?.should == true
       RStore::CSV.query('plastronics.fastercsv') do |table|
-        table.first.should == 
+        table.first.should ==
           {:id=>1,
            :col1=>"GPNLWG",
            :col2=>"",
