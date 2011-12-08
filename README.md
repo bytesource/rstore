@@ -233,9 +233,10 @@ File options are used for fetching csv data from a source. The following options
 * **:recursive**, default: `false`
     * When set to true and a directory is given, recursively search for files. Non-csv files are skipped.
 * **:digit_seps**, default `[',', '.']`
-    * The *thousands separator* and *decimal mark* used for numbers in the data source. Different countries use different thousands separators
-      and decimal marks, and setting this options ensures that parsing of these numbers succeeds. Note that all numbers will still be
-      *stored* in the format that Ruby recognizes, that is with a point (.) as the decimal mark.
+    * The *thousands separator* and *decimal mark* used for numbers in the data source.
+      Different countries use different thousands separators and decimal marks,
+      and setting this options ensures that parsing of these numbers succeeds.
+      Note that all numbers will still be *stored* in the format that Ruby recognizes, that is with a point (.) as the decimal mark.
 * **:selector**, default: `""`
     * Mandatory css selector when fetching data from an URL. For more details please see the section *Further Reading* below
 
