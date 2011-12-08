@@ -1,4 +1,4 @@
-# RStore 
+# RStore
 
 ### A library for easy batch storage of csv data into a database
 
@@ -6,25 +6,25 @@ Uses the CSV standard library for parsing, *Nokogiri* for URL handling, and *Seq
 
 ## Special Features
 
-* **Batch processing** of csv files  
-* Fetches data from different sources: **files, directories, URLs**  
-* **Customizable** using additional options (also see section *Available Options*)  
-* **Validation of field values**. At the moment validation of the following types is supported:  
-  * `String`, `Integer`, `Float`, `Date`, `DateTime`, `Time`, and `Boolean` 
-* **Descriptive error messages** pointing helping you to find any invalid data quickly.  
-* Only define your database and table classes once, then just `require` them when needed.  
-* **Safe and transparent data storage**: 
-  * Using database transactions: Either the data from all all files is stored or none (also see section *Database Requirements*)  
+* **Batch processing** of csv files
+* Fetches data from different sources: **files, directories, URLs**
+* **Customizable** using additional options (also see section *Available Options*)
+* **Validation of field values**. At the moment validation of the following types is supported:
+  * `String`, `Integer`, `Float`, `Date`, `DateTime`, `Time`, and `Boolean`
+* **Descriptive error messages** pointing helping you to find any invalid data quickly.
+* Only define your database and table classes once, then just `require` them when needed.
+* **Safe and transparent data storage**:
+  * Using database transactions: Either the data from all all files is stored or none (also see section *Database Requirements*)
   * To avoid double entry of data, the `run` method can only be run once on a single instance of `RStore::CSV`.
 
 
 ## Database Requirements
-  
+
 1. Expects the database table to have an addition column storing an auto-incrementing primary key.
-2. **Requires the database to support transactions**:  
-   Most other database platforms support transactions natively.  
-   In MySQL, you'll need to be running `InnoDB` or `BDB` table types rather than the more common `MyISAM`.  
-   If you are using MySQL and the table has not been created yet, RStore::CSV will take care of using the  
+2. **Requires the database to support transactions**:
+   Most other database platforms support transactions natively.
+   In MySQL, you'll need to be running `InnoDB` or `BDB` table types rather than the more common `MyISAM`.
+   If you are using MySQL and the table has not been created yet, RStore::CSV will take care of using the
    correct table type upon creation.
 
 
@@ -34,23 +34,23 @@ Uses the CSV standard library for parsing, *Nokogiri* for URL handling, and *Seq
 $ gem install rstore
 ```
 
-**Note**:  
+**Note**:
 As `RStore` depends on [Nokogiri](http://nokogiri.org/) for fetching data from URLs, you need to install Nokogiri first to use this feature.
 However, on some operating systems there can be problems due to missing libraries,
-so you might want to take a look at the following installation instructions: 
+so you might want to take a look at the following installation instructions:
 
-**Debian**  
-Users of Debian Linux (e.g. Ubuntu) need to run:  
+**Debian**
+Users of Debian Linux (e.g. Ubuntu) need to run:
 
 ``` bash
-$ sudo apt-get install libxslt1-dev libxml2-dev 
+$ sudo apt-get install libxslt1-dev libxml2-dev
 
 $ gem install nokogiri
 
 ```
 
-**Mac OS X**  
-The following instruction should work, but I haven't tested them personally  
+**Mac OS X**
+The following instruction should work, but I haven't tested them personally
 
 ``` bash
 $ sudo port install libxml2 libxslt
@@ -73,33 +73,33 @@ The documentation is hosted on *RubyDoc.info*: [RStore Public API documentation]
 
 Sample csv file
 
-> "product","quantity","price","created_at","min_demand","max_demand","on_stock"  
-> "toy1","1","1.12","2011-2-4","1:30","1:30am","true"  
-> "toy2","2","2.22","2012/2/4","2:30","2:30pm","false  
-> "toy3","3","3.33","2013/2/4","3:30","3:30 a.m.","True  
-> "toy4","4",,,"4:30","4:30 p.m.","False"  
-> "toy4","5","5.55","2015-2-4","5:30","5:30AM","1"  
-> "toy5","6","6.66","2016/2/4","6:30","6:30 P.M.","0"  
-> "toy6","7","7.77",,,,"false"  
+> "product","quantity","price","created_at","min_demand","max_demand","on_stock"
+> "toy1","1","1.12","2011-2-4","1:30","1:30am","true"
+> "toy2","2","2.22","2012/2/4","2:30","2:30pm","false
+> "toy3","3","3.33","2013/2/4","3:30","3:30 a.m.","True
+> "toy4","4",,,"4:30","4:30 p.m.","False"
+> "toy4","5","5.55","2015-2-4","5:30","5:30AM","1"
+> "toy5","6","6.66","2016/2/4","6:30","6:30 P.M.","0"
+> "toy6","7","7.77",,,,"false"
 
 
 1) Load gem
 
-``` ruby    
+``` ruby
 
 require 'rstore/csv'
 
 ```
-2) Store database information in a subclass of `RStore::BaseDB`  
+2) Store database information in a subclass of `RStore::BaseDB`
 Naming convention: name => NameDB
 
-``` ruby 
+``` ruby
 
 class CompanyDB < RStore::BaseDB
 
   # Same as Sequel.connect, except that you don't need to
   # provide the :database key.
-  info(:adapter  => 'mysql', 
+  info(:adapter  => 'mysql',
        :host     => 'localhost',
        :user     => 'root',
        :password => 'xxx')
@@ -108,10 +108,10 @@ end
 
 ```
 
-3) Store table information in a subclass of `RStore::BaseTable`  
+3) Store table information in a subclass of `RStore::BaseTable`
 Naming convention: name => NameTable
 
-``` ruby 
+``` ruby
 
 class ProductsTable < RStore::BaseTable
 
@@ -130,16 +130,16 @@ class ProductsTable < RStore::BaseTable
 
 end
 
-```  
+```
 
-**Note**:  
+**Note**:
 You can put the database and table class definitions in separate files
 and `require` them when needed.
 
 
-4) Enter csv data into the database  
-The `from` method accepts a path to a file or directory as well as an URL.  
-The `to` metthod accepts a string of the form *db_name.table_name*  
+4) Enter csv data into the database
+The `from` method accepts a path to a file or directory as well as an URL.
+The `to` metthod accepts a string of the form *db_name.table_name*
 
 ```ruby
 RStore::CSV.new do
@@ -152,16 +152,16 @@ end
 
 ```
 ### Additional Features
---- 
+---
 
 You can change and reset the default options (see section *Available Options* below for details)
 
-``` ruby  
+``` ruby
 # Search directories recursively and handle the first row of a file as data by default
-RStore::CSV.change_default_options(:recursive => true, :has_headers => false) 
+RStore::CSV.change_default_options(:recursive => true, :has_headers => false)
 
 RStore::CSV.new do
-  from 'dir1'              
+  from 'dir1'
   from 'dir2'
   from 'dir3'
   to   'company.products'
@@ -173,12 +173,12 @@ RStore::CSV.reset_default_options
 
 ```
 
-There is also a convenience method enabling you to use  
+There is also a convenience method enabling you to use
 all of [Sequels query methods](http://sequel.rubyforge.org/rdoc/files/doc/querying_rdoc.html).
 
-``` ruby  
-RStore::CSV.query('company.products') do |table|    # table = Sequel::Dataset object 
-  table.all                                         # fetch everything 
+``` ruby
+RStore::CSV.query('company.products') do |table|    # table = Sequel::Dataset object
+  table.all                                         # fetch everything
   table.all[3]                                      # fetch row number 4 (see output below)
   table.filter(:id => 2).update(:on_stock => true)  # update entry
   table.filter(:id => 3).delete                     # delete entry
@@ -189,7 +189,7 @@ end
 *)
 Output of `db[table.name].all[3]`
 
-``` ruby   
+``` ruby
 # {:product     => "toy4",
 #  :quantity    => 4,
 #  :price       => nil,
@@ -200,10 +200,10 @@ Output of `db[table.name].all[3]`
 
 ```
 
-Access all of Sequels functionality by using the convenience methods   
-`BaseDB.connect`, `BaseTable.name`, and `BaseTable.table_info`:  
+Access all of Sequels functionality by using the convenience methods
+`BaseDB.connect`, `BaseTable.name`, and `BaseTable.table_info`:
 
-``` ruby  
+``` ruby
 
 DB     = CompanyDB.connect           # Open connection to 'company' database
 name   = ProductTable.name           # Table name, :products, used as an argument to the following methods.
@@ -228,14 +228,18 @@ The method `from` accepts two kinds of options, file options and parse options:
 ### File Options
 File options are used for fetching csv data from a source. The following options are recognized:
 
-* **:has_headers**, default: `true` 
+* **:has_headers**, default: `true`
     * When set to false, the first line of a file is processed as data, otherwise it is discarded.
-* **:recursive**, default: `false` 
-    * When set to true and a directory is given, recursively search for files. Non-csv files are skipped. 
-* **:selector**, default: `""` 
-    * Mandatory css selector with an URL. For more details please see the section *Further Reading* below 
- 
-  
+* **:recursive**, default: `false`
+    * When set to true and a directory is given, recursively search for files. Non-csv files are skipped.
+* **:digit_seps**, default `[',', '.']`
+    * The *thousands separator* and *decimal mark* used for numbers in the data source. Different countries use different thousands separators
+      and decimal marks, and setting this options ensures that parsing of these numbers succeeds. Note that all numbers will still be
+      *stored* in the format that Ruby recognizes, that is with a point (.) as the decimal mark.
+* **:selector**, default: `""`
+    * Mandatory css selector when fetching data from an URL. For more details please see the section *Further Reading* below
+
+
 ### Parse Options
 Parse options are arguments to `CSV::parse`. The following options are recognized:
 
@@ -253,7 +257,7 @@ Parse options are arguments to `CSV::parse`. The following options are recognize
 For more information on the parse options, please see section *Further Reading* below.
 
 
-## Further Reading  
+## Further Reading
 
 * Sequel
   * [Cheat sheet][sequel_cheat]
@@ -270,7 +274,7 @@ For more information on the parse options, please see section *Further Reading* 
 [sequel_query]: http://sequel.rubyforge.org/rdoc/files/doc/querying_rdoc.html
 [csv_options]: http://ruby-doc.org/stdlib-1.9.2/libdoc/csv/rdoc/CSV.html#method-c-new
 [csv_standard]: http://www.ietf.org/rfc/rfc4180.txt
-[nokogiri_home]: http://nokogiri.org/ 
+[nokogiri_home]: http://nokogiri.org/
 
 
 ## Feedback
