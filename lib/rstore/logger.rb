@@ -7,10 +7,10 @@ module RStore
 
     attr_accessor :data
     attr_accessor :message
-    
 
-    KnownStates = 
-      {:fetch   => "loading files", 
+
+    KnownStates =
+      {:fetch   => "loading files",
        :parse   => "parsing file content",
        :convert => "converting field values into their corresponding datatypes",
        :store   => "storing file content into database"}
@@ -24,19 +24,19 @@ module RStore
 
 
     def log state, error, loc={}
-      raise ArgumentError "#{state} is an invalid state vor #{self.class}"  unless valid_state? state
+      raise ArgumentError "#{state} is an invalid state for #{self.class}"  unless valid_state? state
 
       loc = correct_location(loc)
 
       type_of_error = error.class
       error_message = error.to_s
-      location      = "Location     : #{location_to_s(loc)}" 
+      location      = "Location     : #{location_to_s(loc)}"
       location      = loc.empty? ? '' : location
 
       report = <<-TEXT.gsub(/^\s+/, '')
       An error occured while #{KnownStates[state]}:
-      File         : #{@data.path} 
-      Type of error: #{type_of_error} 
+      File         : #{@data.path}
+      Type of error: #{type_of_error}
       Error message: #{error_message}
       #{location}
       =============
@@ -61,9 +61,9 @@ module RStore
     end
 
 
-    
+
     def correct_location location
- 
+
       if location[:row]        # row_index
         row = correct_row(location[:row])
         if location[:col]      # col_index
@@ -88,7 +88,7 @@ module RStore
 
 
     def valid_state? state
-      KnownStates.keys.any? { |val| val == state } 
+      KnownStates.keys.any? { |val| val == state }
     end
 
 
