@@ -34,9 +34,10 @@ module RStore
     #  where the error occured.
     Converters = Hash.new {|h,k| h[k] = lambda { |field| field }}.
       merge!({string:     lambda { |field| field },
-              date:       lambda { |field| Date.parse(field).to_s },
+              date:       lambda { |field| Date.parse(field).strftime("%Y-%m-%d") },
               datetime:   lambda { |field| DateTime.parse(field).to_s },
               # Convert to DateTime, because DateTime also checks if the argument is valid
+              # Sequel handles Time as DateTime
               time:       lambda { |field| DateTime.parse(field).to_s },
               integer:    lambda { |field| Integer(field) },
               float:      lambda { |field| Float(field) },
