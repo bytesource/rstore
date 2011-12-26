@@ -36,6 +36,9 @@ module RStore
 
       @path        = path
       self.options = new_options
+      # options= deletes all valid options already processed from new_options,
+      # leaving only options that are not valid.
+      # Therefore, new_options.size > 0 indicates that options not recognized where passed.
       raise ArgumentError, arg_error_message(@path, new_options) if new_options.size > 0
 
       @file_options  = extract_with(Configuration.default_file_options)
