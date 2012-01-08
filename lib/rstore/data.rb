@@ -20,14 +20,14 @@ module RStore
 
     def initialize path, content, state, options
       error_message = "#{path}: The following options are not valid as an argument to #{self.class}:\n#{options}"
-      raise ArgumentError, error_message  unless options.is_a?(Hash) 
+      raise ArgumentError, error_message  unless options.is_a?(Hash)
       @path      = path
       @content   = content
       self.state = state
       @options   = options
     end
 
-  
+
     #def extract_type path
     #  path, filename = File.split(path)
     #  filename.match(/\.(?<type>.*)$/)[:type].to_sym
@@ -41,9 +41,9 @@ module RStore
 
       begin
         csv = CSVWrapper.parse(@content, parse_options)
-        csv = csv.drop(1)  if file_options[:has_headers] == true  # drop the first row if it is a header 
+        csv = csv.drop(1)  if file_options[:has_headers] == true  # drop the first row if it is a header
       rescue => e
-        Logger.new(@options).print(@data.path, :parse, e)
+        Logger.new(@options).print(@path, :parse, e)
       end
 
       @state = :parsed
@@ -64,7 +64,7 @@ module RStore
 
 
     def state= state
-      error_message = "#{state.inspect} is not a valid state. The following states are valid: #{print_valid_states}" 
+      error_message = "#{state.inspect} is not a valid state. The following states are valid: #{print_valid_states}"
       raise ArgumentError, error_message  unless KnownStates.include?(state)
       @state = state
     end
@@ -76,5 +76,5 @@ module RStore
     end
 
   end
-end 
- 
+end
+
