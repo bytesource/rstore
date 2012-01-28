@@ -11,7 +11,7 @@ module RStore
     #attr_reader :file_options_hash
     attr_reader :data_hash
 
-    attr_reader :file_options, :parse_options 
+    attr_reader :file_options, :parse_options
     attr_reader :path
     attr_reader :file_paths, :file_type
     attr_reader :config
@@ -79,8 +79,6 @@ module RStore
 
 
     def file_options_hash= file_paths
-      @file_options_hash unless @file_options_hash.nil?
-
       hash = Hash.new {|h,k| h[k] = Hash.new {|h,k| h[k] = nil}}
       file_paths.each do |path|
         hash[path][:file_options]  = @file_options
@@ -122,10 +120,10 @@ module RStore
         when /^www/  # open-uri does not recognize URLs starting with 'www'
           address = 'http://' + address
           retry
-        when /^http:/ # open-uri does not redirect from http to https on a valid https URL 
+        when /^http:/ # open-uri does not redirect from http to https on a valid https URL
           address = address.gsub(/http/,'https')
           retry
-        else 
+        else
           raise ArgumentError, "Could not connect to #{url}. Please check if this URL is correct."
         end
       end
