@@ -31,7 +31,7 @@ module RStore
 
 
     def file_paths= path
-      return @file_paths unless @file_paths.nil?
+      return @file_paths unless @file_paths.nil?  # @file_path can only be set once on initialization
 
       @file_paths = []
       files       = []
