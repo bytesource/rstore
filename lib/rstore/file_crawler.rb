@@ -45,7 +45,7 @@ module RStore
         end
       else                                            # Either a file or a non-existing directory path
         file = File.expand_path(path)
-        raise ArgumentError, "'#{path}' is not a valid path" unless File.exists?(file)
+        raise ArgumentError, "'#{path}' is not a valid path" unless File.exists?(file) # File.exist?(“/path/to/file_or_dir”)
 
         error_message = <<-MESSAGE.gsub(/^\s+/,'')
                            Not a #{@file_type} file.
