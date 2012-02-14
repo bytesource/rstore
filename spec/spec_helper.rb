@@ -3,7 +3,6 @@ $:.unshift File.expand_path('..', __FILE__)
 $:.unshift File.expand_path('../../lib', __FILE__)
 
 require 'rspec'
-require 'pp'
 require 'rstore/exceptions'
 require 'rstore/base_db'
 require 'rstore/base_table'
