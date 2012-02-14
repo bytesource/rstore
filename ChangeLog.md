@@ -1,3 +1,8 @@
+## Version 0.3.4 (February 14, 2012)
+
+### Other
+* Update dependencies in gemspec.
+
 ## Version 0.3.2 (December 12, 2011)
 
 ### Bugfixes
