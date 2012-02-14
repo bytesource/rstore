@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.has_rdoc = 'yard'
   s.required_ruby_version = '>= 1.9.1'
   s.rubyforge_project = 'rstore'
-  s.add_dependency 'nokogiri'
-  s.add_development_dependency 'rspec'
+  s.add_dependency ["open-uri", "nokogiri", "bigdecimal", "sequel", "csv"]
+  s.add_development_dependency ['rspec', 'mysql', 'sqlite3-ruby']
   s.files = Dir["{lib}/**/*.rb", "*.md", 'Rakefile', 'LICENSE']
 end
