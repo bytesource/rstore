@@ -7,7 +7,7 @@ describe RStore::Data do
 
   # Preparing data for content:
   csv = <<-CSV.gsub(/^ +/, "")
-  "col1","col2","col3","生日","col5","col6"
+  "col1","col2","col3","col4","col5","col6"
   1,2,3,4.433,5,-6.43
   ""test"",test2,,,,
   CSV
@@ -24,8 +24,8 @@ describe RStore::Data do
 
       data.path.should       == '/home/sovonex/temp/fantastic.csv'
       data.state.should      == :parsed
-      data.content.should    == [["col1", "col2", "col3", "生日", "col5", "col6"], 
-                                 ["1", "2", "3", "4.433", "5", "-6.43"], 
+      data.content.should    == [["col1", "col2", "col3", "col4", "col5", "col6"],
+                                 ["1", "2", "3", "4.433", "5", "-6.43"],
                                  ["\"test\"", "test2", nil, nil, nil, nil]]
     end
   end
