@@ -1,6 +1,7 @@
 # require 'spec/rake/spectask' # depreciated
 require 'rspec/core/rake_task'
-require 'rake/gempackagetask'
+# require 'rake/gempackagetask' # depreciated
+require 'rubygems/package_task'
 require 'rdoc/task'
 
 # Build gem: rake gem
@@ -27,7 +28,7 @@ end
 
 gem_spec = eval(File.read('rstore.gemspec'))
 
-Rake::GemPackageTask.new( gem_spec ) do |t|
+Gem::PackageTask.new( gem_spec ) do |t|
   t.need_zip = true
 end
 
