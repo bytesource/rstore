@@ -37,5 +37,5 @@ end
 #end
 
 task :push => :gem do |t|
-  sh "gem push pkg/#{gem_spec.name}-#{gem_spec.version}.gem"
+  sh "gem push -v pkg/#{gem_spec.name}-#{gem_spec.version}.gem"
 end
