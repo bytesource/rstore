@@ -1,5 +1,9 @@
-## Version 0.3.6 (April 06, 2012)
+## Version 0.3.8 (April 06, 2012)
 
+### Other
+* Remove dependencies to csv and bigdecimal as these are part of the standard libary anyway.
+
+## Version 0.3.6 (April 06, 2012)
 
 ### Other
 * Update dependencies in gemspec (so that they are actually recognized by RubyGems)
