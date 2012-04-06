@@ -22,9 +22,7 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'open-uri'
   s.add_dependency 'nokogiri'
-  s.add_dependency 'bigdecimal'
   s.add_dependency 'sequel'
-  s.add_dependency 'csv'
 
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'mysql'
