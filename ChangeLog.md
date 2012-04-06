@@ -1,3 +1,9 @@
+## Version 0.3.6 (April 06, 2012)
+
+
+### Other
+* Update dependencies in gemspec (so that they are actually recognized by RubyGems)
+
 ## Version 0.3.4 (February 14, 2012)
 
 ### Other
