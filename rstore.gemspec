@@ -20,7 +20,6 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 1.9.1'
   s.rubyforge_project     = 'rstore'
 
-  s.add_dependency 'open-uri'
   s.add_dependency 'nokogiri'
   s.add_dependency 'sequel'
 
