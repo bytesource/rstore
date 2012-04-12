@@ -1,7 +1,12 @@
+## Version 0.3.9 (April 12, 2012)
+
+### Other
+* Remove dependency to 'open-uri' from gemspec as this library is part of Ruby's standard library.
+
 ## Version 0.3.8 (April 06, 2012)
 
 ### Other
-* Remove dependencies to csv and bigdecimal as these are part of the standard libary anyway.
+* Remove dependencies to 'csv' and 'bigdecimal' as these libaries are part of Ruby's standard libary.
 
 ## Version 0.3.6 (April 06, 2012)
 
